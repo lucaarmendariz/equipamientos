@@ -1,0 +1,112 @@
+/* Variables con tu paleta de colores */
+:root {
+  --blue-darkest: #0D47A1;
+  --blue-dark: #1565C0;
+  --blue-medium: #1976D2;
+  --blue-light: #1E88E5;
+  --blue-lightest: #2196F3;
+
+  --blue-bg-darkest: #E3F2FD;
+  --blue-bg-dark: #BBDEFB;
+  --blue-bg-medium: #90CAF9;
+  --blue-bg-light: #64B5F6;
+  --blue-bg-lightest: #42A5F5;
+
+  --text-color: #0D47A1;
+  --input-bg: white;
+  --input-border: var(--blue-light);
+  --input-focus-border: var(--blue-dark);
+  --button-bg: var(--blue-dark);
+  --button-hover-bg: var(--blue-medium);
+}
+
+/* Reset y box sizing */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body, html {
+  height: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--blue-bg-darkest);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenedor principal */
+.login-container {
+  background: white;
+  padding: 2.5rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(13, 71, 161, 0.3);
+  width: 360px;
+}
+
+/* Formulario */
+.login-form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Título */
+.login-form h2 {
+  color: var(--text-color);
+  text-align: center;
+  margin-bottom: 2rem;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+/* Fieldset para agrupar label e input */
+fieldset {
+  border: none;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Label */
+label {
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+/* Inputs */
+input[type="text"],
+input[type="password"] {
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  border: 2px solid var(--input-border);
+  border-radius: 6px;
+  background: var(--input-bg);
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: var(--input-focus-border);
+  outline: none;
+}
+
+/* Botón */
+button {
+  margin-top: 1rem;
+  padding: 0.9rem 0;
+  background: var(--button-bg);
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background: var(--button-hover-bg);
+}
