@@ -8,9 +8,14 @@ $db = 'erronka';
 $user = 'root';
 $pass = 'ikasle123';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Error de conexión: " . $e->getMessage());
+// Crear conexión
+$mysqli = new mysqli($host, $user, $pass, $db);
+
+// Comprobar conexión
+if ($mysqli->connect_errno) {
+    die(json_encode(['success' => false, 'message' => 'Error de conexión: ' . $mysqli->connect_error]));
 }
+
+// Establecer conjunto de caracteres a UTF-8
+$mysqli->set_charset("utf8");
+?>
