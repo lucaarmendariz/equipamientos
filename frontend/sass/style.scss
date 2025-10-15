@@ -8,11 +8,11 @@
   --blue-light: #1E88E5;
   --blue-lightest: #2196F3;
 
-  --blue-bg-darkest: #E3F2FD;
-  --blue-bg-dark: #BBDEFB;
+  --blue-bg-lightest: #E3F2FD;
+  --blue-bg-light: #BBDEFB;
   --blue-bg-medium: #90CAF9;
-  --blue-bg-light: #64B5F6;
-  --blue-bg-lightest: #42A5F5;
+  --blue-bg-dark: #64B5F6;
+  --blue-bg-darkest: #42A5F5;
 
   --text-color: #0D47A1;
   --input-bg: white;
@@ -32,7 +32,7 @@
 body, html {
   height: 100%;
   font-family: 'Inria Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--blue-bg-darkest);
+  background: var(--blue-bg-lightest);
   display: flex;
 }
 

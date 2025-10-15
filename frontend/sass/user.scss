@@ -140,6 +140,13 @@ header {
   cursor: pointer;
 }
 
+/* Cabecera */
+.data-header {
+  background-color: --blue-bg-lightest; // azul más oscuro
+  color: white;
+  font-weight: 700;
+}
+
 
 /* Zebra striping: alternar colores */
 .data-row:nth-child(even) {
@@ -151,12 +158,7 @@ header {
   background-color: #b3d9f0;
   cursor: pointer;
 }
-/* Cabecera */
-.data-header {
-  background-color: var(--blue-bg-dark); // azul más oscuro
-  color: white;
-  font-weight: 700;
-}
+
 
 /* Listas de Inbentario y Usuarios */
 ul {

@@ -2,19 +2,27 @@
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-require_once 'conexion.php';
+require_once 'conexion.php'; // conexión a la base de datos ($mysqli)
 
 $response = [
     'success' => false,
-    'user' => null,
+    'message' => '',
     'redirect' => ''
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']);
+    $username = trim($_POST['username'] ?? '');
+    $password = trim($_POST['password'] ?? '');
 
-    $stmt = $mysqli->prepare("SELECT pasahitza, rola FROM erabiltzailea WHERE erabiltzailea = ?");
+    // Validar campos vacíos
+    if ($username === '' || $password === '') {
+        $response['message'] = 'Por favor, rellena todos los campos.';
+        echo json_encode($response);
+        exit;
+    }
+
+    // Buscar el usuario
+    $stmt = $mysqli->prepare("SELECT erabiltzailea, pasahitza, rola FROM erabiltzailea WHERE erabiltzailea = ?");
     if (!$stmt) {
         $response['message'] = 'Error en la base de datos.';
         echo json_encode($response);
@@ -26,22 +34,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $stmt->get_result();
 
     if ($user = $result->fetch_assoc()) {
-        if ($password === $user['pasahitza']) { // o password_verify si está en hash
+        // Comparar contraseñas (texto plano, ideal usar password_verify)
+        if ($password === $user['pasahitza']) {
             session_regenerate_id(true);
-            $_SESSION['username'] = $username;
+            $_SESSION['username'] = $user['erabiltzailea'];
             $_SESSION['rola'] = $user['rola'];
 
+            // ✅ Éxito: el JS se encargará de redirigir
             $response['success'] = true;
-            $response['user'] = ['username' => $username, 'role' => $user['rola']];
-
-            // Redirigir según rol (solo en JS)
-            $response['redirect'] = strtolower($user['rola']) === 'a' ? '../frontend/admin.html' : '../frontend/user.html';
-        } 
+            $response['message'] = 'Inicio de sesión correcto. Redirigiendo...';
+            $response['redirect'] = (strtolower($user['rola']) === 'a')
+                ? '../frontend/admin.html'
+                : '../frontend/user.html';
+        } else {
+            // Contraseña incorrecta
+            $response['message'] = 'El usuario o la contraseña son incorrectos. Inténtalo de nuevo.';
+        }
+    } else {
+        // Usuario no encontrado
+        $response['message'] = 'El usuario o la contraseña son incorrectos. Inténtalo de nuevo.';
     }
 
     $stmt->close();
     echo json_encode($response);
-} else {
-    $response['message'] = 'Método no permitido.';
-    echo json_encode($response);
+    exit;
 }
+
+// Si no es método POST
+$response['message'] = 'Método no permitido.';
+echo json_encode($response);
+exit;
+?>
