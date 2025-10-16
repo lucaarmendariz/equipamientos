@@ -110,3 +110,57 @@ button {
 button:hover {
   background: var(--button-hover-bg);
 }
+
+.main-footer {
+  background-color: var(--blue-dark);
+  color: white;
+  padding: 1rem 0;
+  text-align: center;
+  font-size: 0.9rem;
+  margin-top: auto; // para empujar al final si usas flex en body
+  a {
+    color: var(--blue-lightest);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+
+
+/* ICONO DEL MENÚ (hamburger) */
+.menu-icon {
+  display: none; // por defecto oculto en escritorio
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: white;
+}
+
+/* Mostrar solo en móviles */
+@media (max-width: 900px) {
+  .menu-icon {
+    display: block;
+  }
+
+  nav#main-nav {
+    display: none; /* esconder nav completo en móvil por defecto */
+    position: absolute;
+    top: -6px; /* justo debajo del header */
+    left: 0;
+    width: 100%;
+    background-color: var(--blue-bg-lightest);
+    z-index: 1000;
+    flex-direction: column;
+  }
+
+  nav#main-nav.active {
+    display: flex; /* mostrar cuando se haga click en el icono */
+  }
+
+  nav#main-nav a {
+    padding: 1rem;
+    border-bottom: 1px solid var(--blue-bg-light);
+  }
+}
+

@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $response['success'] = true;
             $response['message'] = 'Inicio de sesión correcto. Redirigiendo...';
-            // 🔹 Todos los roles van al mismo dashboard
+            // Todos los roles van al mismo dashboard
             $response['redirect'] = '../frontend/menu.html';
             $response['role'] = $user['rola'];
         } else {
