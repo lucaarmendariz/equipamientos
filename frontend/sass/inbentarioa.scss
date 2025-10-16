@@ -172,13 +172,13 @@ li.empty {
 
 /* Nav inferior */
 nav {
-  background-color: #ffffff;
+  
   padding: 1rem 0.5rem;
   display: flex;
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+
 }
 
 nav button {
@@ -204,11 +204,18 @@ nav button {
   }
 }
 
+.search-section {
+  display: flex;
+  align-items: center; /* Centra verticalmente el botón */
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap; /* En pantallas pequeñas se apila */
+}  
+
 .search-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 500px;
-  flex: 1;
+  flex: 1; /* ocupa todo el espacio disponible */
+  min-width: 250px;
 }
 
 .search-wrapper input {
@@ -216,11 +223,11 @@ nav button {
   padding: 10px 10px 10px 35px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  font-size: 1rem;
 }
-
 .search-icon {
   position: absolute;
-  top: 30%;
+  top: 50%;
   left: 10px;
   transform: translateY(-50%);
   color: #777;
@@ -247,4 +254,144 @@ nav button {
   padding: 5px 10px;
   top: 30%;
   font-weight: bold;
+}
+
+//* Navbar secundaria horizontal (segmento) sin fondo azul */
+.navbar {
+  margin-top: 1rem;
+  padding: 0; /* quitar padding para que no ocupe espacio extra */
+  width: 100%;
+  background: transparent; /* sin fondo */
+  box-shadow: none; /* sin sombra */
+}
+
+.segmento {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.nav {
+  display: flex;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.nav-item {
+  display: flex;
+}
+
+.nav-link {
+  display: block;
+  padding: 0.5rem 1.2rem;
+  background-color: transparent;
+  color: var(--text-color); /* o white si quieres */
+  border-radius: 20px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Hover effect */
+.nav-link:hover {
+  background-color: var(--blue-light);
+  color: var(--blue-darkest);
+}
+
+
+.hidden {
+  display: none;
+}
+
+ /* Estilos para el bloque centrado */
+    #categoria-content {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #b9d8ff;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      width: 300px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      text-align: left;
+      z-index: 1000;
+    }
+    #categoria-content p {
+      position: relative;
+      margin: 0.5rem 0;
+      padding-right: 50px;
+    }
+    #categoria-content i {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: rgba(0,0,0,0.3);
+      font-size: 0.9rem;
+    }
+    #categoria-content i.fa-pen {
+      right: 30px;
+    }
+    /* Fondo oscuro para cuando aparece el modal */
+    #overlay {
+      display: none;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.3);
+      z-index: 900;
+    }
+
+    /* Modal / bloque centrado */
+.modal-content {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #b9d8ff;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  width: 300px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  text-align: left;
+  z-index: 1000;
+}
+.modal-content h3 {
+  margin-top: 0;
+}
+.modal-content p {
+  position: relative;
+  margin: 0.5rem 0;
+  padding-right: 50px;
+  font-weight: 600;
+}
+.modal-content i {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: rgba(0,0,0,0.3);
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+}
+.modal-content i.fa-pen {
+  right: 30px;
+}
+.modal-content i:hover {
+  color: rgba(0,0,0,0.7);
+}
+
+/* Fondo oscuro overlay */
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 900;
 }
