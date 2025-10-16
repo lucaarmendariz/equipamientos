@@ -1,47 +1,67 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // --- CONTROL DE SESIÓN Y ROLES ---
+  const role = sessionStorage.getItem("userRole");
+
+  if (!role) {
+    alert("Sesión no válida. Por favor, inicia sesión de nuevo.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  // Si NO es admin, ocultamos la columna y el botón de "Erabiltzaileak"
+  if (role.toLowerCase() !== "a") {
+    const usuariosContainer = document.getElementById("usuarios-container");
+    const usuariosButton = document.querySelector("nav button:last-child");
+
+    if (usuariosContainer) usuariosContainer.style.display = "none";
+    if (usuariosButton) usuariosButton.style.display = "none";
+  }
+
+  // --- FETCH DE EQUIPAMIENTOS ---
   const equipContainer = document.getElementById("equipamientos-list");
 
   fetch("../backend/equipos.php")
-    .then((response) => response.json())
+    .then((response) => {
+      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+      return response.json();
+    })
     .then((data) => {
-      console.log(data);
+      console.log("Datos recibidos:", data);
 
-      // Vaciar el contenedor
-      equipContainer.innerHTML = "";
+      if (data.success && data.data.length > 0) {
+        equipContainer.innerHTML = "";
 
-      // Crear cabecera
-      const header = document.createElement("div");
-      header.classList.add("data-row", "data-header");
-      header.innerHTML = `
-        <span class="col-nombre">Nombre</span>
-        <span class="col-stock">Stock</span>
-        <span class="col-marca">Marca</span>
-        <span class="col-modelo">Modelo</span>
-      `;
-      equipContainer.appendChild(header);
+        // Añadir cabecera de la tabla/filas
+        const header = document.createElement("div");
+        header.classList.add("data-row", "data-header");
+        header.innerHTML = `
+          <span>Izena</span>
+          <span>Stock</span>
+          <span>Marka</span>
+          <span>Modelo</span>
+        `;
+        equipContainer.appendChild(header);
 
-      // Agregar filas de datos
-      if (data.success) {
-        data.data.forEach((equipo) => {
-          const div = document.createElement("div");
-          div.classList.add("data-row");
-          div.innerHTML = `
-            <span class="col-nombre">${equipo.izena}</span>
-            <span class="col-stock">${equipo.stock}</span>
-            <span class="col-marca">${equipo.marka || "N/A"}</span>
-            <span class="col-modelo">${equipo.modelo || "N/A"}</span>
+        // Crear filas con los datos
+        data.data.forEach((equipo, index) => {
+          const row = document.createElement("div");
+          row.classList.add("data-row");
+          if (index % 2 === 0) row.classList.add("even"); // alternar color
+
+          row.innerHTML = `
+            <span>${equipo.izena}</span>
+            <span>${equipo.stock}</span>
+            <span>${equipo.marka || "—"}</span>
+            <span>${equipo.modelo || "—"}</span>
           `;
-          equipContainer.appendChild(div);
+          equipContainer.appendChild(row);
         });
       } else {
-        const errorDiv = document.createElement("div");
-        errorDiv.classList.add("data-row");
-        errorDiv.textContent = "No se pudieron cargar los equipos: " + data.message;
-        equipContainer.appendChild(errorDiv);
+        equipContainer.innerHTML = `<div class="data-row empty">No hay datos disponibles</div>`;
       }
     })
     .catch((error) => {
       console.error("Error al obtener equipamientos:", error);
-      equipContainer.innerHTML = `<div class="data-row">Error en el servidor. Inténtalo más tarde.</div>`;
+      equipContainer.innerHTML = `<div class="data-row empty">Error al cargar los equipos.</div>`;
     });
 });
