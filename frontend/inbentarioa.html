@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="eu">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inbentarioa - Santurtzi LHII</title>
   <link rel="stylesheet" href="sass/global.scss">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -27,18 +27,40 @@
 
   <!-- Bienvenida -->
   <section class="dashboard-container">
-    <p class="welcome-text">Ongi etorri inbentario kudeaketara</p>
+    <p class="welcome-text">Inbentario kudeaketa</p>
 
     <!-- Sección de búsqueda y botón -->
-    <div class="search-section" style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+    <div class="search-section">
       <div class="search-wrapper">
         <i class="fas fa-search search-icon"></i>
-        <input type="text" id="search" placeholder="Bilatu etiketa edo data...">
+        <input type="text" id="search" placeholder="Bilatu etiketa edo data..." />
       </div>
-      <button class="add-button" id="add-button">
-        <span class="counter" id="counter">0</span>
-        Sartu etiketa
-      </button>
+      <button class="add-button" id="add-button">Sartu etiketa</button>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="navbar">
+      <div class="segmento">
+        <ul class="nav">
+          <li class="nav-item"><a href="#" class="nav-link text-white" id="kategoria-link">Kategoria</a></li>
+          <li class="nav-item"><a href="#" class="nav-link text-white" id="ekipamenduak-link">Ekipamenduak</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- Fondo oscuro overlay -->
+    <div id="overlay"></div>
+
+    <!-- Contenido modal para Kategoria -->
+    <div id="categoria-content" class="modal-content">
+      <h3>Kategoria izena</h3>
+      <!-- Contenido dinámico aquí -->
+    </div>
+
+    <!-- Contenido modal para Ekipamenduak -->
+    <div id="ekipamenduak-content" class="modal-content">
+      <h3>Ekipamenduak izena</h3>
+      <!-- Contenido dinámico aquí -->
     </div>
 
     <!-- Grid de columnas -->
@@ -60,5 +82,7 @@
       </div>
     </div>
   </section>
+
+  <script src="js/inbentarioa.js"></script>
 </body>
 </html>
