@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inbentarioa - Santurtzi LHII</title>
+  <link rel="stylesheet" href="sass/inbentarioa.scss">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="menu-icon"><i class="fas fa-bars"></i></div>
+    <div class="title">Santurtzi LHII</div>
+    <div class="user-icon"><i class="fas fa-user"></i></div>
+  </header>
+
+  <!-- Bienvenida -->
+  <section class="dashboard-container">
+    <p class="welcome-text">Ongi etorri inbentario kudeaketara</p>
+
+    <!-- Sección de búsqueda y botón -->
+    <div class="search-section" style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+      <div class="search-wrapper">
+        <i class="fas fa-search search-icon"></i>
+        <input type="text" id="search" placeholder="Bilatu etiketa edo data...">
+      </div>
+      <button class="add-button" id="add-button">
+        <span class="counter" id="counter">0</span>
+        Sartu etiketa
+      </button>
+    </div>
+
+    <!-- Grid de columnas -->
+    <div class="dashboard-grid">
+      <div class="dashboard-column">
+        <h2>Inbentarioa</h2>
+
+        <!-- Cabecera -->
+        <div class="data-row data-header">
+          <span>Etiketa</span>
+          <span class="col-stock">Data</span>
+          <span class="col-marca">Ekintzak</span>
+        </div>
+
+        <!-- Contenedor de filas -->
+        <div class="equipamientos-grid" id="inventory-list">
+          <!-- Filas dinámicas -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

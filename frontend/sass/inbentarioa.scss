@@ -1,0 +1,250 @@
+@import 'style.scss'; 
+
+
+/* Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Body y contenedor general */
+body {
+  font-family: 'Inria Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--blue-bg-lightest);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Header */
+header {
+  background-color: var(--blue-dark);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menu-icon,
+.user-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* Texto de bienvenida */
+.welcome-text {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--blue-darkest);
+  margin-bottom: 1rem;
+}
+
+/* Dashboard grid ocupa todo el ancho */
+.dashboard-container {
+  width: 100%;
+  padding: 1rem;
+  flex-grow: 1;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+/* Columnas */
+.dashboard-column {
+  background-color: var(--blue-bg-medium);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.dashboard-column h2 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--blue-dark);
+  border-bottom: 2px solid var(--blue-light);
+  padding-bottom: 0.5rem;
+}
+
+/* Scroll de las columnas */
+.dashboard-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-column::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+/* Filas de datos */.equipamientos-grid {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 0.25rem;
+}
+
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.data-row span {
+  flex: 1;
+}
+
+.data-row span.col-stock {
+  text-align: center;
+}
+.data-row span.col-marca,
+.data-row span.col-modelo {
+  text-align: right;
+}
+
+/* Zebra striping solo en filas de datos */
+.data-row:not(.data-header):nth-child(even) {
+  background-color: #cce4f6;
+}
+.data-row:not(.data-header):nth-child(odd) {
+  background-color: #e3f2fd;
+}
+
+/* Hover solo en filas de datos */
+.data-row:not(.data-header):hover {
+  background-color: #b3d9f0;
+  cursor: pointer;
+}
+
+
+/* Zebra striping: alternar colores */
+.data-row:nth-child(even) {
+  background-color: #cce4f6;
+}
+
+/* Hover para resaltar fila */
+.data-row:hover {
+  background-color: #b3d9f0;
+  cursor: pointer;
+}
+/* Cabecera */
+.data-header {
+  background-color: var(--blue-bg-dark); // azul más oscuro
+  color: white;
+  font-weight: 700;
+}
+
+/* Listas de Inbentario y Usuarios */
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+li.empty {
+  color: #777;
+  font-style: italic;
+}
+
+/* Nav inferior */
+nav {
+  background-color: #ffffff;
+  padding: 1rem 0.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+}
+
+nav button {
+  background-color: var(--blue-dark);
+  border: none;
+  border-radius: 20px;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+
+  &:hover {
+    background-color: var(--blue-medium);
+    transform: translateY(-1px);
+  }
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  flex: 1;
+}
+
+.search-wrapper input {
+  width: 100%;
+  padding: 10px 10px 10px 35px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.search-icon {
+  position: absolute;
+  top: 30%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: #777;
+  pointer-events: none;
+}
+
+.add-button {
+  background-color: var(--blue-dark);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.add-button .counter {
+  background-color: white;
+  color: var(--blue-dark);
+  border-radius: 50%;
+  padding: 5px 10px;
+  top: 30%;
+  font-weight: bold;
+}
