@@ -1,6 +1,6 @@
 <?php
+// inventario.php
 header('Content-Type: application/json; charset=utf-8');
-
 require_once 'conexion.php'; // conexión $mysqli
 
 $response = [
@@ -10,18 +10,24 @@ $response = [
 ];
 
 try {
-    // Consulta para traer todos los usuarios
-    $query = "SELECT nan, izena, abizena, erabiltzailea, rola FROM erabiltzailea";
+    // Hacemos un JOIN para traer el nombre del equipo
+    $query = "
+        SELECT i.etiketa, e.izena AS equipo, i.erosketaData
+        FROM inbentarioa i
+        LEFT JOIN ekipamendua e ON i.idEkipamendu = e.id
+        LIMIT 20
+    ";
+    
     $result = $mysqli->query($query);
 
     if ($result) {
-        $usuarios = [];
+        $inventario = [];
         while ($row = $result->fetch_assoc()) {
-            $usuarios[] = $row;
+            $inventario[] = $row;
         }
 
         $response['success'] = true;
-        $response['data'] = $usuarios;
+        $response['data'] = $inventario;
     } else {
         $response['message'] = "Error en la consulta: " . $mysqli->error;
     }

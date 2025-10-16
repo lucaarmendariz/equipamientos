@@ -14,12 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-    // Validar campos vacíos
-    if ($username === '' || $password === '') {
-        $response['message'] = 'Por favor, rellena todos los campos.';
-        echo json_encode($response);
-        exit;
-    }
 
     // Buscar el usuario
     $stmt = $mysqli->prepare("SELECT erabiltzailea, pasahitza, rola FROM erabiltzailea WHERE erabiltzailea = ?");
@@ -34,18 +28,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $stmt->get_result();
 
     if ($user = $result->fetch_assoc()) {
-        // Comparar contraseñas (texto plano, ideal usar password_verify)
+        // Comparar contraseñas 
         if ($password === $user['pasahitza']) {
             session_regenerate_id(true);
             $_SESSION['username'] = $user['erabiltzailea'];
             $_SESSION['rola'] = $user['rola'];
 
-            // ✅ Éxito: el JS se encargará de redirigir
             $response['success'] = true;
             $response['message'] = 'Inicio de sesión correcto. Redirigiendo...';
-            $response['redirect'] = (strtolower($user['rola']) === 'a')
-                ? '../frontend/admin.html'
-                : '../frontend/user.html';
+            // 🔹 Todos los roles van al mismo dashboard
+            $response['redirect'] = '../frontend/menu.html';
+            $response['role'] = $user['rola'];
         } else {
             // Contraseña incorrecta
             $response['message'] = 'El usuario o la contraseña son incorrectos. Inténtalo de nuevo.';
