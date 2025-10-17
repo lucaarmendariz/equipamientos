@@ -5,19 +5,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!role) {
     alert("Sesión no válida. Por favor, inicia sesión de nuevo.");
-    window.location.href = "login.html";
+    window.location.href = "../frontend/index.html";
     return;
   }
 
   // Si NO es admin, ocultamos la columna y el botón de "Erabiltzaileak"
   if (role.toLowerCase() !== "a") {
     const usuariosContainer = document.getElementById("usuarios-container");
-    const usuariosButton = Array.from(document.querySelectorAll("nav button"))
-      .find(btn => btn.textContent.includes("Erabiltzaileak"));
+    const usuariosLink = Array.from(document.querySelectorAll("nav a"))
+      .find(link => link.textContent.includes("Erabiltzaileak"));
 
     if (usuariosContainer) usuariosContainer.style.display = "none";
-    if (usuariosButton) usuariosButton.style.display = "none";
+    if (usuariosLink) usuariosLink.style.display = "none";
   }
+
 
   // --- FUNCIONES GENERALES PARA CARGAR DATOS ---
   function cargarDatos(url, contenedorId, columnas, placeholder = "No hay datos disponibles") {
