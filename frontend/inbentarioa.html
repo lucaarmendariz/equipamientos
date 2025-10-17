@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html lang="eu">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inbentarioa - Santurtzi LHII</title>
   <link rel="stylesheet" href="sass/global.scss">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-      <script src="js/menu.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/validation.js"></script>
 
 </head>
+
 <body>
   <header>
     <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
     <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
-    <div class="user-icon"><i class="fas fa-user"></i></div>
+    <div class="user-icon">
+      <span class="user-name" id="user-name"></span> <!-- Aquí aparecerá nombre + apellido -->
 
+      <i class="fas fa-user"></i>
+      <div class="user-menu">
+        <a href="perfil.html">Ver perfil</a>
+        <a href="perfil.html#editar">Modificar perfil</a>
+        <a href="#" id="logout-button">Cerrar sesión</a>
+      </div>
+    </div>
   </header>
   <nav id="main-nav">
     <div class="nav-container">
@@ -85,4 +96,5 @@
 
   <script src="js/inbentarioa.js"></script>
 </body>
+
 </html>
