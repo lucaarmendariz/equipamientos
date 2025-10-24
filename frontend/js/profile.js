@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const inputName = document.getElementById("name");
   const inputLastname = document.getElementById("lastname");
   const inputRole = document.getElementById("role");
-  const editBtn = document.getElementById("edit-btn");
   const saveBtn = document.getElementById("save-btn");
   const userNameSpan = document.getElementById("user-name");
 
@@ -24,33 +23,19 @@ document.addEventListener("DOMContentLoaded", () => {
   inputName.value = name;
   inputLastname.value = lastname;
   inputRole.value = role.toUpperCase() === "A" ? "Administrador" : "Usuario";
-
   if (userNameSpan) userNameSpan.textContent = `${name} ${lastname}`;
 
   // Función para actualizar el modo (ver o editar)
   function updateMode() {
     const isEditMode = window.location.hash === "#editar";
-
     inputName.disabled = !isEditMode;
     inputLastname.disabled = !isEditMode;
-
-    if (isEditMode) {
-      saveBtn.style.display = "inline-block";
-      editBtn.style.display = "none";
-    } else {
-      saveBtn.style.display = "none";
-      editBtn.style.display = "none"; // nunca mostrar botón en modo ver perfil
-    }
+    saveBtn.style.display = isEditMode ? "inline-block" : "none";
   }
 
   // Ejecutar al cargar y al cambiar hash
   updateMode();
   window.addEventListener("hashchange", updateMode);
-
-  // Botón de editar (solo cambia hash)
-  editBtn.addEventListener("click", () => {
-    window.location.hash = "#editar";
-  });
 
   // Guardar cambios
   const form = document.getElementById("profile-form");
@@ -60,10 +45,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const updatedName = inputName.value.trim();
     const updatedLastname = inputLastname.value.trim();
 
-    fetch("../backend/update_profile.php", {
+    if (!updatedName || !updatedLastname) {
+      alert("Por favor, completa todos los campos.");
+      return;
+    }
+
+    fetch("../backend/usuarios.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, name: updatedName, lastname: updatedLastname })
+      body: JSON.stringify({
+        action: "PUT",
+        username,
+        name: updatedName,
+        lastname: updatedLastname
+      })
     })
     .then(res => res.json())
     .then(data => {

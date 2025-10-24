@@ -1,14 +1,98 @@
 <?php
+// gelak.php
 header('Content-Type: application/json; charset=utf-8');
-require_once 'conexion.php';
+require_once 'conexion.php'; // conexión $mysqli
 
-$result = $mysqli->query("SELECT id, izena FROM gela ORDER BY izena ASC");
+// Recibir datos JSON
+$input = json_decode(file_get_contents('php://input'), true);
+$action = $input['action'] ?? 'list';
 
-$gelas = [];
-while ($row = $result->fetch_assoc()) {
-    $gelas[] = $row;
+$response = [
+    'success' => false,
+    'data' => [],
+    'message' => ''
+];
+
+try {
+    switch ($action) {
+
+        // =================================================
+        // LISTAR GELAS
+        // =================================================
+        case 'list':
+            $query = "SELECT id, izena FROM gela ORDER BY izena ASC";
+            $result = $mysqli->query($query);
+
+            if ($result) {
+                $gelas = [];
+                while ($row = $result->fetch_assoc()) {
+                    $gelas[] = $row;
+                }
+                $response['success'] = true;
+                $response['data'] = $gelas;
+            } else {
+                $response['message'] = "Error en la consulta: " . $mysqli->error;
+            }
+            break;
+
+        // =================================================
+        // AÑADIR GELA (opcional)
+        // =================================================
+        case 'add':
+            $nombre = $input['izena'] ?? null;
+            if (!$nombre) throw new Exception("Falta el nombre de la gela");
+
+            $stmt = $mysqli->prepare("INSERT INTO gela (izena) VALUES (?)");
+            $stmt->bind_param("s", $nombre);
+            $stmt->execute();
+            $stmt->close();
+
+            $response['success'] = true;
+            $response['message'] = "Gela añadida correctamente";
+            break;
+
+        // =================================================
+        // ACTUALIZAR GELA (opcional)
+        // =================================================
+        case 'update':
+            $id = $input['id'] ?? null;
+            $nombre = $input['izena'] ?? null;
+            if (!$id || !$nombre) throw new Exception("Faltan campos obligatorios");
+
+            $stmt = $mysqli->prepare("UPDATE gela SET izena = ? WHERE id = ?");
+            $stmt->bind_param("si", $nombre, $id);
+            $stmt->execute();
+            $stmt->close();
+
+            $response['success'] = true;
+            $response['message'] = "Gela actualizada correctamente";
+            break;
+
+        // =================================================
+        // ELIMINAR GELA (opcional)
+        // =================================================
+        case 'delete':
+            $id = $input['id'] ?? null;
+            if (!$id) throw new Exception("Falta el ID de la gela");
+
+            $stmt = $mysqli->prepare("DELETE FROM gela WHERE id = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $stmt->close();
+
+            $response['success'] = true;
+            $response['message'] = "Gela eliminada correctamente";
+            break;
+
+        default:
+            $response['message'] = "Acción no reconocida";
+
+    }
+} catch (Exception $e) {
+    $response['success'] = false;
+    $response['message'] = "Error: " . $e->getMessage();
 }
 
-echo json_encode($gelas);
-
 $mysqli->close();
+echo json_encode($response);
+exit;

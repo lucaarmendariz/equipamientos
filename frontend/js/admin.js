@@ -1,19 +1,30 @@
+// js/dashboard.js
 document.addEventListener("DOMContentLoaded", () => {
 
-  
-
-
   // --- FUNCIONES GENERALES PARA CARGAR DATOS ---
+  /**
+   * cargarDatos envía siempre { action: "list" } al backend vía POST y pinta la respuesta.
+   * @param {string} url - endpoint (ej: ../backend/equipos.php)
+   * @param {string} contenedorId - id del elemento donde renderizar
+   * @param {Array} columnas - [{label: 'Izena', key: 'izena'}, ...]
+   * @param {string} placeholder - texto si no hay datos
+   */
   function cargarDatos(url, contenedorId, columnas, placeholder = "No hay datos disponibles") {
     const container = document.getElementById(contenedorId);
+    if (!container) return; // evita errores si la sección no existe en la página
 
-    fetch(url)
+    // Enviamos siempre action=list para pedir la lista
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "list" })
+    })
       .then(res => {
-        if (!res.ok) throw new Error("Error en la respuesta del servidor");
+        if (!res.ok) throw new Error(`Respuesta del servidor: ${res.status}`);
         return res.json();
       })
       .then(data => {
-        if (data.success && data.data.length > 0) {
+        if (data && data.success && Array.isArray(data.data) && data.data.length > 0) {
           container.innerHTML = "";
 
           // Cabecera
@@ -28,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
             row.classList.add("data-row");
             if (index % 2 === 0) row.classList.add("even");
 
-            row.innerHTML = columnas.map(col => `<span>${item[col.key] ?? "—"}</span>`).join("");
+            row.innerHTML = columnas.map(col => `<span>${escapeHtml(item[col.key] ?? "—")}</span>`).join("");
             container.appendChild(row);
           });
         } else {
@@ -36,11 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       })
       .catch(err => {
-        console.error(`Error al obtener ${contenedorId}:`, err);
+        console.error(`Error al obtener ${contenedorId} desde ${url}:`, err);
         container.innerHTML = `<div class="data-row empty">Error al cargar los datos.</div>`;
       });
   }
 
+  // pequeño helper para evitar inyección de HTML al mostrar texto
+  function escapeHtml(str) {
+    if (typeof str !== "string") return str;
+    return str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]);
+  }
 
   // --- CARGAR DATOS POR CADA COLUMNA ---
   cargarDatos("../backend/equipos.php", "equipamientos-list", [
