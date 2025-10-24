@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 $host = 'localhost';
 $db = 'erronka';
 $user = 'root';
-$pass = 'ikasle123';
+$pass = 'admin';
 
 // Crear conexión
 $mysqli = new mysqli($host, $user, $pass, $db);
