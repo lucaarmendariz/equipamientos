@@ -14,9 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
-
-    // Buscar el usuario
-    $stmt = $mysqli->prepare("SELECT erabiltzailea, pasahitza, rola FROM erabiltzailea WHERE erabiltzailea = ?");
+    // Buscar el usuario y traer todos los campos necesarios
+    $stmt = $mysqli->prepare("SELECT nan, izena, abizena, erabiltzailea, pasahitza, rola FROM erabiltzailea WHERE erabiltzailea = ?");
     if (!$stmt) {
         $response['message'] = 'Error en la base de datos.';
         echo json_encode($response);
@@ -28,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $result = $stmt->get_result();
 
     if ($user = $result->fetch_assoc()) {
-        // Comparar contraseñas 
+        // Comparar contraseñas
         if ($password === $user['pasahitza']) {
             session_regenerate_id(true);
             $_SESSION['username'] = $user['erabiltzailea'];
@@ -36,15 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $response['success'] = true;
             $response['message'] = 'Inicio de sesión correcto. Redirigiendo...';
-            // Todos los roles van al mismo dashboard
             $response['redirect'] = '../frontend/menu.html';
-            $response['role'] = $user['rola'];
+            // Enviar todos los datos necesarios para sessionStorage
+            $response['rola'] = $user['rola'];
+            $response['erabiltzailea'] = $user['erabiltzailea'];
+            $response['izena'] = $user['izena'];
+            $response['abizena'] = $user['abizena'];
         } else {
-            // Contraseña incorrecta
             $response['message'] = 'El usuario o la contraseña son incorrectos. Inténtalo de nuevo.';
         }
     } else {
-        // Usuario no encontrado
         $response['message'] = 'El usuario o la contraseña son incorrectos. Inténtalo de nuevo.';
     }
 
@@ -53,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// Si no es método POST
 $response['message'] = 'Método no permitido.';
 echo json_encode($response);
 exit;

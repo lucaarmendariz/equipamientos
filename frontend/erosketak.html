@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="sass/global.scss" />
 
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="js/menu.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="js/validation.js"></script>
 
 </head>
 
@@ -16,8 +17,16 @@
   <header>
     <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
     <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
-    <div class="user-icon"><i class="fas fa-user"></i></div>
+    <div class="user-icon">
+      <span class="user-name" id="user-name"></span> <!-- Aquí aparecerá nombre + apellido -->
 
+      <i class="fas fa-user"></i>
+      <div class="user-menu">
+        <a href="perfil.html">Ver perfil</a>
+        <a href="perfil.html#editar">Modificar perfil</a>
+        <a href="#" id="logout-button">Cerrar sesión</a>
+      </div>
+    </div>
   </header>
   <nav id="main-nav">
     <div class="nav-container">
@@ -29,10 +38,10 @@
   </nav>
 
   <footer class="main-footer">
-  <div class="footer-content">
-    <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
-    <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
-  </div>
-</footer>
+    <div class="footer-content">
+      <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
+      <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+    </div>
+  </footer>
 
 </html>
