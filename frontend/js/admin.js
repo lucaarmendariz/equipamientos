@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+
   // --- CONTROL DE SESIÓN Y ROLES ---
   const role = sessionStorage.getItem("userRole");
 

@@ -1,14 +1,13 @@
-@import 'style.scss'; 
+@import 'style.scss';
 
-
-/* Reset */
+/* === RESET === */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Body y contenedor general */
+/* === BASE === */
 body {
   font-family: 'Inria Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: var(--blue-bg-lightest);
@@ -19,7 +18,7 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
+/* === HEADER === */
 header {
   background-color: var(--blue-dark);
   color: white;
@@ -44,7 +43,12 @@ header {
   text-align: center;
 }
 
-/* Texto de bienvenida */
+.title a {
+  color: white;
+  text-decoration: none;
+}
+
+/* === TEXTO DE BIENVENIDA === */
 .welcome-text {
   text-align: center;
   font-size: 1.1rem;
@@ -53,22 +57,23 @@ header {
   margin-bottom: 1rem;
 }
 
-/* Dashboard grid ocupa todo el ancho */
+/* === CONTENEDOR GENERAL === */
 .dashboard-container {
   width: 100%;
   padding: 1rem;
   flex-grow: 1;
 }
 
+/* === GRID DE COLUMNAS === */
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  align-items: start;
+  display: flex;
+  gap: 20px;
+  flex-wrap: nowrap;
 }
 
-/* Columnas */
 .dashboard-column {
+  flex: 1;
+  min-width: 0;
   background-color: var(--blue-bg-medium);
   border-radius: 8px;
   padding: 1rem;
@@ -89,126 +94,102 @@ header {
   padding-bottom: 0.5rem;
 }
 
-/* Scroll de las columnas */
+/* === SCROLLBAR === */
 .dashboard-column::-webkit-scrollbar {
   width: 6px;
 }
-
 .dashboard-column::-webkit-scrollbar-thumb {
   background-color: rgba(0, 0, 0, 0.2);
   border-radius: 3px;
 }
 
-/* Filas de datos */.equipamientos-grid {
+/* === TABLAS === */
+.equipamientos-grid {
   display: flex;
   flex-direction: column;
   width: 100%;
   gap: 0.25rem;
 }
 
-.data-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.75rem 1rem;
+/* === FILAS Y CABECERA === */
+.data-row,
+.data-header {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.2fr 0.7fr 1.5fr 1.3fr; /* Izena, Marka, Modelo, Stock, Kategoria, Ekintzak */
+  align-items: center;
+  padding: 0.6rem 1rem;
   border-radius: 6px;
   font-weight: 500;
+}
+
+.data-header {
+  background-color: var(--blue-bg-dark);
+  color: var(--blue-darkest);
+  font-weight: 700;
+}
+
+/* === CELDAS === */
+.data-row span,
+.data-header span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* === COLUMNA DE ACCIONES === */
+.col-ekintzak {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* === BOTONES === */
+.col-ekintzak button {
+  background-color: var(--blue-dark);
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
   transition: background-color 0.2s ease;
 }
-
-.data-row span {
-  flex: 1;
+.col-ekintzak button:hover {
+  background-color: var(--blue-medium);
 }
 
-.data-row span.col-stock {
-  text-align: center;
-}
-.data-row span.col-marca,
-.data-row span.col-modelo {
-  text-align: right;
-}
-
-/* Zebra striping solo en filas de datos */
-.data-row:not(.data-header):nth-child(even) {
-  background-color: #cce4f6;
-}
-.data-row:not(.data-header):nth-child(odd) {
-  background-color: #e3f2fd;
-}
-
-/* Hover solo en filas de datos */
-.data-row:not(.data-header):hover {
-  background-color: #b3d9f0;
-  cursor: pointer;
-}
-
-
-/* Zebra striping: alternar colores */
+/* === FILAS ALTERNAS === */
 .data-row:nth-child(even) {
   background-color: #cce4f6;
 }
-
-/* Hover para resaltar fila */
+.data-row:nth-child(odd) {
+  background-color: #e3f2fd;
+}
 .data-row:hover {
   background-color: #b3d9f0;
   cursor: pointer;
 }
-/* Cabecera */
-.data-header {
-  background-color: var(--blue-bg-dark); // azul más oscuro
-  color: white;
-  font-weight: 700;
+
+/* === TABLA INVENTARIO === */
+.dashboard-column:first-child .data-row,
+.dashboard-column:first-child .data-header {
+  grid-template-columns: 2fr 1.5fr 1fr; /* Etiketa | Data | Ekintzak */
 }
 
-/* Listas de Inbentario y Usuarios */
-ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-li.empty {
-  color: #777;
-  font-style: italic;
-}
-
-/* Nav inferior */
-nav {
-  background-color: #ffffff;
-  padding: 1rem 0.5rem;
+/* === BÚSQUEDA === */
+.search-section {
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
-  box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
-}
-
-nav button {
-  background-color: var(--blue-dark);
-  border: none;
-  border-radius: 20px;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-
-  &:hover {
-    background-color: var(--blue-medium);
-    transform: translateY(-1px);
-  }
-}
-
-/* Responsive */
-@media (max-width: 900px) {
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 .search-wrapper {
   position: relative;
-  width: 100%;
-  max-width: 500px;
   flex: 1;
+  min-width: 250px;
 }
 
 .search-wrapper input {
@@ -216,17 +197,19 @@ nav button {
   padding: 10px 10px 10px 35px;
   border: 1px solid #ccc;
   border-radius: 6px;
+  font-size: 1rem;
 }
 
 .search-icon {
   position: absolute;
-  top: 30%;
+  top: 50%;
   left: 10px;
   transform: translateY(-50%);
   color: #777;
   pointer-events: none;
 }
 
+/* === BOTÓN AÑADIR === */
 .add-button {
   background-color: var(--blue-dark);
   color: white;
@@ -239,12 +222,122 @@ nav button {
   cursor: pointer;
   font-size: 0.95rem;
 }
-
-.add-button .counter {
-  background-color: white;
-  color: var(--blue-dark);
-  border-radius: 50%;
-  padding: 5px 10px;
-  top: 30%;
-  font-weight: bold;
+.add-button:hover {
+  background-color: var(--blue-medium);
 }
+
+/* === NAVBAR === */
+.navbar {
+  margin-top: 1rem;
+  padding: 0;
+  width: 100%;
+  background: transparent;
+  box-shadow: none;
+}
+.segmento {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.nav {
+  display: flex;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.nav-link {
+  display: block;
+  padding: 0.5rem 1.2rem;
+  background-color: transparent;
+  color: var(--text-color);
+  border-radius: 20px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+.nav-link:hover {
+  background-color: var(--blue-light);
+  color: var(--blue-darkest);
+}
+
+/* === MODALES / OVERLAY === */
+/* Overlay */
+#overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 900;
+}
+
+/* Modal base */
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: 350px;
+  max-width: 90%;
+  background-color: #f0f8ff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  padding: 1.5rem;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Modal contenido */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+/* Botón guardar */
+.save-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.save-button:hover {
+  background-color: #0056b3;
+}
+
+/* Inputs y selects */
+.modal-content input,
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+/* Cerrar modal (X) */
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  background-color: red;
+  color: white;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 28px;
+  cursor: pointer;
+  z-index: 1100;
+  transition: background-color 0.2s ease;
+}
+.close-modal:hover {
+  background-color: darkred;
+}
+
