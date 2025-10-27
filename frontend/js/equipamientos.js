@@ -1,257 +1,192 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const backendURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
+  const categoriasURL = CONFIG.BASE_URL + "backend/controladores/kategoriaController.php";
 
-  const backendURL = "../backend/equipos.php";
-
-  // ============================================================
-  // FUNCIONES AUXILIARES
-  // ============================================================
-
-  // Función para cargar categorías en un select
+  // Cargar categorías en select
   function cargarCategorias(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
-
-    fetch('../backend/kategoriak.php')
+    fetch(categoriasURL)
       .then(res => res.json())
       .then(data => {
         select.innerHTML = '<option value="">Seleccione una categoría</option>';
-        data.data.forEach(cat => {
-          const option = document.createElement('option');
-          option.value = cat.id;
-          option.textContent = cat.izena;
-          select.appendChild(option);
-        });
-      })
-      .catch(err => console.error('Error cargando categorías:', err));
-  }
-
-  // Al cargar la página o modal, cargar categorías
-  cargarCategorias('edit-categoria');
-
-  // 🧩 Función para cargar datos en un contenedor
-  function cargarDatos(url, contenedorId, columnas, placeholder = "No hay datos disponibles") {
-    const container = document.getElementById(contenedorId);
-
-    fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "list" })
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.data.length > 0) {
-          container.innerHTML = "";
-
-          // Cabecera
-          const header = document.createElement("div");
-          header.classList.add("data-row", "data-header");
-          header.innerHTML = columnas.map(col => `<span>${col.label}</span>`).join("") + "<span>Acciones</span>";
-          container.appendChild(header);
-
-          // Filas
-          data.data.forEach((item, index) => {
-            const row = document.createElement("div");
-            row.classList.add("data-row");
-            if (index % 2 === 0) row.classList.add("even");
-
-            row.innerHTML = columnas.map(col => `<span>${item[col.key] ?? "—"}</span>`).join("");
-
-            // Botones de acción
-            const btns = document.createElement("span");
-            btns.innerHTML = `
-              <button class="btn btn-sm btn-outline-primary me-1 edit-btn" data-id="${item.id}">✏️</button>
-              <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.id}">🗑️</button>
-            `;
-            row.appendChild(btns);
-            container.appendChild(row);
+        if (data.success && Array.isArray(data.data)) {
+          data.data.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.izena;
+            select.appendChild(option);
           });
-
-          // Añadir eventos a botones
-          document.querySelectorAll(".edit-btn").forEach(btn =>
-            btn.addEventListener("click", () => editarEquipo(btn.dataset.id))
-          );
-          document.querySelectorAll(".delete-btn").forEach(btn =>
-            btn.addEventListener("click", () => eliminarEquipo(btn.dataset.id))
-          );
-
-        } else {
-          container.innerHTML = `<div class="data-row empty">${placeholder}</div>`;
         }
       })
-      .catch(err => {
-        console.error(`Error al obtener ${contenedorId}:`, err);
-        container.innerHTML = `<div class="data-row empty">Error al cargar los datos.</div>`;
-      });
+      .catch(err => console.error("Error cargando categorías:", err));
   }
+  cargarCategorias("categoria");
+  cargarCategorias("edit-categoria");
 
-  // ============================================================
-  // 🔄 CARGAR LISTA DE EQUIPOS
-  // ============================================================
-
+  // Listar equipos
   function actualizarListaEquipos() {
-    cargarDatos(backendURL, "equipamientos-list", [
-      { label: "Izena", key: "izena" },
-      { label: "Stock", key: "stock" },
-      { label: "Marka", key: "marka" },
-      { label: "Modelo", key: "modelo" }
-    ]);
+    const container = document.getElementById("equipamientos-list");
+    container.innerHTML = `<div class="data-row text-center py-2">Cargando datos...</div>`;
+
+    fetch(backendURL)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+          container.innerHTML = `<div class="data-row empty text-center">No hay equipos registrados.</div>`;
+          return;
+        }
+
+        console.log(data.data)
+
+        container.innerHTML = "";
+        const header = document.createElement("div");
+        header.classList.add("data-row", "data-header");
+        header.innerHTML = `<span>Nombre</span><span>Stock</span><span>Marca</span><span>Modelo</span><span>Acciones</span>`;
+        container.appendChild(header);
+
+        data.data.forEach((item, i) => {
+          const row = document.createElement("div");
+          row.classList.add("data-row");
+          if (i % 2 === 0) row.classList.add("even");
+          row.innerHTML = `
+            <span>${item.izena ?? "—"}</span>
+            <span>${item.stock ?? 0}</span>
+            <span>${item.marka ?? "—"}</span>
+            <span>${item.modelo ?? "—"}</span>
+            <span>
+              <button class="btn btn-sm btn-outline-primary me-1 edit-btn" data-id="${item.id}">✏️</button>
+              <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.id}">🗑️</button>
+            </span>
+          `;
+          container.appendChild(row);
+        });
+
+        document.querySelectorAll(".edit-btn").forEach(btn =>
+          btn.addEventListener("click", () => editarEquipo(btn.dataset.id))
+        );
+        document.querySelectorAll(".delete-btn").forEach(btn =>
+          btn.addEventListener("click", () => eliminarEquipo(btn.dataset.id))
+        );
+      })
+      .catch(err => console.error("Error cargando equipos:", err));
   }
   actualizarListaEquipos();
 
-  // ============================================================
-  // 📚 CARGAR SELECTS (CATEGORÍAS)
-  // ============================================================
-
-  fetch('../backend/kategoriak.php')
-    .then(res => res.json())
-    .then(data => {
-      const select = document.getElementById('categoria');
-      data.data.forEach(c => {
-        const option = document.createElement('option');
-        option.value = c.id;
-        option.textContent = c.izena;
-        select.appendChild(option);
-      });
-    });
-
-
-  // ============================================================
-  // ➕ AGREGAR NUEVO EQUIPO
-  // ============================================================
-
-  const form = document.getElementById('addEquipoForm');
-  form.addEventListener('submit', e => {
+  // Crear equipo
+  document.getElementById("addEquipoForm").addEventListener("submit", e => {
     e.preventDefault();
-
     const payload = {
-      action: "insert",
-      nombre: document.getElementById('nombre').value,
-      deskribapena: document.getElementById('descripcion').value,
-      marca: document.getElementById('marca').value,
-      modelo: document.getElementById('modelo').value,
-      stock: parseInt(document.getElementById('stock').value),
-      idKategoria: parseInt(document.getElementById('categoria').value),
+      izena: document.getElementById("nombre").value,
+      deskribapena: document.getElementById("descripcion").value,
+      marca: document.getElementById("marca").value || null,
+      modelo: document.getElementById("modelo").value || null,
+      stock: parseInt(document.getElementById("stock").value) || 0,
+      idKategoria: parseInt(document.getElementById("categoria").value) || 0
     };
 
+    console.log(payload)
     fetch(backendURL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
-          // Cerrar modal y limpiar formulario
-          bootstrap.Modal.getInstance(document.getElementById('addEquipoModal')).hide();
-          form.reset();
-
+          bootstrap.Modal.getInstance(document.getElementById("addEquipoModal")).hide();
+          e.target.reset();
           actualizarListaEquipos();
-
-          // Mostrar modal de éxito
-          new bootstrap.Modal(document.getElementById('successModal')).show();
-        } else {
-          alert('Error: ' + data.message);
-        }
-      })
-      .catch(err => console.error(err));
+          new bootstrap.Modal(document.getElementById("successModal")).show();
+        } else alert("Error: " + data.message);
+      });
   });
 
-  // ============================================================
-  // ✏️ EDITAR EQUIPO
-  // ============================================================
-
+  // Editar equipo
   function editarEquipo(id) {
+
+    fetch(`${backendURL}?id=${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.success || !data.data) return alert("Equipo no encontrado");
+        const e = data.data;
+        document.getElementById("edit-id").value = e.id;
+        document.getElementById("edit-nombre").value = e.izena;
+        document.getElementById("edit-descripcion").value = e.deskribapena ?? "";
+        document.getElementById("edit-marca").value = e.marka ?? "";
+        document.getElementById("edit-modelo").value = e.modelo ?? "";
+        document.getElementById("edit-stock").value = e.stock ?? 0;
+        document.getElementById("edit-categoria").value = e.idKategoria ?? "";
+        new bootstrap.Modal(document.getElementById("editEquipoModal")).show();
+      });
+  }
+
+  document.getElementById("editEquipoForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const payload = {
+      id: parseInt(document.getElementById("edit-id").value),
+      izena: document.getElementById("edit-nombre").value,
+      deskribapena: document.getElementById("edit-descripcion").value,
+      marca: document.getElementById("edit-marca").value || null,
+      modelo: document.getElementById("edit-modelo").value || null,
+      stock: parseInt(document.getElementById("edit-stock").value) || 0,
+      idKategoria: parseInt(document.getElementById("edit-categoria").value) || 0
+    };
+
+    console.log(JSON.stringify(payload) + 'a enviar')
+
     fetch(backendURL, {
-      method: "POST",
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "getById", id: id }) // enviamos el ID
+      body: JSON.stringify(payload)
     })
       .then(res => res.json())
       .then(data => {
-        if (!data.success) return alert(data.message || "Equipo no encontrado");
+        if (data.success) {
+          bootstrap.Modal.getInstance(document.getElementById("editEquipoModal")).hide();
+          actualizarListaEquipos();
+          new bootstrap.Modal(document.getElementById("editSuccessModal")).show();
+        } else alert("Error: " + data.message);
+      });
+  });
 
-        const equipo = data.data; // ya es un objeto, no un array
-        console.log(equipo);
-
-        // Rellenar formulario de edición
-        document.getElementById("edit-id").value = equipo.id;
-        document.getElementById("edit-nombre").value = equipo.izena;
-        document.getElementById("edit-descripcion").value = equipo.deskribapena ?? "";
-        document.getElementById("edit-marca").value = equipo.marka ?? "";
-        document.getElementById("edit-modelo").value = equipo.modelo ?? "";
-        document.getElementById("edit-stock").value = equipo.stock ?? 0;
-
-        // Seleccionar categoría actual en el select
-        const selectCategoria = document.getElementById("edit-categoria");
-        if (selectCategoria) {
-          selectCategoria.value = equipo.idKategoria ?? "";
-        }
-
-        // Mostrar modal
-        new bootstrap.Modal(document.getElementById("editEquipoModal")).show();
-      })
-      .catch(err => console.error("Error al cargar el equipo:", err));
-  }
-
-
-
-  // Guardar cambios de edición
-  const editForm = document.getElementById("editEquipoForm");
-  if (editForm) {
-    editForm.addEventListener("submit", e => {
-      e.preventDefault();
-
-      const payload = {
-        action: "update",
-        id: parseInt(document.getElementById("edit-id").value),
-        nombre: document.getElementById("edit-nombre").value,
-        deskribapena: document.getElementById("edit-descripcion").value,
-        marca: document.getElementById("edit-marca").value,
-        modelo: document.getElementById("edit-modelo").value,
-        stock: parseInt(document.getElementById("edit-stock").value),
-        idKategoria: parseInt(document.getElementById("edit-categoria").value || 0)
-      };
-
-      fetch(backendURL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            bootstrap.Modal.getInstance(document.getElementById("editEquipoModal")).hide();
-            actualizarListaEquipos();
-            alert("Equipo actualizado correctamente");
-          } else {
-            alert("Error: " + data.message);
-          }
-        })
-        .catch(err => console.error(err));
-    });
-  }
-
-  // ============================================================
-  // 🗑️ ELIMINAR EQUIPO
-  // ============================================================
-
+  // Eliminar equipo
   function eliminarEquipo(id) {
-    if (!confirm("¿Seguro que quieres eliminar este equipo?")) return;
-
+    if (!confirm("¿Seguro que deseas eliminar este equipo?")) return;
+    console.log(id);
     fetch(backendURL, {
-      method: "POST",
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "delete", id: parseInt(id) })
+      body: JSON.stringify({ id: parseInt(id) })
     })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           actualizarListaEquipos();
-          alert("Equipo eliminado correctamente");
-        } else {
-          alert("Error: " + data.message);
-        }
-      })
-      .catch(err => console.error(err));
+          new bootstrap.Modal(document.getElementById("editDeleteModal")).show();
+        } else alert("Error: " + data.message);
+      });
+  }
+
+  // ============================================================
+  // BÚSQUEDA GLOBAL DE EQUIPOS (IGNORA MAYÚSCULAS Y LA CABECERA)
+  // ============================================================
+  const searchInput = document.getElementById("searchInput");
+
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      const filtro = searchInput.value.trim().toLowerCase();
+      const contenedor = document.getElementById("equipamientos-list");
+
+      if (!contenedor) return;
+
+      // Seleccionamos todas las filas excepto la cabecera
+      const filas = contenedor.querySelectorAll(".data-row:not(.data-header)");
+
+      filas.forEach(fila => {
+        const texto = fila.innerText.toLowerCase();
+        fila.style.display = texto.includes(filtro) ? "" : "none";
+      });
+    });
   }
 });

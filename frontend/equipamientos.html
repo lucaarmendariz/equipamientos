@@ -17,6 +17,8 @@
   <!-- Scripts globales -->
   <script src="js/validation.js"></script>
   <script src="js/menu.js"></script>
+  <script src="../assets/config.js"></script>
+
 </head>
 
 <body>
@@ -54,6 +56,12 @@
   ============================================================ -->
   <main class="dashboard-container container py-4">
     <h2 class="mb-3 text-center">Ekipamenduak</h2>
+
+
+    <div class="mb-3">
+      <input type="text" id="searchInput" class="form-control"
+        placeholder="Buscar por nombre, etiqueta, marca, modelo o categoría...">
+    </div>
 
     <!-- Botón para añadir nuevo equipo -->
     <div class="text-end mb-3">
@@ -202,6 +210,50 @@
       </div>
     </div>
   </div>
+
+  <!-- ============================================================
+       MODAL: EQUIPO MODIFICADO CORRECTAMENTE
+  ============================================================ -->
+  <div class="modal fade" id="editSuccessModal" tabindex="-1" aria-labelledby="editSuccessModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editSuccessModalLabel">¡Equipo actualizado!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+          <span id="editSuccessMessage">El equipo ha sido modificado correctamente.</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: EQUIPO ELIMINADO CORRECTAMENTE
+  ============================================================ -->
+  <div class="modal fade" id="editDeleteModal" tabindex="-1" aria-labelledby="editDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editDeleteModalLabel">¡Equipo eliminado!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+          <span id="editSuccessMessage">El equipo ha sido eliminado correctamente.</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ============================================================
        FOOTER
