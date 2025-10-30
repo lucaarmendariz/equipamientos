@@ -10,7 +10,7 @@ window.onload = function() {
 
   // ================== INVENTARIO ==================
   function cargarInventario() {
-    fetch('../backend/inventario.php')
+    fetch('../backend/controladores/inbentarioController.php')
       .then(r => r.json())
       .then(res => {
         if (!res.success) {
@@ -36,7 +36,7 @@ window.onload = function() {
   }
   // ================== EQUIPAMIENTOS ==================
   function cargarEquipamientos() {
-    fetch('../backend/equipamientos.php')
+    fetch('../backend/controladores/ekipamenduakController.php')
       .then(res => res.json())
       .then(data => {
         if (!data.success) {
@@ -68,7 +68,7 @@ window.onload = function() {
       return;
     }
 
-    fetch('../backend/kategoria.php', {
+    fetch('../backend/controladores/kategoriaController.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ izena: nombre })
