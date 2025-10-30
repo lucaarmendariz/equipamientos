@@ -68,6 +68,10 @@
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipoModal">
         <i class="fa fa-plus"></i> Añadir Equipo
       </button>
+      <button type="button" class="btn btn-secondary" id="openCategoriasModalBtn">
+        <i class="fa fa-cog"></i> Gestionar Categorías
+      </button>
+
     </div>
 
     <!-- Listado de equipos -->
@@ -117,9 +121,12 @@
                 <input type="number" class="form-control" id="stock" required>
               </div>
               <div class="col-md-6 mb-3">
-                <label for="categoria" class="form-label">Categoría</label>
+                <label for="categoria" class="form-label d-flex justify-content-between align-items-center">
+                  <span>Categoría</span>
+                </label>
                 <select class="form-select" id="categoria" required></select>
               </div>
+
             </div>
           </div>
 
@@ -171,9 +178,12 @@
                 <input type="number" class="form-control" id="edit-stock" required>
               </div>
               <div class="col-md-6 mb-3">
-                <label for="edit-categoria" class="form-label">Categoría</label>
+                <label for="edit-categoria" class="form-label d-flex justify-content-between align-items-center">
+                  <span>Categoría</span>
+                </label>
                 <select class="form-select" id="edit-categoria"></select>
               </div>
+
             </div>
           </div>
 
@@ -272,6 +282,81 @@
       </div>
     </div>
   </div>
+
+  <!-- ============================================================
+     MODAL: GESTIÓN DE CATEGORÍAS
+============================================================ -->
+  <div class="modal fade" id="manageCategoriasModal" tabindex="-1" aria-labelledby="manageCategoriasModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="manageCategoriasModalLabel">Gestión de Categorías</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+
+          <!-- Botón para añadir nueva categoría -->
+          <div class="mb-3 text-end">
+            <button class="btn btn-primary btn-sm" id="addCategoriaModalBtn"><i class="fa fa-plus"></i> Nueva
+              Categoría</button>
+          </div>
+
+          <!-- Tabla de categorías -->
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="categoriasTableBody">
+              <tr>
+                <td colspan="3" class="text-center">Cargando categorías...</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ============================================================
+     MODAL: AÑADIR CATEGORÍA
+    ============================================================ -->
+  <div class="modal fade" id="addCategoriaModal" tabindex="-1" aria-labelledby="addCategoriaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addCategoriaForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCategoriaModalLabel">Nueva Categoría</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="categoria-nombre" class="form-label">Nombre de la categoría</label>
+              <input type="text" class="form-control" id="categoria-nombre" required>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Crear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
 
   <!-- ============================================================

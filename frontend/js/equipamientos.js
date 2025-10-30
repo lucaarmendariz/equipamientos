@@ -21,8 +21,103 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(err => console.error("Error cargando categorías:", err));
   }
-  cargarCategorias("categoria");
-  cargarCategorias("edit-categoria");
+
+  // ============================
+  // Gestión de categorías en modal
+  // ============================
+  const manageCategoriasModal = new bootstrap.Modal(document.getElementById("manageCategoriasModal"));
+  const categoriasTableBody = document.getElementById("categoriasTableBody");
+  const addCategoriaModalBtn = document.getElementById("addCategoriaModalBtn");
+
+  // Abrir modal y cargar categorías
+  document.getElementById("openCategoriasModalBtn")?.addEventListener("click", () => {
+    cargarCategoriasTabla();
+    manageCategoriasModal.show();
+  });
+
+  // Abrir modal de añadir categoría desde el modal de gestión
+  addCategoriaModalBtn.addEventListener("click", () => {
+    manageCategoriasModal.hide();
+    new bootstrap.Modal(document.getElementById("addCategoriaModal")).show();
+  });
+
+  // Función para cargar categorías en la tabla del modal
+  async function cargarCategoriasTabla() {
+    categoriasTableBody.innerHTML = `<tr><td colspan="3" class="text-center">Cargando categorías...</td></tr>`;
+
+    try {
+      const res = await fetch(categoriasURL);
+      const result = await res.json();
+
+      if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
+        categoriasTableBody.innerHTML = `<tr><td colspan="3" class="text-center">No hay categorías.</td></tr>`;
+        return;
+      }
+
+      categoriasTableBody.innerHTML = "";
+      result.data.forEach(cat => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+        <td>${cat.id}</td>
+        <td>
+          <input type="text" class="form-control form-control-sm categoria-nombre" value="${cat.izena}" data-id="${cat.id}">
+        </td>
+        <td class="text-center">
+          <button class="btn btn-success btn-sm me-1 save-categoria" data-id="${cat.id}"><i class="fa fa-check"></i></button>
+          <button class="btn btn-danger btn-sm delete-categoria" data-id="${cat.id}"><i class="fa fa-trash"></i></button>
+        </td>
+      `;
+        categoriasTableBody.appendChild(tr);
+      });
+
+      // Guardar cambios
+      document.querySelectorAll(".save-categoria").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const nombre = btn.closest("tr").querySelector(".categoria-nombre").value.trim();
+          if (!nombre) return alert("El nombre no puede estar vacío");
+
+          const res = await fetch(categoriasURL, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: parseInt(id), izena: nombre })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(data.message || "Categoría actualizada");
+            cargarCategoriasTabla();
+            cargarCategorias("categoria");
+            cargarCategorias("edit-categoria");
+          } else alert(data.message);
+        });
+      });
+
+      // Eliminar categoría
+      document.querySelectorAll(".delete-categoria").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (!confirm("¿Eliminar esta categoría?")) return;
+          const id = btn.dataset.id;
+          const res = await fetch(categoriasURL, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: parseInt(id) })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(data.message || "Categoría eliminada");
+            cargarCategoriasTabla();
+            cargarCategorias("categoria");
+            cargarCategorias("edit-categoria");
+          } else alert(data.message);
+        });
+      });
+
+    } catch (error) {
+      console.error("Error cargando categorías:", error);
+      categoriasTableBody.innerHTML = `<tr><td colspan="3" class="text-center">Error cargando categorías</td></tr>`;
+    }
+  }
+
 
   // Listar equipos
   function actualizarListaEquipos() {
@@ -37,31 +132,42 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        console.log(data.data)
-
         container.innerHTML = "";
+
+        // CABECERA
         const header = document.createElement("div");
         header.classList.add("data-row", "data-header");
-        header.innerHTML = `<span>Nombre</span><span>Stock</span><span>Marca</span><span>Modelo</span><span>Acciones</span>`;
+        header.innerHTML = `
+        <span>Nombre</span>
+        <span>Stock</span>
+        <span>Marca</span>
+        <span>Modelo</span>
+        <span>Categoría</span>
+        <span>Acciones</span>
+      `;
         container.appendChild(header);
 
+        // FILAS
         data.data.forEach((item, i) => {
           const row = document.createElement("div");
           row.classList.add("data-row");
           if (i % 2 === 0) row.classList.add("even");
+
           row.innerHTML = `
-            <span>${item.izena ?? "—"}</span>
-            <span>${item.stock ?? 0}</span>
-            <span>${item.marka ?? "—"}</span>
-            <span>${item.modelo ?? "—"}</span>
-            <span>
-              <button class="btn btn-sm btn-outline-primary me-1 edit-btn" data-id="${item.id}">✏️</button>
-              <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.id}">🗑️</button>
-            </span>
-          `;
+          <span>${item.izena ?? "—"}</span>
+          <span>${item.stock ?? 0}</span>
+          <span>${item.marka ?? "—"}</span>
+          <span>${item.modelo ?? "—"}</span>
+          <span>${item.kategoria ?? "—"}</span>
+          <span>
+            <button class="btn btn-sm btn-outline-primary me-1 edit-btn" data-id="${item.id}">✏️</button>
+            <button class="btn btn-sm btn-outline-danger delete-btn" data-id="${item.id}">🗑️</button>
+          </span>
+        `;
           container.appendChild(row);
         });
 
+        // EVENTOS DE BOTONES
         document.querySelectorAll(".edit-btn").forEach(btn =>
           btn.addEventListener("click", () => editarEquipo(btn.dataset.id))
         );
@@ -71,6 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(err => console.error("Error cargando equipos:", err));
   }
+
   actualizarListaEquipos();
 
   // Crear equipo
@@ -183,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bootstrap.Modal.getInstance(modalEl).hide();
       });
   });
-  
+
 
   // ============================================================
   // BÚSQUEDA GLOBAL DE EQUIPOS (IGNORA MAYÚSCULAS Y LA CABECERA)
@@ -206,4 +313,94 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+
+  // ============================================================
+  //  AÑADIR NUEVA CATEGORÍA 
+  // ============================================================
+  document.getElementById('addCategoriaForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const izena = document.getElementById('categoria-nombre').value.trim();
+    if (!izena) return alert('Sartu kategoria izena.');
+
+    try {
+      const response = await fetch(categoriasURL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ izena })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Cierra el modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addCategoriaModal'));
+        modal.hide();
+
+        // Limpia el formulario
+        document.getElementById('categoria-nombre').value = '';
+
+        // Recarga las categorías
+        if (typeof cargarCategorias === 'function') {
+          await cargarCategorias();
+        }
+
+        // Muestra el mensaje de éxito
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+        document.getElementById('successMessage').textContent = result.message || 'Kategoria ondo gehitu da.';
+        successModal.show();
+      } else {
+        alert(result.message || 'Errorea kategoria gehitzean.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Zerbitzariarekin konexio errorea.');
+    }
+  });
+  // ============================================================
+  //  CARGAR TODAS LAS CATEGORÍAS DESDE EL BACKEND
+  // ============================================================
+  async function cargarCategorias() {
+    try {
+      const response = await fetch(categoriasURL, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success && Array.isArray(result.data)) {
+        const categorias = result.data;
+
+        const selectAdd = document.getElementById('categoria');
+        const selectEdit = document.getElementById('edit-categoria');
+
+        // Limpiamos ambos select antes de rellenar
+        selectAdd.innerHTML = '<option value="">Aukeratu kategoria...</option>';
+        selectEdit.innerHTML = '<option value="">Aukeratu kategoria...</option>';
+
+        categorias.forEach(cat => {
+          const option1 = document.createElement('option');
+          option1.value = cat.id;
+          option1.textContent = cat.izena;
+          selectAdd.appendChild(option1);
+
+          const option2 = document.createElement('option');
+          option2.value = cat.id;
+          option2.textContent = cat.izena;
+          selectEdit.appendChild(option2);
+        });
+      } else {
+        console.warn('No se pudieron cargar las categorías:', result.message);
+      }
+    } catch (error) {
+      console.error('Error al cargar categorías:', error);
+    }
+  }
+
+  // Llamamos a la función al cargar la página
+  document.addEventListener('DOMContentLoaded', cargarCategorias);
+
+
+
 });
