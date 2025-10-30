@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch("../backend/login.php", {
+      const response = await fetch(CONFIG.BASE_URL + "backend/controladores/loginController.php", {
         method: "POST",
         body: formData,
       });
@@ -15,13 +15,22 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
 
       if (data.success) {
-        // Guardar el rol en sessionStorage
-        sessionStorage.setItem("userRole", data.role);
+        // Guardar datos del usuario en sessionStorage
+        sessionStorage.setItem("userRole", data.rola);
+        sessionStorage.setItem("username", data.erabiltzailea);
+        sessionStorage.setItem("name", data.izena);
+        sessionStorage.setItem("lastname", data.abizena);
 
-        // Redirigir al dashboard
+        // Redirigir al dashboard o menú principal
         window.location.href = data.redirect;
       } else {
-        alert(data.message);
+        // Mostrar mensaje de error
+        const errorLabel = document.getElementById("error-message");
+        if (errorLabel) {
+          errorLabel.textContent = data.message;
+        } else {
+          alert(data.message);
+        }
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);

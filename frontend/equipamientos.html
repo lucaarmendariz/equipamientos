@@ -5,39 +5,374 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Santurtzi LHII - Dashboard</title>
+
+  <!-- Estilos -->
   <link rel="stylesheet" href="sass/global.scss" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Scripts globales -->
+  <script src="js/validation.js"></script>
+  <script src="js/menu.js"></script>
+  <script src="../assets/config.js"></script>
 
 </head>
 
 <body>
+  <!-- ============================================================
+       HEADER
+  ============================================================ -->
   <header>
     <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
     <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
-    <div class="user-icon"><i class="fas fa-user"></i></div>
-
+    <div class="user-icon">
+      <span class="user-name" id="user-name"></span>
+      <i class="fas fa-user"></i>
+      <div class="user-menu">
+        <a href="perfil.html">Ver perfil</a>
+        <a href="perfil.html#editar">Modificar perfil</a>
+        <a href="#" id="logout-button">Cerrar sesión</a>
+      </div>
+    </div>
   </header>
+
+  <!-- ============================================================
+       MENÚ DE NAVEGACIÓN
+  ============================================================ -->
   <nav id="main-nav">
     <div class="nav-container">
-      <a href="equipamientos.html">Ekipamenduak</a>
+      <a href="equipamientos.html" class="active">Ekipamenduak</a>
       <a href="inbentarioa.html">Inbentarioa</a>
       <a href="erosketak.html">Erosketak</a>
       <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
     </div>
   </nav>
 
+  <!-- ============================================================
+       CONTENIDO PRINCIPAL
+  ============================================================ -->
+  <main class="dashboard-container container py-4">
+    <h2 class="mb-3 text-center">Ekipamenduak</h2>
 
 
-</div>
-    <script src="js/menu.js"></script>
+    <div class="mb-3">
+      <input type="text" id="searchInput" class="form-control"
+        placeholder="Buscar por nombre, etiqueta, marca, modelo o categoría...">
+    </div>
 
-</body>
+    <!-- Botón para añadir nuevo equipo -->
+    <div class="text-end mb-3">
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipoModal">
+        <i class="fa fa-plus"></i> Añadir Equipo
+      </button>
+      <button type="button" class="btn btn-secondary" id="openCategoriasModalBtn">
+        <i class="fa fa-cog"></i> Gestionar Categorías
+      </button>
 
-  <footer class="main-footer">
-  <div class="footer-content">
-    <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
-    <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+    </div>
+
+    <!-- Listado de equipos -->
+    <div class="dashboard-grid">
+      <section class="dashboard-column" id="equipamientos-container">
+        <div id="equipamientos-list">
+          <div class="data-row text-center py-2">Cargando datos...</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ============================================================
+     MODAL: AÑADIR EQUIPO
+============================================================ -->
+  <div class="modal fade" id="addEquipoModal" tabindex="-1" aria-labelledby="addEquipoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addEquipoForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addEquipoModalLabel">Nuevo Equipo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="nombre" required>
+            </div>
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción</label>
+              <textarea class="form-control" id="descripcion" required></textarea>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="marca" class="form-label">Marca</label>
+                <input type="text" class="form-control" id="marca">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="modelo" class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="modelo">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="stock" class="form-label">Stock</label>
+                <input type="number" class="form-control" id="stock" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="categoria" class="form-label d-flex justify-content-between align-items-center">
+                  <span>Categoría</span>
+                </label>
+                <select class="form-select" id="categoria" required></select>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Añadir</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
-</footer>
+
+
+  <!-- ============================================================
+       MODAL: EDITAR EQUIPO
+  ============================================================ -->
+  <div class="modal fade" id="editEquipoModal" tabindex="-1" aria-labelledby="editEquipoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="editEquipoForm">
+          <input type="hidden" id="edit-id">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editEquipoModalLabel">Editar Equipo</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="edit-nombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="edit-nombre" required>
+            </div>
+            <div class="mb-3">
+              <label for="edit-descripcion" class="form-label">Descripción</label>
+              <textarea class="form-control" id="edit-descripcion" required></textarea>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit-marca" class="form-label">Marca</label>
+                <input type="text" class="form-control" id="edit-marca">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit-modelo" class="form-label">Modelo</label>
+                <input type="text" class="form-control" id="edit-modelo">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="edit-stock" class="form-label">Stock</label>
+                <input type="number" class="form-control" id="edit-stock" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="edit-categoria" class="form-label d-flex justify-content-between align-items-center">
+                  <span>Categoría</span>
+                </label>
+                <select class="form-select" id="edit-categoria"></select>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: MENSAJE DE ÉXITO
+  ============================================================ -->
+  <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+          <span id="successMessage">Operación realizada correctamente.</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: EQUIPO MODIFICADO CORRECTAMENTE
+  ============================================================ -->
+  <div class="modal fade" id="editSuccessModal" tabindex="-1" aria-labelledby="editSuccessModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editSuccessModalLabel">¡Equipo actualizado!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+          <span id="editSuccessMessage">El equipo ha sido modificado correctamente.</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODAL: EQUIPO ELIMINADO CORRECTAMENTE
+  ============================================================ -->
+  <div class="modal fade" id="editDeleteModal" tabindex="-1" aria-labelledby="editDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editDeleteModalLabel">¡Equipo eliminado!</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+          <span id="editSuccessMessage">El equipo ha sido eliminado correctamente.</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     MODAL: CONFIRMAR ELIMINAR
+  ============================================================ -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
+          <span id="confirmDeleteMessage">¿Seguro que deseas eliminar este equipo?</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     MODAL: GESTIÓN DE CATEGORÍAS
+============================================================ -->
+  <div class="modal fade" id="manageCategoriasModal" tabindex="-1" aria-labelledby="manageCategoriasModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="manageCategoriasModalLabel">Gestión de Categorías</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+
+          <!-- Botón para añadir nueva categoría -->
+          <div class="mb-3 text-end">
+            <button class="btn btn-primary btn-sm" id="addCategoriaModalBtn"><i class="fa fa-plus"></i> Nueva
+              Categoría</button>
+          </div>
+
+          <!-- Tabla de categorías -->
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="categoriasTableBody">
+              <tr>
+                <td colspan="3" class="text-center">Cargando categorías...</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ============================================================
+     MODAL: AÑADIR CATEGORÍA
+    ============================================================ -->
+  <div class="modal fade" id="addCategoriaModal" tabindex="-1" aria-labelledby="addCategoriaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addCategoriaForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCategoriaModalLabel">Nueva Categoría</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="categoria-nombre" class="form-label">Nombre de la categoría</label>
+              <input type="text" class="form-control" id="categoria-nombre" required>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Crear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="main-footer mt-5">
+    <div class="footer-content text-center py-3">
+      <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
+      <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       SCRIPT PRINCIPAL (CRUD)
+  ============================================================ -->
+  <script src="js/equipamientos.js"></script>
+</body>
 
 </html>

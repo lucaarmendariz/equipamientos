@@ -36,11 +36,12 @@ header {
   font-size: 1.5rem;
   cursor: pointer;
   user-select: none;
+  margin-right: 5px;
 }
 
 .title {
   flex-grow: 1;
-  text-align: center;
+  text-align: left;
 }
 
 /* Texto de bienvenida */
@@ -59,12 +60,6 @@ header {
   flex-grow: 1;
 }
 
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  align-items: start;
-}
 
 /* Columnas */
 .dashboard-column {
@@ -257,3 +252,53 @@ li.empty {
   font-weight: bold;
   text-decoration: none;    /* o ninguno si quieres que no subraye */
 }
+
+.user-icon {
+  position: relative;
+  cursor: pointer;
+
+  i {
+    font-size: 1.5rem;
+    color: white;
+  }
+
+  .user-menu {
+    display: none; /* oculto por defecto */
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: var(--blue-dark);
+    color: white;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    min-width: 180px;
+    z-index: 1000;
+
+    a {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: white;
+      text-decoration: none;
+      font-size: 0.9rem;
+
+      &:hover {
+        background-color: var(--blue-medium);
+      }
+    }
+  }
+}
+
+.user-menu.active {
+  display: block;
+}
+
+.user-name {
+  color: white;
+  font-weight: 23px;
+  max-width: 50px; // ajusta según necesites
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
