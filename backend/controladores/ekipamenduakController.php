@@ -1,9 +1,6 @@
 <?php
 declare(strict_types=1);
 
-// Capturar cualquier salida accidental
-// ob_start();
-
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'conexion.php';

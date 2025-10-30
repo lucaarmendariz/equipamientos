@@ -94,10 +94,6 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label for="etiketa" class="form-label">Etiqueta</label>
-              <input type="text" class="form-control" id="etiketa" required placeholder="E000001">
-            </div>
-            <div class="mb-3">
               <label for="nombre" class="form-label">Nombre</label>
               <input type="text" class="form-control" id="nombre" required>
             </div>
@@ -249,6 +245,29 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     MODAL: CONFIRMAR ELIMINAR
+  ============================================================ -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
+          <span id="confirmDeleteMessage">¿Seguro que deseas eliminar este equipo?</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
         </div>
       </div>
     </div>

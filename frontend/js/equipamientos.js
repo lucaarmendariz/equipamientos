@@ -150,23 +150,40 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 
-  // Eliminar equipo
+  let equipoAEliminarId = null;
+
   function eliminarEquipo(id) {
-    if (!confirm("¿Seguro que deseas eliminar este equipo?")) return;
-    console.log(id);
+    equipoAEliminarId = id;
+    const modal = new bootstrap.Modal(document.getElementById("confirmDeleteModal"));
+    modal.show();
+  }
+
+  // Listener del botón "Eliminar" en el modal
+  document.getElementById("confirmDeleteButton").addEventListener("click", () => {
+    if (!equipoAEliminarId) return;
+
     fetch(backendURL, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: parseInt(id) })
+      body: JSON.stringify({ id: parseInt(equipoAEliminarId) })
     })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
           actualizarListaEquipos();
           new bootstrap.Modal(document.getElementById("editDeleteModal")).show();
-        } else alert("Error: " + data.message);
+        } else {
+          alert("Error: " + data.message);
+        }
+      })
+      .finally(() => {
+        // Ocultar modal de confirmación y resetear variable
+        equipoAEliminarId = null;
+        const modalEl = document.getElementById("confirmDeleteModal");
+        bootstrap.Modal.getInstance(modalEl).hide();
       });
-  }
+  });
+  
 
   // ============================================================
   // BÚSQUEDA GLOBAL DE EQUIPOS (IGNORA MAYÚSCULAS Y LA CABECERA)

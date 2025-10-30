@@ -1,12 +1,12 @@
 <?php
+declare(strict_types=1);
 session_start();
 header('Content-Type: application/json; charset=utf-8');
 
-require_once 'conexion.php'; // Conexión $mysqli
+require_once '../klaseak/erabiltzailea.php';
 
-// Recibir datos JSON
 $input = json_decode(file_get_contents('php://input'), true);
-$action = $input['action'] ?? 'list'; // acción por defecto: listar usuarios
+$action = strtoupper(trim($input['action'] ?? 'GET'));
 
 $response = [
     'success' => false,
@@ -20,24 +20,23 @@ try {
         // =================================================
         // LISTAR USUARIOS
         // =================================================
-        case 'list':
-            $query = "SELECT nan, izena, abizena, erabiltzailea, rola FROM erabiltzailea";
-            $result = $mysqli->query($query);
-
-            if ($result) {
-                $usuarios = [];
-                while ($row = $result->fetch_assoc()) {
-                    $usuarios[] = $row;
-                }
-                $response['success'] = true;
-                $response['data'] = $usuarios;
-            } else {
-                $response['message'] = "Error en la consulta: " . $mysqli->error;
+        case 'GET':
+            $usuarios = [];
+            foreach (Erabiltzailea::getAll() as $user) {
+                $usuarios[] = [
+                    'nan' => $user->getNan(),
+                    'izena' => $user->getIzena(),
+                    'abizena' => $user->getAbizena(),
+                    'erabiltzailea' => $user->getErabiltzailea(),
+                    'rola' => $user->getRola()
+                ];
             }
+            $response['success'] = true;
+            $response['data'] = $usuarios;
             break;
 
         // =================================================
-        // ACTUALIZAR PERFIL PROPIO
+        // ACTUALIZAR PERFIL (MODIFICAR PROPIO)
         // =================================================
         case 'PUT':
             $username = trim($input['username'] ?? '');
@@ -52,7 +51,8 @@ try {
                 throw new Exception('No autorizado.');
             }
 
-            $stmt = $mysqli->prepare("UPDATE erabiltzailea SET izena = ?, abizena = ? WHERE erabiltzailea = ?");
+            $conn = DB::getConnection();
+            $stmt = $conn->prepare("UPDATE erabiltzailea SET izena = ?, abizena = ? WHERE erabiltzailea = ?");
             if (!$stmt) throw new Exception('Error en la base de datos.');
 
             $stmt->bind_param('sss', $name, $lastname, $username);
@@ -60,60 +60,60 @@ try {
             $stmt->close();
 
             $response['success'] = true;
-            $response['message'] = 'Perfil actualizado correctamente';
+            $response['message'] = 'Perfil actualizado correctamente.';
             break;
 
         // =================================================
-        // AÑADIR USUARIO
+        // CREAR NUEVO USUARIO
         // =================================================
         case 'POST':
-            $username = trim($input['username'] ?? '');
+            $nan = trim($input['nan'] ?? '');
             $name = trim($input['name'] ?? '');
             $lastname = trim($input['lastname'] ?? '');
+            $username = trim($input['username'] ?? '');
             $password = trim($input['password'] ?? '');
-            $role = trim($input['role'] ?? 'user');
+            $role = trim($input['role'] ?? 'U');
 
-            if (!$username || !$name || !$lastname || !$password) {
-                throw new Exception('Datos incompletos para añadir usuario.');
+            if (!$nan || !$name || !$lastname || !$username || !$password) {
+                throw new Exception('Datos incompletos para crear usuario.');
             }
 
-            // Hash de la contraseña
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            // Usa el método estático de la clase
+            $user = Erabiltzailea::create($nan, $name, $lastname, $username, $password, $role);
 
-            $stmt = $mysqli->prepare("INSERT INTO erabiltzailea (izena, abizena, erabiltzailea, password, rola) VALUES (?, ?, ?, ?, ?)");
-            $stmt->bind_param('sssss', $name, $lastname, $username, $hashedPassword, $role);
-            $stmt->execute();
-            $stmt->close();
-
-            $response['success'] = true;
-            $response['message'] = 'Usuario añadido correctamente';
+            if ($user) {
+                $response['success'] = true;
+                $response['message'] = 'Usuario creado correctamente.';
+            } else {
+                throw new Exception('Error al crear el usuario.');
+            }
             break;
 
         // =================================================
         // ELIMINAR USUARIO
         // =================================================
-        case 'delete':
+        case 'DELETE':
             $username = trim($input['username'] ?? '');
-            if (!$username) throw new Exception('Falta el nombre de usuario para eliminar');
+            if (!$username) throw new Exception('Falta el nombre de usuario.');
 
-            $stmt = $mysqli->prepare("DELETE FROM erabiltzailea WHERE erabiltzailea = ?");
+            $conn = DB::getConnection();
+            $stmt = $conn->prepare("DELETE FROM erabiltzailea WHERE erabiltzailea = ?");
             $stmt->bind_param("s", $username);
             $stmt->execute();
             $stmt->close();
 
             $response['success'] = true;
-            $response['message'] = 'Usuario eliminado correctamente';
+            $response['message'] = 'Usuario eliminado correctamente.';
             break;
 
         default:
-            $response['message'] = 'Acción no reconocida';
+            throw new Exception('Acción no reconocida.');
     }
 
 } catch (Exception $e) {
     $response['success'] = false;
-    $response['message'] = "Error: " . $e->getMessage();
+    $response['message'] = 'Error: ' . $e->getMessage();
 }
 
-$mysqli->close();
 echo json_encode($response);
 exit;

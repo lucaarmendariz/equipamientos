@@ -1,7 +1,7 @@
 <?php
-// gelak.php
-header('Content-Type: application/json; charset=utf-8');
-require_once 'conexion.php'; // conexión $mysqli
+declare(strict_types=1);
+
+header('Content-Type: application/json; charset=utf-8');require_once 'conexion.php'; // conexión $mysqli
 
 // Recibir datos JSON
 $input = json_decode(file_get_contents('php://input'), true);
@@ -19,7 +19,7 @@ try {
         // =================================================
         // LISTAR GELAS
         // =================================================
-        case 'list':
+        case 'GET':
             $query = "SELECT id, izena FROM gela ORDER BY izena ASC";
             $result = $mysqli->query($query);
 
@@ -38,7 +38,7 @@ try {
         // =================================================
         // AÑADIR GELA (opcional)
         // =================================================
-        case 'add':
+        case 'POST':
             $nombre = $input['izena'] ?? null;
             if (!$nombre) throw new Exception("Falta el nombre de la gela");
 
@@ -54,7 +54,7 @@ try {
         // =================================================
         // ACTUALIZAR GELA (opcional)
         // =================================================
-        case 'update':
+        case 'PUT':
             $id = $input['id'] ?? null;
             $nombre = $input['izena'] ?? null;
             if (!$id || !$nombre) throw new Exception("Faltan campos obligatorios");
@@ -71,7 +71,7 @@ try {
         // =================================================
         // ELIMINAR GELA (opcional)
         // =================================================
-        case 'delete':
+        case "DELETE":
             $id = $input['id'] ?? null;
             if (!$id) throw new Exception("Falta el ID de la gela");
 

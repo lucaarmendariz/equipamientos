@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    fetch("../backend/usuarios.php", {
+fetch("../backend/controladores/erabiltzaileController.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

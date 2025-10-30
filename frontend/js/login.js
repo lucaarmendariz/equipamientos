@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const formData = new FormData(form);
 
     try {
-      const response = await fetch("../backend/login.php", {
+      const response = await fetch(CONFIG.BASE_URL + "backend/controladores/loginController.php", {
         method: "POST",
         body: formData,
       });
