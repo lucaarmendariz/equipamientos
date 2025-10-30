@@ -129,6 +129,18 @@ header {
 }
 
 /* === CELDAS === */
+.data-row span {
+  flex: 1;
+}
+
+.data-row span:last-child {
+  flex: 0 0 auto;
+}
+
+.data-row button {
+  margin-left: 4px;
+}
+
 .data-row span,
 .data-header span {
   overflow: hidden;
@@ -144,6 +156,15 @@ header {
   gap: 0.4rem;
 }
 
+.col-ekintzak button {
+  margin: 0 4px;
+}
+
+.col-ekintzak i {
+  font-size: 1.1rem;
+  vertical-align: middle;
+}
+
 /* === BOTONES === */
 .col-ekintzak button {
   background-color: var(--blue-dark);
@@ -151,13 +172,14 @@ header {
   border-radius: 6px;
   color: white;
   font-size: 0.9rem;
-  padding: 0.4rem 0.6rem;
+  padding: 0.5rem 0.6rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 .col-ekintzak button:hover {
   background-color: var(--blue-medium);
 }
+
 
 /* === FILAS ALTERNAS === */
 .data-row:nth-child(even) {
@@ -261,83 +283,24 @@ header {
   color: var(--blue-darkest);
 }
 
-/* === MODALES / OVERLAY === */
-/* Overlay */
-#overlay {
-  display: none;
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 900;
-}
-
-/* Modal base */
-.modal {
-  display: none;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  width: 350px;
-  max-width: 90%;
-  background-color: #f0f8ff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  padding: 1.5rem;
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-/* Modal contenido */
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-/* Botón guardar */
-.save-button {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-.save-button:hover {
-  background-color: #0056b3;
-}
-
-/* Inputs y selects */
-.modal-content input,
-.modal-content select,
-.modal-content textarea {
-  width: 100%;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  box-sizing: border-box;
-}
-
-/* Cerrar modal (X) */
-.close-modal {
+.btn-close-circle {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background-color: red;
   color: white;
-  border-radius: 50%;
-  font-size: 18px;
+  border-radius: 50%; 
+  border: none;
+  font-size: 25px;
   font-weight: bold;
   text-align: center;
-  line-height: 28px;
+  line-height: 2px;
   cursor: pointer;
-  z-index: 1100;
+  z-index: 1055; /* encima del contenido */
   transition: background-color 0.2s ease;
 }
-.close-modal:hover {
+.btn-close-circle:hover {
   background-color: darkred;
 }
-
