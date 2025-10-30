@@ -1,110 +1,64 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-require_once 'conexion.php'; // conexión $mysqli
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+ini_set('display_errors', 0);
 
-$method = $_SERVER['REQUEST_METHOD'];
+require_once 'conexion.php';
+require_once '../klases/Ekipamendua.php';
 
 function respond($success, $data = [], $message = '') {
-    echo json_encode(['success' => $success, 'data' => $data, 'message' => $message]);
+    echo json_encode(['success'=>$success,'data'=>$data,'message'=>$message]);
     exit;
 }
 
-switch($method) {
-    case 'GET':
-        // Obtener lista de equipos con categoría
-        $query = "
-            SELECT  e.izena, e.deskribapena, e.marka, e.modelo, e.stock, k.izena AS kategoria
-            FROM ekipamendua e
-            LEFT JOIN kategoria k ON e.idKategoria = k.id
-            ORDER BY e.izena
-        ";
-        $result = $mysqli->query($query);
-        if ($result) {
-            $data = [];
-            while($row = $result->fetch_assoc()) {
-                $data[] = $row;
-            }
-            respond(true, $data);
-        } else {
-            respond(false, [], 'Error en consulta: ' . $mysqli->error);
-        }
-        break;
+$method = $_SERVER['REQUEST_METHOD'];
+$equipo = new Ekipamendua($mysqli);
 
-    case 'POST':
-        // Crear nuevo equipo
-        $input = json_decode(file_get_contents('php://input'), true);
-        if (!$input) respond(false, [], 'No se recibieron datos');
+try {
+    switch($method) {
+        case 'GET':
+            // Obtener todos los equipos
+            $equipo = new Ekipamendua($mysqli);
+            $equipos = $equipo->getAll();
+            respond(true, $equipos);
+            break;
 
-        $izena = $mysqli->real_escape_string($input['izena'] ?? '');
-        $deskribapena = $mysqli->real_escape_string($input['deskribapena'] ?? '');
-        $marka = $mysqli->real_escape_string($input['marka'] ?? '');
-        $modelo = $mysqli->real_escape_string($input['modelo'] ?? '');
-        $stock = (int)($input['stock'] ?? 0);
-        $idKategoria = (int)($input['idKategoria'] ?? 0);
+        case 'POST':
+            $input = json_decode(file_get_contents('php://input'), true);
+            if (!$input) respond(false, [], 'Datos no recibidos');
 
-        if (!$izena || !$deskribapena || !$stock || !$idKategoria) {
-            respond(false, [], 'Faltan campos obligatorios');
-        }
+            $id = $equipo->create($input);
+            respond(true, ['id'=>$id], 'Equipo creado correctamente');
+            break;
 
-        $sql = "INSERT INTO ekipamendua (izena, deskribapena, marka, modelo, stock, idKategoria)
-                VALUES ('$izena', '$deskribapena', '$marka', '$modelo', $stock, $idKategoria)";
+        case 'PUT':
+            $input = json_decode(file_get_contents('php://input'), true);
+            if (!$input || empty($input['id'])) respond(false, [], 'ID requerido para actualizar');
 
-        if ($mysqli->query($sql)) {
-            respond(true, [], 'Equipo creado correctamente');
-        } else {
-            respond(false, [], 'Error al insertar: ' . $mysqli->error);
-        }
-        break;
+            $id = (int)$input['id'];
+            $existing = $equipo->findById($id);
+            if (!$existing) respond(false, [], 'Equipo no encontrado');
 
-    case 'PUT':
-        // Actualizar equipo
-        $input = json_decode(file_get_contents('php://input'), true);
-        if (!$input || empty($input['id'])) respond(false, [], 'ID requerido para actualizar');
-
-        $id = (int)$input['id'];
-        $izena = $mysqli->real_escape_string($input['izena'] ?? '');
-        $deskribapena = $mysqli->real_escape_string($input['deskribapena'] ?? '');
-        $marka = $mysqli->real_escape_string($input['marka'] ?? '');
-        $modelo = $mysqli->real_escape_string($input['modelo'] ?? '');
-        $stock = (int)($input['stock'] ?? 0);
-        $idKategoria = (int)($input['idKategoria'] ?? 0);
-
-        if (!$izena || !$deskribapena || !$stock || !$idKategoria) {
-            respond(false, [], 'Faltan campos obligatorios');
-        }
-
-        $sql = "UPDATE ekipamendua SET
-                izena='$izena',
-                deskribapena='$deskribapena',
-                marka='$marka',
-                modelo='$modelo',
-                stock=$stock,
-                idKategoria=$idKategoria
-                WHERE id=$id";
-
-        if ($mysqli->query($sql)) {
+            $equipo->update($id, $input);
             respond(true, [], 'Equipo actualizado correctamente');
-        } else {
-            respond(false, [], 'Error al actualizar: ' . $mysqli->error);
-        }
-        break;
+            break;
 
-    case 'DELETE':
-        // Eliminar equipo
-        parse_str(file_get_contents("php://input"), $del_vars);
-        if (empty($del_vars['id'])) respond(false, [], 'ID requerido para eliminar');
+        case 'DELETE':
+            $input = json_decode(file_get_contents('php://input'), true);
+            if (!$input || empty($input['id'])) respond(false, [], 'ID requerido para eliminar');
 
-        $id = (int)$del_vars['id'];
+            $id = (int)$input['id'];
+            $existing = $equipo->findById($id);
+            if (!$existing) respond(false, [], 'Equipo no encontrado');
 
-        $sql = "DELETE FROM ekipamendua WHERE id=$id";
-
-        if ($mysqli->query($sql)) {
+            $equipo->delete($id);
             respond(true, [], 'Equipo eliminado correctamente');
-        } else {
-            respond(false, [], 'Error al eliminar: ' . $mysqli->error);
-        }
-        break;
+            break;
 
-    default:
-        respond(false, [], 'Método no soportado');
+        default:
+            respond(false, [], 'Método no soportado');
+    }
+} catch(Exception $e) {
+    respond(false, [], 'Error en servidor: '.$e->getMessage());
 }
+?>
