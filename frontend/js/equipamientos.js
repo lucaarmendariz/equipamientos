@@ -21,102 +21,201 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(err => console.error("Error cargando categorías:", err));
   }
+  cargarCategorias("categoria");
+  cargarCategorias("edit-categoria");
 
-  // ============================
-  // Gestión de categorías en modal
-  // ============================
+  // ============================================================
+  // MODAL: GESTIÓN DE CATEGORÍAS
+  // ============================================================
   const manageCategoriasModal = new bootstrap.Modal(document.getElementById("manageCategoriasModal"));
   const categoriasTableBody = document.getElementById("categoriasTableBody");
   const addCategoriaModalBtn = document.getElementById("addCategoriaModalBtn");
+  let categoriaAEliminarId = null;
 
-  // Abrir modal y cargar categorías
+  // Abrir modal de gestión y cargar categorías
   document.getElementById("openCategoriasModalBtn")?.addEventListener("click", () => {
     cargarCategoriasTabla();
     manageCategoriasModal.show();
   });
 
-  // Abrir modal de añadir categoría desde el modal de gestión
+  // Abrir modal de añadir categoría desde gestión
   addCategoriaModalBtn.addEventListener("click", () => {
     manageCategoriasModal.hide();
     new bootstrap.Modal(document.getElementById("addCategoriaModal")).show();
   });
 
-  // Función para cargar categorías en la tabla del modal
+  // ============================================================
+  // CARGAR TABLA DE CATEGORÍAS
+  // ============================================================
   async function cargarCategoriasTabla() {
-    categoriasTableBody.innerHTML = `<tr><td colspan="3" class="text-center">Cargando categorías...</td></tr>`;
+    categoriasTableBody.innerHTML = `<tr><td colspan="4" class="text-center">Cargando categorías...</td></tr>`;
 
     try {
       const res = await fetch(categoriasURL);
       const result = await res.json();
 
       if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
-        categoriasTableBody.innerHTML = `<tr><td colspan="3" class="text-center">No hay categorías.</td></tr>`;
+        categoriasTableBody.innerHTML = `<tr><td colspan="4" class="text-center">No hay categorías.</td></tr>`;
         return;
       }
 
       categoriasTableBody.innerHTML = "";
+
       result.data.forEach(cat => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
         <td>${cat.id}</td>
         <td>
-          <input type="text" class="form-control form-control-sm categoria-nombre" value="${cat.izena}" data-id="${cat.id}">
+          <input type="text" class="form-control form-control-sm categoria-nombre" value="${cat.izena}" data-id="${cat.id}" disabled>
         </td>
         <td class="text-center">
-          <button class="btn btn-success btn-sm me-1 save-categoria" data-id="${cat.id}"><i class="fa fa-check"></i></button>
+          <button class="btn btn-warning btn-sm me-1 edit-categoria" data-id="${cat.id}"><i class="fa fa-edit"></i> Editar</button>
+          <button class="btn btn-secondary btn-sm cancel-categoria" data-id="${cat.id}" style="display:none;"><i class="fa fa-times"></i></button>
+          <button class="btn btn-success btn-sm me-1 save-categoria" data-id="${cat.id}" style="display:none;"><i class="fa fa-check"></i> Guardar</button>
           <button class="btn btn-danger btn-sm delete-categoria" data-id="${cat.id}"><i class="fa fa-trash"></i></button>
         </td>
       `;
         categoriasTableBody.appendChild(tr);
       });
 
-      // Guardar cambios
-      document.querySelectorAll(".save-categoria").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          const id = btn.dataset.id;
-          const nombre = btn.closest("tr").querySelector(".categoria-nombre").value.trim();
-          if (!nombre) return alert("El nombre no puede estar vacío");
-
-          const res = await fetch(categoriasURL, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: parseInt(id), izena: nombre })
-          });
-          const data = await res.json();
-          if (data.success) {
-            alert(data.message || "Categoría actualizada");
-            cargarCategoriasTabla();
-            cargarCategorias("categoria");
-            cargarCategorias("edit-categoria");
-          } else alert(data.message);
-        });
-      });
-
-      // Eliminar categoría
-      document.querySelectorAll(".delete-categoria").forEach(btn => {
-        btn.addEventListener("click", async () => {
-          if (!confirm("¿Eliminar esta categoría?")) return;
-          const id = btn.dataset.id;
-          const res = await fetch(categoriasURL, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: parseInt(id) })
-          });
-          const data = await res.json();
-          if (data.success) {
-            alert(data.message || "Categoría eliminada");
-            cargarCategoriasTabla();
-            cargarCategorias("categoria");
-            cargarCategorias("edit-categoria");
-          } else alert(data.message);
-        });
-      });
+      configurarBotonesCategorias();
 
     } catch (error) {
       console.error("Error cargando categorías:", error);
-      categoriasTableBody.innerHTML = `<tr><td colspan="3" class="text-center">Error cargando categorías</td></tr>`;
+      categoriasTableBody.innerHTML = `<tr><td colspan="4" class="text-center">Error cargando categorías</td></tr>`;
     }
   }
+
+  // ============================================================
+  // CONFIGURAR BOTONES DE LA TABLA
+  // ============================================================
+  function configurarBotonesCategorias() {
+  // EDITAR
+  document.querySelectorAll(".edit-categoria").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const row = btn.closest("tr");
+      const input = row.querySelector(".categoria-nombre");
+      input.disabled = false;
+      input.focus();
+
+      row.querySelector(".save-categoria").style.display = "inline-block";
+      row.querySelector(".cancel-categoria").style.display = "inline-block";
+      btn.style.display = "none";
+      row.querySelector(".delete-categoria").style.display = "none";
+
+      row.dataset.original = input.value;
+
+      document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
+        if (r !== row) {
+          r.querySelector(".edit-categoria").disabled = true;
+          r.querySelector(".delete-categoria").disabled = true;
+        }
+      });
+    });
+  });
+
+  // CANCELAR
+  document.querySelectorAll(".cancel-categoria").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const row = btn.closest("tr");
+      const input = row.querySelector(".categoria-nombre");
+      input.value = row.dataset.original;
+      input.disabled = true;
+
+      row.querySelector(".save-categoria").style.display = "none";
+      row.querySelector(".cancel-categoria").style.display = "none";
+      row.querySelector(".edit-categoria").style.display = "inline-block";
+      row.querySelector(".delete-categoria").style.display = "inline-block";
+
+      document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
+        r.querySelector(".edit-categoria").disabled = false;
+        r.querySelector(".delete-categoria").disabled = false;
+      });
+    });
+  });
+
+  // GUARDAR
+  document.querySelectorAll(".save-categoria").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const row = btn.closest("tr");
+      const id = parseInt(btn.dataset.id);
+      const nombre = row.querySelector(".categoria-nombre").value.trim();
+      if (!nombre) return alert("El nombre no puede estar vacío");
+
+      try {
+        const res = await fetch(categoriasURL, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id, izena: nombre })
+        });
+        const data = await res.json();
+        if (!data.success) return alert(data.message);
+
+        const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
+        document.getElementById("categoriaSuccessMessage").textContent = data.message || "La categoría ha sido modificada correctamente.";
+        successModal.show();
+
+        row.querySelector(".categoria-nombre").disabled = true;
+        row.querySelector(".save-categoria").style.display = "none";
+        row.querySelector(".cancel-categoria").style.display = "none";
+        row.querySelector(".edit-categoria").style.display = "inline-block";
+        row.querySelector(".delete-categoria").style.display = "inline-block";
+
+        document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
+          if (r !== row) {
+            r.querySelector(".edit-categoria").disabled = false;
+            r.querySelector(".delete-categoria").disabled = false;
+          }
+        });
+
+        await cargarCategorias(); // actualizar selects
+      } catch (error) {
+        console.error("Error al actualizar categoría:", error);
+        alert("Error al actualizar categoría");
+      }
+    });
+  });
+
+  // ELIMINAR (solo abre modal, no hace DELETE directamente)
+  document.querySelectorAll(".delete-categoria").forEach(btn => {
+    btn.addEventListener("click", () => {
+      categoriaAEliminarId = parseInt(btn.dataset.id);
+      const nombre = btn.closest("tr").querySelector(".categoria-nombre").value;
+
+      document.getElementById("confirmCategoriaDeleteMessage").textContent =
+        `¿Seguro que deseas eliminar la categoría "${nombre}"?`;
+
+      new bootstrap.Modal(document.getElementById("confirmCategoriaDeleteModal")).show();
+    });
+  });
+}
+
+document.getElementById("confirmCategoriaDeleteButton").addEventListener("click", async () => {
+  if (!categoriaAEliminarId) return;
+
+  try {
+    const res = await fetch(categoriasURL, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: categoriaAEliminarId })
+    });
+    const data = await res.json();
+    if (!data.success) return alert(data.message);
+
+    const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
+    document.getElementById("categoriaSuccessMessage").textContent = data.message || "Categoría eliminada correctamente.";
+    successModal.show();
+
+    cargarCategoriasTabla();
+    cargarCategorias();
+  } catch (error) {
+    console.error("Error al eliminar categoría:", error);
+  } finally {
+    categoriaAEliminarId = null;
+    bootstrap.Modal.getInstance(document.getElementById("confirmCategoriaDeleteModal")).hide();
+  }
+});
+
 
 
   // Listar equipos
@@ -234,7 +333,7 @@ document.addEventListener("DOMContentLoaded", () => {
       id: parseInt(document.getElementById("edit-id").value),
       izena: document.getElementById("edit-nombre").value,
       deskribapena: document.getElementById("edit-descripcion").value,
-      marca: document.getElementById("edit-marca").value || null,
+      marka: document.getElementById("edit-marca").value || null,
       modelo: document.getElementById("edit-modelo").value || null,
       stock: parseInt(document.getElementById("edit-stock").value) || 0,
       idKategoria: parseInt(document.getElementById("edit-categoria").value) || 0

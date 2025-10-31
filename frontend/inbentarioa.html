@@ -5,11 +5,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inbentarioa - Santurtzi LHII</title>
-  <link rel="stylesheet" href="sass/global.scss">
-  <link rel="stylesheet" href="sass/inbentarioa.scss">
+
+  <!-- Tus estilos -->
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="js/menu.js"></script>
   <script src="js/validation.js"></script>
+
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link rel="stylesheet" href="sass/global.scss">
+  <link rel="stylesheet" href="sass/inbentarioa.scss">
 
 </head>
 
@@ -32,7 +45,6 @@
     <div class="nav-container">
       <a href="equipamientos.html">Ekipamenduak</a>
       <a href="inbentarioa.html">Inbentarioa</a>
-      <a href="erosketak.html">Erosketak</a>
       <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
     </div>
   </nav>
@@ -45,24 +57,17 @@
         <i class="fas fa-search search-icon"></i>
         <input type="text" id="search" placeholder="Bilatu etiketa edo data..." />
       </div>
-      <button class="add-button" id="add-button">Sartu etiketa</button>
+      <button class="add-button" id="add-button"><i class="bi bi-search"></i>Bilatu etiketa</button>
     </div>
 
-    <nav class="navbar">
-      <div class="segmento">
-        <ul class="nav">
-          <li class="nav-item"><a href="#" class="nav-link text-white" id="kategoria-link">Kategoria</a></li>
-        </ul>
-      </div>
-    </nav>
 
     <div id="overlay"></div>
 
-    <div id="categoria-content" class="modal-content">
-      <h3>Kategoria izena</h3>
-      <!-- Contenido dinámico aquí -->
+    <div class="mb-3">
+      <button id="nueva-categoria-btn" class="add-button">
+        <i class="bi bi-plus-circle"></i> Erosketa
+      </button>
     </div>
-
     <!-- Contenedor de inventario y equipos lado a lado -->
     <div class="dashboard-grid">
 
@@ -71,9 +76,10 @@
         <h2>Inbentarioa</h2>
 
         <div class="data-row data-header">
+          <span>Izena</span>
           <span>Etiketa</span>
-          <span class="col-data">Data</span>
-          <span class="col-ekintzak">Ekintzak</span>
+          <span>Kokaleku</span>
+          
         </div>
         <br>
         <div class="equipamientos-grid" id="inventory-list">
@@ -81,60 +87,29 @@
         </div>
       </div>
 
-      <!-- Columna Ekipamenduak -->
-      <div class="dashboard-column">
-        <h2>Ekipamenduak</h2>
 
-        <div class="data-row data-header">
-          <span>Izena</span>
-          <span>Marka</span>
-          <span>Modelo</span>
-          <span>Stock</span>
-          <span>Kategoria</span>
-          <span class="col-ekintzak">Ekintzak</span>
-        </div>
-        <br>
-        <div id="lista-equipos" class="equipamientos-grid">
-          <!-- Filas dinámicas de equipos -->
-        </div>
-      </div>
 
+<!-- Modal Nueva Categoría -->
+<div class="modal fade" id="nuevaCategoriaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content position-relative p-4">
+      <button type="button" class="btn-close-circle" data-bs-dismiss="modal" aria-label="Cerrar">&times;</button>
+      <h5>Erosi nahi den ekipamendua</h5>
+      <select id="equipo-select" class="form-select mb-3">
+        <option value="">-- Aukeratu ekipamendua --</option>
+      </select>
+      <h5>kantitatea</h5>
+      <input type="int" id="nueva-categoria-input" placeholder="Nahi duzun kantitatea" class="mb-3 form-control">
+      <button id="guardar-categoria" class="btn btn-primary w-100">Erosi</button>
     </div>
-
-  </section>
-
- <!-- Modal Inventario -->
-<div id="inventario-modal" class="modal">
-  <span id="close-inventario-modal" class="close-modal">&times;</span>
-  <div class="modal-content">
-    <h3>Editar Inventario</h3>
-    <input type="text" id="etiketa-input" placeholder="Etiqueta" disabled>
-    <select id="equipo-select"></select>
-    <input type="date" id="fecha-input">
-    <button id="guardar-inventario" class="save-button">Guardar</button>
   </div>
 </div>
 
-<!-- Modal Equipo -->
-<div id="equipo-modal" class="modal">
-  <span id="close-equipo-modal" class="close-modal">&times;</span>
-  <div class="modal-content">
-    <h3>Editar Equipo</h3>
-    <input type="text" id="nombre-input" placeholder="Nombre">
-    <input type="text" id="marca-input" placeholder="Marca">
-    <input type="text" id="modelo-input" placeholder="Modelo">
-    <input type="number" id="stock-input" placeholder="Stock">
-    <select id="categoria-select"></select>
-    <textarea id="descripcion-input" placeholder="Descripción"></textarea>
-    <button id="guardar-equipo" class="save-button">Guardar</button>
-  </div>
-</div>
+  <!-- Overlay -->
+  <div id="overlay"></div>
+    
 
-<!-- Overlay -->
-<div id="overlay"></div>
-  
-
-  <script src="js/inbentarioa.js"></script>
+    <script src="js/inbentarioa.js"></script>
 </body>
 
 </html>
