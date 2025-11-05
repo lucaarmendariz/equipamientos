@@ -1,249 +1,258 @@
-document.addEventListener('DOMContentLoaded', () => {
-
-  // ================= ELEMENTOS =================
-  const inventarioModal = document.getElementById('inventario-modal');
-  const equipoModal = document.getElementById('equipo-modal');
-  const overlay = document.getElementById('overlay');
-
-  const closeInventario = document.getElementById('close-inventario-modal');
-  const closeEquipo = document.getElementById('close-equipo-modal');
-
+document.addEventListener("DOMContentLoaded", () => {
+  // ===== ELEMENTOS =====
   const inventoryList = document.getElementById('inventory-list');
-  const listaEquipos = document.getElementById('lista-equipos');
-
-  const etiketaInput = document.getElementById('etiketa-input');
   const equipoSelect = document.getElementById('equipo-select');
-  const fechaInput = document.getElementById('fecha-input');
-  const guardarInventarioBtn = document.getElementById('guardar-inventario');
+  const nuevaCategoriaBtn = document.getElementById('nueva-categoria-btn');
+  const nuevaCategoriaModal = new bootstrap.Modal(document.getElementById('nuevaCategoriaModal'));
+  const nuevaCategoriaInput = document.getElementById('nueva-categoria-input');
+  const guardarCategoriaBtn = document.getElementById('guardar-categoria');
+  const searchInput = document.getElementById("searchInput");
 
-  const nombreInput = document.getElementById('nombre-input');
-  const marcaInput = document.getElementById('marca-input');
-  const modeloInput = document.getElementById('modelo-input');
-  const stockInput = document.getElementById('stock-input');
-  const categoriaSelect = document.getElementById('categoria-select');
-  const descripcionInput = document.getElementById('descripcion-input');
-  const guardarEquipoBtn = document.getElementById('guardar-equipo');
+  const carritoBtn = document.getElementById('carrito-btn');
+  const cestaModalEl = document.getElementById('cestaModal');
+  const cestaModal = new bootstrap.Modal(cestaModalEl);
+  const cestaList = document.getElementById('cesta-list');
+  const vaciarCestaBtn = document.getElementById('vaciar-cesta');
+  const finalizarCompraBtn = document.getElementById('finalizar-compra');
 
-  // ================= FUNCIONES MODAL =================
-  function abrirModal(modal) {
-    modal.style.display = 'block';
-    overlay.style.display = 'block';
+  // ===== CESTA =====
+  let cesta = [];
+
+  function actualizarCesta() {
+    cestaList.innerHTML = '';
+    if (cesta.length === 0) {
+      cestaList.innerHTML = '<li class="list-group-item">La cesta está vacía</li>';
+      return;
+    }
+    cesta.forEach((item, index) => {
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-center';
+      li.innerHTML = `
+        ${item.nombre} - Cantidad: ${item.cantidad}
+        <button class="btn btn-sm btn-outline-danger" onclick="eliminarItem(${index})">&times;</button>
+      `;
+      cestaList.appendChild(li);
+    });
   }
 
-  function cerrarModal(modal) {
-    modal.style.display = 'none';
-    overlay.style.display = 'none';
-  }
+  window.eliminarItem = function (index) {
+    cesta.splice(index, 1);
+    actualizarCesta();
+  };
 
-  closeInventario.addEventListener('click', () => cerrarModal(inventarioModal));
-  closeEquipo.addEventListener('click', () => cerrarModal(equipoModal));
-  overlay.addEventListener('click', () => {
-    cerrarModal(inventarioModal);
-    cerrarModal(equipoModal);
+  vaciarCestaBtn.addEventListener('click', () => {
+    cesta = [];
+    actualizarCesta();
   });
 
-  // ================= INVENTARIO =================
+  carritoBtn.addEventListener('click', () => {
+    actualizarCesta();
+    cestaModal.show();
+  });
+
+  // ================== INVENTARIO ==================
   function cargarInventario() {
-    fetch('../backend/inventario.php')
+    fetch('../backend/controladores/inbentarioController.php')
+      .then(r => r.json())
+      .then(res => {
+        if (!res.success) {
+          console.error('Error al cargar inventario:', res.message);
+          return;
+        }
+        console.log('Inventario cargado:', res.data);
+        inventoryList.innerHTML = '';
+        res.data.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'data-row';
+          div.dataset.etiketa = item.etiketa;
+          div.innerHTML = `
+            <span>${item.ekipamendua}</span>
+            <span>${item.etiketa}</span>
+            <span>${item.gela ?? 'Kokaleku ezezaguna'}</span>
+            <span class="col-ekintzak">
+              <button class="btn btn-sm btn-primary eliminar-btn">
+                <i class="bi bi-trash"></i>
+              </button>
+            </span>
+          `;
+          inventoryList.appendChild(div);
+        });
+      })
+      .catch(err => console.error('Error al cargar inventario:', err));
+  }
+
+  // ============================================================
+  // BÚSQUEDA GLOBAL DE EQUIPOS (IGNORA MAYÚSCULAS Y LA CABECERA)
+  // ============================================================
+  if (searchInput && inventoryList) {
+    searchInput.addEventListener("input", () => {
+      const filtro = searchInput.value.trim().toLowerCase();
+      const filas = inventoryList.querySelectorAll(".data-row");
+
+      filas.forEach(fila => {
+        const textoFila = fila.innerText.toLowerCase();
+        fila.style.display = textoFila.includes(filtro) ? "" : "none";
+      });
+    });
+  }
+
+  // ================== EQUIPAMIENTOS ==================
+  function cargarEquipamientos() {
+    fetch('../backend/controladores/ekipamenduakController.php')
       .then(res => res.json())
       .then(data => {
-        if (data.success) mostrarInventario(data.data);
-      });
+        if (!data.success) {
+          console.error('Error al cargar equipamientos:', data.message);
+          return;
+        }
+        equipoSelect.innerHTML = '<option value="">-- Aukeratu ekipamendua --</option>';
+        data.data.forEach(equipo => {
+          const option = document.createElement('option');
+          option.value = equipo.id; // Enviamos ID al backend
+          option.textContent = equipo.izena;
+          equipoSelect.appendChild(option);
+        });
+      })
+      .catch(err => console.error('Error fetching equipamientos:', err));
   }
 
-  function mostrarInventario(data) {
-    inventoryList.innerHTML = '';
-    data.forEach(item => {
-      const div = document.createElement('div');
-      div.classList.add('data-row');
-      div.innerHTML = `
-        <span>${item.etiketa}</span>
-        <span>${item.erosketaData}</span>
-        <span>
-          <button class="editar-inventario">Editar</button>
-          <button class="eliminar-inventario">Eliminar</button>
-        </span>
-      `;
-      inventoryList.appendChild(div);
-    });
-  }
+  // ================== MODAL DE COMPRA ==================
+  nuevaCategoriaBtn.onclick = () => {
+    nuevaCategoriaInput.value = '';
+    guardarCategoriaBtn.textContent = 'Gehitu saskira';
+    nuevaCategoriaModal.show();
+  };
 
-  inventoryList.addEventListener('click', e => {
-    const fila = e.target.closest('.data-row');
-    if (!fila) return;
-    const etiketa = fila.querySelector('span').textContent;
+  guardarCategoriaBtn.onclick = () => {
+    const idEquipo = parseInt(equipoSelect.value);
+    const cantidad = parseInt(nuevaCategoriaInput.value.trim());
 
-    if (e.target.classList.contains('editar-inventario')) {
-      abrirModal(inventarioModal);
-      etiketaInput.value = etiketa;
+    if (!idEquipo) {
+      Swal.fire({ icon: 'info', title: 'Info', text: 'Ekipamendu bat aukeratu' });
+      return;
+    }
+    if (!cantidad || cantidad <= 0) {
+      Swal.fire({ icon: 'info', title: 'Info', text: 'artu balio zuzen bat' });
+      return;
+    }
 
-      // Cargar datos del inventario
-      fetch(`../backend/inventario.php?etiketa=${encodeURIComponent(etiketa)}`)
+    const nombreEquipo = equipoSelect.options[equipoSelect.selectedIndex].text;
+
+    // Añadir a la cesta
+    cesta.push({ id: idEquipo, nombre: nombreEquipo, cantidad });
+    Swal.fire({ icon: 'success', title: 'Añadido', text: `${nombreEquipo} Saskira gehituta` });
+    nuevaCategoriaModal.hide();
+    nuevaCategoriaInput.value = '';
+    equipoSelect.value = '';
+    actualizarCesta();
+  };
+
+  // ================== FINALIZAR COMPRA ==================
+  finalizarCompraBtn.addEventListener('click', () => {
+    if (cesta.length === 0) {
+      Swal.fire({ icon: 'error', title: 'Errorea', text: 'Saskia hutsik dago!' });
+      return;
+    }
+
+    cesta.forEach(item => {
+      console.log("Enviando compra:", item);
+
+      fetch('../backend/controladores/inbentarioController.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'STOCK',
+          idEkipamendu: item.id,
+          cantidad: item.cantidad
+        })
+      })
         .then(res => res.json())
         .then(data => {
-          if (data.success && data.data.length > 0) {
-            const item = data.data[0];
-            fechaInput.value = item.erosketaData;
-            equipoSelect.innerHTML = '';
-            fetch('../backend/ekipamendua.php')
-              .then(r => r.json())
-              .then(equipos => {
-                if (equipos.success) {
-                  equipos.data.forEach(eq => {
-                    const opt = document.createElement('option');
-                    opt.value = eq.id;
-                    opt.textContent = eq.izena;
-                    if (eq.id == item.idEkipamendu) opt.selected = true;
-                    equipoSelect.appendChild(opt);
-                  });
-                }
-              });
+          console.log("Respuesta JSON:", data);
+
+          if (!data.success) {
+            Swal.fire({ icon: 'error', title: 'Errorea', text: data.message });
+            return;
           }
-        });
-    }
 
-    if (e.target.classList.contains('eliminar-inventario')) {
-      if (!confirm(`¿Seguro que quieres eliminar "${etiketa}"?`)) return;
-      const body = new URLSearchParams();
-      body.append('action', 'delete');
-      body.append('etiketa', etiketa);
-      fetch('../backend/inventario.php', { method: 'POST', body })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) cargarInventario();
-          else alert('Error: ' + data.message);
-        });
-    }
-  });
+          // Mostrar etiquetas recién creadas en inventario
+          data.nuevas_etiquetas.forEach(etk => {
+            const etiquetaDiv = document.createElement('div');
+            etiquetaDiv.classList.add('data-row');
+            etiquetaDiv.innerHTML = `
+            <span>${item.nombre}</span>
+            <span>${etk}</span>
+            <span>Kokaleku ezezaguna</span>
+          `;
+            document.getElementById('inventory-list').appendChild(etiquetaDiv);
+          });
 
-  if (guardarInventarioBtn) {
-    guardarInventarioBtn.addEventListener('click', () => {
-      if (!equipoSelect.value || !fechaInput.value) {
-        alert('Completa todos los campos antes de guardar.');
-        return;
-      }
-      const body = new URLSearchParams();
-      body.append('action', 'update');
-      body.append('etiketa', etiketaInput.value);
-      body.append('idEkipamendu', equipoSelect.value);
-      body.append('erosketaData', fechaInput.value);
-
-      fetch('../backend/inventario.php', { method: 'POST', body })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            cerrarModal(inventarioModal);
-            cargarInventario();
-          } else alert('Error al actualizar: ' + data.message);
-        });
-    });
-  }
-
-  // ================= EQUIPOS =================
-  function cargarEquipos() {
-    fetch('../backend/ekipamendua.php')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) mostrarEquipos(data.data);
-      });
-  }
-
-  function mostrarEquipos(data) {
-    listaEquipos.innerHTML = '';
-    data.forEach(item => {
-      const div = document.createElement('div');
-      div.classList.add('data-row');
-      div.innerHTML = `
-        <span>${item.izena}</span>
-        <span>${item.marka}</span>
-        <span>${item.modelo}</span>
-        <span>${item.stock}</span>
-        <span>${item.kategoria}</span>
-        <span>
-          <button class="editar-equipo">Editar</button>
-          <button class="eliminar-equipo">Eliminar</button>
-        </span>
-      `;
-      listaEquipos.appendChild(div);
-    });
-  }
-
-  listaEquipos.addEventListener('click', e => {
-    const fila = e.target.closest('.data-row');
-    if (!fila) return;
-    const nombre = fila.querySelector('span').textContent;
-
-    if (e.target.classList.contains('editar-equipo')) {
-      abrirModal(equipoModal);
-      fetch(`../backend/ekipamendua.php?nombre=${encodeURIComponent(nombre)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.success && data.data.length > 0) {
-            const eq = data.data[0];
-            nombreInput.value = eq.izena;
-            marcaInput.value = eq.marka;
-            modeloInput.value = eq.modelo;
-            stockInput.value = eq.stock;
-            descripcionInput.value = eq.deskribapena;
-            categoriaSelect.innerHTML = '';
-            fetch('../backend/kategoria.php')
-              .then(r => r.json())
-              .then(catData => {
-                if (catData.success) {
-                  catData.data.forEach(cat => {
-                    const opt = document.createElement('option');
-                    opt.value = cat.id;
-                    opt.textContent = cat.izena;
-                    if (cat.id == eq.idKategoria) opt.selected = true;
-                    categoriaSelect.appendChild(opt);
-                  });
-                }
-              });
+          // ==== ACTUALIZAR STOCK VISUAL EN INVENTARIO ====
+          const stockSpan = document.querySelector(`#stock-${item.id}`);
+          if (stockSpan) {
+            stockSpan.textContent = data.nuevo_stock;
           }
-        });
-    }
 
-    if (e.target.classList.contains('eliminar-equipo')) {
-      if (!confirm(`¿Seguro que quieres eliminar "${nombre}"?`)) return;
-      const body = new URLSearchParams();
-      body.append('action', 'delete');
-      body.append('nombre', nombre);
-      fetch('../backend/ekipamendua.php', { method: 'POST', body })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) cargarEquipos();
-          else alert('Error: ' + data.message);
-        });
-    }
-  });
+          Swal.fire({
+            icon: 'success',
+            title: 'Erosketa osatuta!',
+            text: 'Stock eguneratu da eta etiketak sortu dira.'
+          });
 
-  if (guardarEquipoBtn) {
-    guardarEquipoBtn.addEventListener('click', () => {
-      if (!nombreInput.value || !marcaInput.value || !modeloInput.value || !stockInput.value || !categoriaSelect.value) {
-        alert('Completa todos los campos antes de guardar.');
-        return;
-      }
-      const body = new URLSearchParams();
-      body.append('action', 'update');
-      body.append('nombre', nombreInput.value);
-      body.append('marca', marcaInput.value);
-      body.append('modelo', modeloInput.value);
-      body.append('stock', stockInput.value);
-      body.append('idKategoria', categoriaSelect.value);
-      body.append('deskribapena', descripcionInput.value);
-
-      fetch('../backend/ekipamendua.php', { method: 'POST', body })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            cerrarModal(equipoModal);
-            cargarEquipos();
-          } else alert('Error al actualizar: ' + data.message);
+          // Limpiar cesta
+          cesta = [];
+          actualizarCesta();
+        })
+        .catch(err => {
+          console.error("Error catch JS:", err);
+          Swal.fire({ icon: 'error', title: 'Errorea', text: 'Ez da erosketa prozesatu.' });
         });
     });
-  }
+  });
+// ================== FUNCIONALIDAD ELIMINAR ETIQUETA ==================
+async function eliminarEtiqueta(row, etiketa) {
+  if (!confirm(`¿Deseas eliminar la etiqueta ${etiketa}?`)) return;
 
-  // ================= INICIALIZACIÓN =================
+  try {
+    const response = await fetch('../backend/controladores/inbentarioController.php', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'DELETE', etiketa })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Elimina la fila de la interfaz
+      row.remove();
+
+      // Actualiza el stock en la tabla de equipamientos si existe
+      const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
+      if (stockCell) stockCell.textContent = data.nuevo_stock;
+
+      console.log(data.message);
+    } else {
+      alert(data.message || 'Error al eliminar la etiqueta');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error en la petición al servidor');
+  }
+}
+
+
+// Delegación de eventos para eliminar etiquetas (funciona con filas dinámicas)
+inventoryList.addEventListener('click', (e) => {
+  const button = e.target.closest('.eliminar-btn');
+  if (!button) return;
+  const row = button.closest('.data-row');
+  const etiketa = row.dataset.etiketa;
+  eliminarEtiqueta(row, etiketa);
+});
+
+  // ===== INICIAL =====
   cargarInventario();
-  cargarEquipos();
+  cargarEquipamientos();
+  actualizarCesta();
+
 });
