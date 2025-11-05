@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         equipoSelect.innerHTML = '<option value="">-- Aukeratu ekipamendua --</option>';
         data.data.forEach(equipo => {
           const option = document.createElement('option');
-          option.value = equipo.id; // Enviamos ID al backend
+          option.value = equipo.id;
           option.textContent = equipo.izena;
           equipoSelect.appendChild(option);
         });
@@ -138,7 +138,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const nombreEquipo = equipoSelect.options[equipoSelect.selectedIndex].text;
 
-    // Añadir a la cesta
     cesta.push({ id: idEquipo, nombre: nombreEquipo, cantidad });
     Swal.fire({ icon: 'success', title: 'Añadido', text: `${nombreEquipo} Saskira gehituta` });
     nuevaCategoriaModal.hide();
@@ -175,23 +174,27 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
-          // Mostrar etiquetas recién creadas en inventario
+          // Mostrar etiquetas recién creadas en inventario con botón eliminar
           data.nuevas_etiquetas.forEach(etk => {
             const etiquetaDiv = document.createElement('div');
             etiquetaDiv.classList.add('data-row');
+            etiquetaDiv.dataset.etiketa = etk;
             etiquetaDiv.innerHTML = `
-            <span>${item.nombre}</span>
-            <span>${etk}</span>
-            <span>Kokaleku ezezaguna</span>
-          `;
-            document.getElementById('inventory-list').appendChild(etiquetaDiv);
+              <span>${item.nombre}</span>
+              <span>${etk}</span>
+              <span>Kokaleku ezezaguna</span>
+              <span class="col-ekintzak">
+                <button class="btn btn-sm btn-primary eliminar-btn">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </span>
+            `;
+            inventoryList.appendChild(etiquetaDiv);
           });
 
-          // ==== ACTUALIZAR STOCK VISUAL EN INVENTARIO ====
+          // Actualizar stock visual si existe
           const stockSpan = document.querySelector(`#stock-${item.id}`);
-          if (stockSpan) {
-            stockSpan.textContent = data.nuevo_stock;
-          }
+          if (stockSpan) stockSpan.textContent = data.nuevo_stock;
 
           Swal.fire({
             icon: 'success',
@@ -199,7 +202,6 @@ document.addEventListener("DOMContentLoaded", () => {
             text: 'Stock eguneratu da eta etiketak sortu dira.'
           });
 
-          // Limpiar cesta
           cesta = [];
           actualizarCesta();
         })
@@ -209,50 +211,47 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
   });
-// ================== FUNCIONALIDAD ELIMINAR ETIQUETA ==================
-async function eliminarEtiqueta(row, etiketa) {
-  if (!confirm(`¿Deseas eliminar la etiqueta ${etiketa}?`)) return;
 
-  try {
-    const response = await fetch('../backend/controladores/inbentarioController.php', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'DELETE', etiketa })
-    });
+  // ================== FUNCIONALIDAD ELIMINAR ETIQUETA ==================
+  async function eliminarEtiqueta(row, etiketa) {
+    if (!confirm(`¿Deseas eliminar la etiqueta ${etiketa}?`)) return;
 
-    const data = await response.json();
+    try {
+      const response = await fetch('../backend/controladores/inbentarioController.php', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DELETE', etiketa })
+      });
 
-    if (data.success) {
-      // Elimina la fila de la interfaz
-      row.remove();
+      const data = await response.json();
 
-      // Actualiza el stock en la tabla de equipamientos si existe
-      const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
-      if (stockCell) stockCell.textContent = data.nuevo_stock;
+      if (data.success) {
+        row.remove();
 
-      console.log(data.message);
-    } else {
-      alert(data.message || 'Error al eliminar la etiqueta');
+        const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
+        if (stockCell) stockCell.textContent = data.nuevo_stock;
+
+        console.log(data.message);
+      } else {
+        alert(data.message || 'Error al eliminar la etiqueta');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error en la petición al servidor');
     }
-  } catch (err) {
-    console.error(err);
-    alert('Error en la petición al servidor');
   }
-}
 
-
-// Delegación de eventos para eliminar etiquetas (funciona con filas dinámicas)
-inventoryList.addEventListener('click', (e) => {
-  const button = e.target.closest('.eliminar-btn');
-  if (!button) return;
-  const row = button.closest('.data-row');
-  const etiketa = row.dataset.etiketa;
-  eliminarEtiqueta(row, etiketa);
-});
+  // Delegación de eventos para eliminar etiquetas (funciona con filas dinámicas)
+  inventoryList.addEventListener('click', (e) => {
+    const button = e.target.closest('.eliminar-btn');
+    if (!button) return;
+    const row = button.closest('.data-row');
+    const etiketa = row.dataset.etiketa;
+    eliminarEtiqueta(row, etiketa);
+  });
 
   // ===== INICIAL =====
   cargarInventario();
   cargarEquipamientos();
   actualizarCesta();
-
 });
