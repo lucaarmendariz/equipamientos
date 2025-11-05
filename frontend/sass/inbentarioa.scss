@@ -115,7 +115,7 @@ header {
 .data-row,
 .data-header {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.2fr 0.7fr 1.5fr 1.3fr; /* Izena, Marka, Modelo, Stock, Kategoria, Ekintzak */
+  grid-template-columns:  2fr 1fr 1fr 0.5fr;
   align-items: center;
   padding: 0.6rem 1rem;
   border-radius: 6px;
@@ -143,9 +143,9 @@ header {
 
 .data-row span,
 .data-header span {
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 /* === COLUMNA DE ACCIONES === */
@@ -153,11 +153,15 @@ header {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 0.4rem;
+  white-space: nowrap;
 }
 
-.col-ekintzak button {
-  margin: 0 4px;
+.data-row .col-ekintzak {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
 }
 
 .col-ekintzak i {
@@ -172,9 +176,12 @@ header {
   border-radius: 6px;
   color: white;
   font-size: 0.9rem;
-  padding: 0.5rem 0.6rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  padding: 4px 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .col-ekintzak button:hover {
   background-color: var(--blue-medium);
@@ -196,7 +203,10 @@ header {
 /* === TABLA INVENTARIO === */
 .dashboard-column:first-child .data-row,
 .dashboard-column:first-child .data-header {
-  grid-template-columns: 2fr 1.5fr 1fr; /* Etiketa | Data | Ekintzak */
+  display: grid;
+  grid-template-columns: 2fr 1.2fr 1.5fr 0.5fr;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* === BÚSQUEDA === */
