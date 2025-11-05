@@ -1,213 +1,251 @@
-// ===============================
-// CONFIGURACIÓN GLOBAL
-// ===============================
-const usuariosURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
+const erabiltzaileakURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
 
-// ===============================
-// CARGAR USUARIOS AL INICIAR
-// ===============================
 document.addEventListener("DOMContentLoaded", () => {
-  cargarUsuarios();
-});
 
-// ===============================
-// FUNCIONES PRINCIPALES
-// ===============================
+  // ============================================================
+  // LISTAR USUARIOS
+  // ============================================================
+  async function cargarErabiltzaileak() {
+    const container = document.getElementById("users-list");
+    container.innerHTML = `<div class="data-row text-center py-2">Kargatzen erabiltzaileak...</div>`;
 
-// Obtener lista de usuarios y mostrar en tabla
-async function cargarUsuarios() {
-  const tbody = document.getElementById("usuariosTableBody");
-  tbody.innerHTML = `<tr><td colspan="6" class="text-center">Cargando usuarios...</td></tr>`;
+    try {
+      const res = await fetch(erabiltzaileakURL);
+      const data = await res.json();
 
-  try {
-    const res = await fetch(usuariosURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "GET" })
-    });
+      if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
+        container.innerHTML = `<div class="data-row empty text-center">Ez dago erabiltzailerik.</div>`;
+        return;
+      }
 
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message);
+      container.innerHTML = "";
 
-    tbody.innerHTML = "";
-
-    data.data.forEach(user => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${user.nan}</td>
-        <td>${user.izena}</td>
-        <td>${user.abizena}</td>
-        <td>${user.erabiltzailea}</td>
-        <td>${user.rola}</td>
-        <td class="text-center">
-          <button class="btn btn-sm btn-warning edit-user" data-username="${user.erabiltzailea}"><i class="fa fa-pen"></i></button>
-          <button class="btn btn-sm btn-danger delete-user" data-username="${user.erabiltzailea}"><i class="fa fa-trash"></i></button>
-        </td>
+      // CABECERA
+      const header = document.createElement("div");
+      header.classList.add("data-row", "data-header");
+      header.innerHTML = `
+        <span>NAN</span>
+        <span>Izena</span>
+        <span>Abizena</span>
+        <span>Erabiltzailea</span>
+        <span>Rola</span>
+        <span>Ekintzak</span>
       `;
-      tbody.appendChild(tr);
-    });
+      container.appendChild(header);
 
-    activarBotonesUsuarios();
-  } catch (err) {
-    console.error("Error cargando usuarios:", err);
-    tbody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">Error al cargar usuarios.</td></tr>`;
-  }
-}
+      // FILAS
+      data.data.forEach((u, i) => {
+        const row = document.createElement("div");
+        row.classList.add("data-row");
+        if (i % 2 === 0) row.classList.add("even");
 
-// ===============================
-// AÑADIR NUEVO USUARIO
-// ===============================
-document.getElementById("addUserForm")?.addEventListener("submit", async e => {
-  e.preventDefault();
+        row.innerHTML = `
+          <span>${u.nan ?? "—"}</span>
+          <span>${u.izena ?? "—"}</span>
+          <span>${u.abizena ?? "—"}</span>
+          <span>${u.erabiltzailea ?? "—"}</span>
+          <span>${u.rola === "A" ? "Admin" : "User"}</span>
+          <span>
+<button class="btn btn-sm btn-outline-primary me-1 edit-user-btn"
+  data-user='${JSON.stringify(u)}'>✏️</button>
+            <button class="btn btn-sm btn-outline-danger delete-user-btn" data-nan="${u.nan}">🗑️</button>
+          </span>
+        `;
+        container.appendChild(row);
+      });
 
-  const nan = document.getElementById("new-nan").value.trim();
-  const name = document.getElementById("new-name").value.trim();
-  const lastname = document.getElementById("new-lastname").value.trim();
-  const username = document.getElementById("new-username").value.trim();
-  const password = document.getElementById("new-password").value.trim();
-  const role = document.getElementById("new-role").value.trim();
-
-  if (!nan || !name || !lastname || !username || !password) {
-    alert("Por favor, completa todos los campos obligatorios.");
-    return;
-  }
-
-  try {
-    const res = await fetch(usuariosURL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "POST",
-        nan,
-        name,
-        lastname,
-        username,
-        password,
-        role
-      })
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      const modal = bootstrap.Modal.getInstance(document.getElementById("addUserModal"));
-      modal.hide();
-      mostrarModalExito("Usuario añadido correctamente.");
-      cargarUsuarios();
-      e.target.reset();
-    } else {
-      alert(data.message);
-    }
-  } catch (err) {
-    console.error("Error al crear usuario:", err);
-    alert("Error al crear usuario.");
-  }
+      // EVENTOS DE BOTONES
+      document.querySelectorAll(".edit-user-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const user = JSON.parse(btn.dataset.user);
+    editarErabiltzailea(user);
+  });
 });
 
-// ===============================
-// EDITAR USUARIO
-// ===============================
-function activarBotonesUsuarios() {
-  // Editar
-  document.querySelectorAll(".edit-user").forEach(btn => {
-    btn.addEventListener("click", e => {
-      const row = e.target.closest("tr");
-      const username = btn.dataset.username;
-      document.getElementById("edit-username").value = username;
-      document.getElementById("edit-name").value = row.children[1].textContent;
-      document.getElementById("edit-lastname").value = row.children[2].textContent;
-      document.getElementById("edit-role").value = row.children[4].textContent;
 
-      const modal = new bootstrap.Modal(document.getElementById("editUserModal"));
-      modal.show();
-    });
-  });
+      document.querySelectorAll(".delete-user-btn").forEach(btn =>
+        btn.addEventListener("click", () => eliminarErabiltzailea(btn.dataset.nan))
+      );
 
-  // Eliminar
-  document.querySelectorAll(".delete-user").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const username = btn.dataset.username;
-      document.getElementById("confirmDeleteMessage").textContent =
-        `¿Seguro que deseas eliminar al usuario "${username}"?`;
+    } catch (err) {
+      console.error("Errorea erabiltzaileak kargatzean:", err);
+      container.innerHTML = `<div class="data-row text-center text-danger">Errorea kargatzean.</div>`;
+    }
+  }
 
-      document.getElementById("confirmDeleteButton").dataset.username = username;
-      const modal = new bootstrap.Modal(document.getElementById("confirmDeleteModal"));
-      modal.show();
-    });
-  });
-}
+  cargarErabiltzaileak();
 
-// ===============================
-// GUARDAR CAMBIOS EN USUARIO EDITADO
-// ===============================
-document.getElementById("editUserForm")?.addEventListener("submit", async e => {
-  e.preventDefault();
 
-  const username = document.getElementById("edit-username").value.trim();
-  const name = document.getElementById("edit-name").value.trim();
-  const lastname = document.getElementById("edit-lastname").value.trim();
+  // ============================================================
+  // AÑADIR USUARIO
+  // ============================================================
+  document.getElementById("addUserForm").addEventListener("submit", async e => {
+    e.preventDefault();
 
-  if (!username || !name || !lastname) return alert("Todos los campos son obligatorios.");
+    const payload = {
+      action: "POST",
+      nan: document.getElementById("new-nan").value.trim(),
+      name: document.getElementById("new-name").value.trim(),
+      lastname: document.getElementById("new-lastname").value.trim(),
+      username: document.getElementById("new-username").value.trim(),
+      password: document.getElementById("new-password").value.trim(),
+      role: document.getElementById("new-role").value.trim(),
+    };
 
-  try {
-    const res = await fetch(usuariosURL, {
+    if (!payload.nan || !payload.name || !payload.lastname || !payload.username || !payload.password) {
+      return alert("Bete beharrezko eremu guztiak.");
+    }
+
+    const res = await fetch(erabiltzaileakURL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "PUT",
-        username,
-        name,
-        lastname
-      })
+      body: JSON.stringify(payload)
     });
 
     const data = await res.json();
+
+    if (data.success) {
+      bootstrap.Modal.getInstance(document.getElementById("addUserModal")).hide();
+      e.target.reset();
+      cargarErabiltzaileak();
+      new bootstrap.Modal(document.getElementById("successModal")).show();
+    } else {
+      alert("Errorea: " + data.message);
+    }
+  });
+
+
+  // ============================================================
+  // EDITAR USUARIO
+  // ============================================================
+  function editarErabiltzailea(user) {
+  console.log("Editatzen erabiltzailea:", user.nan);
+
+  // Rellenar los campos del formulario con los datos actuales
+  document.getElementById("edit-nan").value = user.nan || "";
+  document.getElementById("edit-name").value = user.izena || "";
+  document.getElementById("edit-lastname").value = user.abizena || "";
+  document.getElementById("edit-username").value = user.erabiltzailea || "";
+  document.getElementById("edit-role").value = user.rola || "U";
+
+  // Mostrar la modal
+  const modal = new bootstrap.Modal(document.getElementById("editUserModal"));
+  modal.show();
+
+  // Guardar cambios
+  const form = document.getElementById("editUserForm");
+  form.onsubmit = e => {
+    e.preventDefault();
+
+    const updatedUser = {
+      nan: document.getElementById("edit-nan").value,
+      name: document.getElementById("edit-name").value,
+      lastname: document.getElementById("edit-lastname").value,
+      username: document.getElementById("edit-username").value,
+      role: document.getElementById("edit-role").value,
+    };
+
+    fetch(erabiltzaileakURL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedUser),
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          modal.hide();
+          cargarErabiltzaileak(); // refrescar la lista
+        } else {
+          alert(data.message || "Errorea eguneratzean.");
+        }
+      })
+      .catch(err => {
+        console.error("Errorea eguneratzean:", err);
+        alert("Errorea eguneratzean.");
+      });
+  };
+}
+
+
+
+
+  document.getElementById("editUserForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const payload = {
+      action: "UPDATE_ADMIN",
+      nan: document.getElementById("edit-nan").value,
+      name: document.getElementById("edit-name").value,
+      lastname: document.getElementById("edit-lastname").value,
+      username: document.getElementById("edit-username").value,
+      password: document.getElementById("edit-password").value,
+      role: document.getElementById("edit-role").value
+    };
+
+    const res = await fetch(erabiltzaileakURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
     if (data.success) {
       bootstrap.Modal.getInstance(document.getElementById("editUserModal")).hide();
-      mostrarModalExito("Usuario actualizado correctamente.");
-      cargarUsuarios();
+      cargarErabiltzaileak();
+      new bootstrap.Modal(document.getElementById("editSuccessModal")).show();
     } else {
-      alert(data.message);
+      alert("Errorea: " + data.message);
     }
-  } catch (err) {
-    console.error("Error al editar usuario:", err);
-    alert("Error al editar usuario.");
+  });
+
+
+  // ============================================================
+  // ELIMINAR USUARIO
+  // ============================================================
+  let nanEzabatzeko = null;
+
+  function eliminarErabiltzailea(nan) {
+    nanEzabatzeko = nan;
+    new bootstrap.Modal(document.getElementById("confirmDeleteUserModal")).show();
   }
-});
 
-// ===============================
-// CONFIRMAR ELIMINACIÓN DE USUARIO
-// ===============================
-document.getElementById("confirmDeleteButton")?.addEventListener("click", async e => {
-  const username = e.target.dataset.username;
-  if (!username) return;
+  document.getElementById("confirmDeleteUserButton")?.addEventListener("click", async () => {
+    if (!nanEzabatzeko) return;
 
-  try {
-    const res = await fetch(usuariosURL, {
-      method: "POST",
+    const res = await fetch(erabiltzaileakURL, {
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "DELETE", username })
+      body: JSON.stringify({ action: "DELETE", nan: nanEzabatzeko })
     });
 
     const data = await res.json();
+
     if (data.success) {
-      bootstrap.Modal.getInstance(document.getElementById("confirmDeleteModal")).hide();
-      mostrarModalExito("Usuario eliminado correctamente.");
-      cargarUsuarios();
+      bootstrap.Modal.getInstance(document.getElementById("confirmDeleteUserModal")).hide();
+      cargarErabiltzaileak();
+      new bootstrap.Modal(document.getElementById("editDeleteModal")).show();
     } else {
-      alert(data.message);
+      alert("Errorea: " + data.message);
     }
-  } catch (err) {
-    console.error("Error al eliminar usuario:", err);
-    alert("Error al eliminar usuario.");
+
+    nanEzabatzeko = null;
+  });
+
+
+  // ============================================================
+  // BÚSQUEDA GLOBAL DE USUARIOS
+  // ============================================================
+  const searchUserInput = document.getElementById("searchUserInput");
+  if (searchUserInput) {
+    searchUserInput.addEventListener("input", () => {
+      const filtro = searchUserInput.value.trim().toLowerCase();
+      const contenedor = document.getElementById("users-list");
+      const filas = contenedor.querySelectorAll(".data-row:not(.data-header)");
+      filas.forEach(fila => {
+        const texto = fila.innerText.toLowerCase();
+        fila.style.display = texto.includes(filtro) ? "" : "none";
+      });
+    });
   }
 });
-
-// ===============================
-// MODAL DE ÉXITO
-// ===============================
-function mostrarModalExito(mensaje) {
-  const msg = document.getElementById("successMessage");
-  msg.textContent = mensaje;
-  const modal = new bootstrap.Modal(document.getElementById("successModal"));
-  modal.show();
-}

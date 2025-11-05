@@ -4,26 +4,34 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Santurtzi LHII - Dashboard</title>
+    <title>Santurtzi LHII - Erabiltzaileak</title>
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="js/menu.js"></script>
-    <script src="js/validation.js"></script>
-    <script src="../assets/config.js"></script>
-    <script src="js/erabiltzaileak.js"></script>
+
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Estilos globales -->
     <link rel="stylesheet" href="sass/global.scss" />
 
+    <!-- Scripts -->
+    <script src="../assets/config.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/validation.js"></script>
+    <script src="js/erabiltzaileak.js" defer></script>
 </head>
 
 <body>
+    <!-- ============================================================
+       HEADER
+  ============================================================ -->
     <header>
         <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
         <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
         <div class="user-icon">
-            <span class="user-name" id="user-name"></span> <!-- Aquí aparecerá nombre + apellido -->
+            <span class="user-name" id="user-name"></span>
             <i class="fas fa-user"></i>
             <div class="user-menu">
                 <a href="perfil.html">Ver perfil</a>
@@ -32,155 +40,226 @@
             </div>
         </div>
     </header>
+
+    <!-- ============================================================
+       MENÚ DE NAVEGACIÓN
+  ============================================================ -->
     <nav id="main-nav">
         <div class="nav-container">
             <a href="equipamientos.html">Ekipamenduak</a>
             <a href="inbentarioa.html">Inbentarioa</a>
-            <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
+            <a href="usuarios.html" id="usuarios-link" class="active">Erabiltzaileak</a>
         </div>
     </nav>
 
-    <main class="container py-4">
-        <h2 class="text-center mb-3">Gestión de usuarios</h2>
+    <!-- ============================================================
+       CONTENIDO PRINCIPAL
+  ============================================================ -->
+    <main class="dashboard-container container py-4">
+        <h2 class="text-center mb-4">Gestión de Erabiltzaileak</h2>
+
+        <!-- Búsqueda -->
+        <input type="text" id="searchUserInput" class="form-control mb-3" placeholder="Bilatu erabiltzaileak...">
+
+
+        <!-- Botón añadir usuario -->
         <div class="text-end mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                <i class="fa fa-plus"></i> Nuevo Usuario
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="fa fa-plus"></i> Erabiltzaile berria
             </button>
         </div>
 
-        <table class="table table-bordered table-hover">
-            <thead class="table-light">
-                <tr>
-                    <th>NAN</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Usuario</th>
-                    <th>Rol</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="usuariosTableBody">
-                <tr>
-                    <td colspan="6" class="text-center">Cargando usuarios...</td>
-                </tr>
-            </tbody>
-        </table>
+
+        <!-- Tabla dinámica -->
+        <section class="dashboard-column" id="equipamientos-container">
+
+            <div id="users-list" class="data-container">
+                <div class="data-row text-center py-2">Kargatzen erabiltzaileak...</div>
+            </div>
+        </section>
     </main>
 
-    <!-- Modal Añadir Usuario -->
+    <!-- ============================================================
+       MODAL: AÑADIR USUARIO
+    ============================================================ -->
     <div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form id="addUserForm">
+                <form id="addUserForm" autocomplete="off">
                     <div class="modal-header">
-                        <h5 class="modal-title">Nuevo Usuario</h5>
+                        <h5 class="modal-title">Erabiltzaile berria</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-2"><label>NAN</label><input id="new-nan" class="form-control" required></div>
-                        <div class="mb-2"><label>Nombre</label><input id="new-name" class="form-control" required></div>
-                        <div class="mb-2"><label>Apellido</label><input id="new-lastname" class="form-control" required>
-                        </div>
-                        <div class="mb-2"><label>Usuario</label><input id="new-username" class="form-control" required>
-                        </div>
-                        <div class="mb-2"><label>Contraseña</label><input id="new-password" type="password"
-                                class="form-control" required></div>
                         <div class="mb-2">
-                            <label>Rol</label>
+                            <label>NAN</label>
+                            <input id="new-nan" class="form-control" required autocomplete="off">
+                        </div>
+                        <div class="mb-2">
+                            <label>Izena</label>
+                            <input id="new-name" class="form-control" required autocomplete="off">
+                        </div>
+                        <div class="mb-2">
+                            <label>Abizena</label>
+                            <input id="new-lastname" class="form-control" required autocomplete="off">
+                        </div>
+                        <div class="mb-2">
+                            <label>Erabiltzailea</label>
+                            <input id="new-username" class="form-control" required autocomplete="new-username">
+                        </div>
+                        <div class="mb-2">
+                            <label>Pasahitza</label>
+                            <input id="new-password" type="password" class="form-control" required
+                                autocomplete="new-password">
+                        </div>
+                        <div class="mb-2">
+                            <label>Rola</label>
                             <select id="new-role" class="form-select">
-                                <option value="U">Usuario</option>
-                                <option value="A">Administrador</option>
+                                <option value="U">Erabiltzailea</option>
+                                <option value="A">Administratzailea</option>
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button class="btn btn-primary" type="submit">Guardar</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Utzi</button>
+                        <button class="btn btn-primary" type="submit">Gorde</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal Editar Usuario -->
+    <!-- ============================================================
+       MODAL: EDITAR USUARIO
+  ============================================================ -->
     <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <form id="editUserForm">
                     <div class="modal-header">
-                        <h5 class="modal-title">Editar Usuario</h5>
+                        <h5 class="modal-title">Editatu erabiltzailea</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <input type="hidden" id="edit-username">
-                        <div class="mb-2"><label>Nombre</label><input id="edit-name" class="form-control" required>
+                        <div class="mb-2"><label>NAN</label><input id="edit-nan" class="form-control" required></div>
+                        <div class="mb-2"><label>Izena</label><input id="edit-name" class="form-control" required></div>
+                        <div class="mb-2"><label>Abizena</label><input id="edit-lastname" class="form-control" required>
                         </div>
-                        <div class="mb-2"><label>Apellido</label><input id="edit-lastname" class="form-control"
-                                required></div>
                         <div class="mb-2">
-                            <label>Rol</label>
+                            <label>Erabiltzailea</label>
+                            <input id="edit-username" class="form-control" readonly>
+                            <small class="text-muted">Ezin da erabiltzaile-izena aldatu.</small>
+                        </div>
+                        <div class="mb-2"><label>Pasahitza</label><input id="edit-password" type="password"
+                                class="form-control" placeholder="Hutsa utzi ez aldatzeko"></div>
+                        <div class="mb-2">
+                            <label>Rola</label>
                             <select id="edit-role" class="form-select">
-                                <option value="U">Usuario</option>
-                                <option value="A">Administrador</option>
+                                <option value="U">Erabiltzailea</option>
+                                <option value="A">Administratzailea</option>
                             </select>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button class="btn btn-success" type="submit">Guardar cambios</button>
+                        <button class="btn btn-secondary" data-bs-dismiss="modal">Utzi</button>
+                        <button class="btn btn-success" type="submit">Gorde aldaketak</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal Confirmar Eliminar -->
-    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
+    <!-- ============================================================
+       MODAL: CONFIRMAR ELIMINACIÓN
+  ============================================================ -->
+    <div class="modal fade" id="confirmDeleteUserModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content text-center">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Confirmar eliminación</h5>
+                    <h5 class="modal-title">Ezabatu erabiltzailea</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body text-center">
-                    <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i>
-                    <p id="confirmDeleteMessage"></p>
-                </div>
+                <div class="modal-body">Ziur zaude erabiltzailea ezabatu nahi duzula?</div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Utzi</button>
+                    <button class="btn btn-danger" id="confirmDeleteUserButton">Ezabatu</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal Éxito -->
+    <!-- ============================================================
+       MODAL: ÉXITO (Añadir / Editar / Eliminar)
+  ============================================================ -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-center">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Éxito</h5>
+                    <h5 class="modal-title">Eragiketa arrakastatsua</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
-                    <span id="successMessage"></span>
+                    <span>Erabiltzailea ondo gorde da.</span>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+                    <button class="btn btn-primary" data-bs-dismiss="modal">Ados</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- ============================================================
+       MODAL: ÉXITO AL EDITAR
+  ============================================================ -->
+    <div class="modal fade" id="editSuccessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Aldaketak gorde dira</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+                    <span>Erabiltzailea eguneratu da.</span>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-bs-dismiss="modal">Ados</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <!-- ============================================================
+       MODAL: ÉXITO AL ELIMINAR
+  ============================================================ -->
+    <div class="modal fade" id="editDeleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Erabiltzailea ezabatu da</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+                    <span>Erabiltzailea ondo ezabatu da.</span>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-bs-dismiss="modal">Ados</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-
-    <footer class="main-footer">
-        <div class="footer-content">
-            <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
-            <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+    <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+    <footer class="main-footer mt-5">
+        <div class="footer-content text-center py-3">
+            <p>&copy; 2025 Santurtzi LHII. Eskubide guztiak erreserbatuta.</p>
+            <p>Kontaktua: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
         </div>
     </footer>
+</body>
 
 </html>

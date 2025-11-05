@@ -53,7 +53,8 @@ try {
 
             $conn = DB::getConnection();
             $stmt = $conn->prepare("UPDATE erabiltzailea SET izena = ?, abizena = ? WHERE erabiltzailea = ?");
-            if (!$stmt) throw new Exception('Error en la base de datos.');
+            if (!$stmt)
+                throw new Exception('Error en la base de datos.');
 
             $stmt->bind_param('sss', $name, $lastname, $username);
             $stmt->execute();
@@ -61,6 +62,43 @@ try {
 
             $response['success'] = true;
             $response['message'] = 'Perfil actualizado correctamente.';
+            break;
+
+        // =================================================
+        // ACTUALIZAR USUARIO (ADMIN)
+        // =================================================
+        case 'UPDATE_ADMIN':
+            $nan = trim($input['nan'] ?? '');
+            $name = trim($input['name'] ?? '');
+            $lastname = trim($input['lastname'] ?? '');
+            $username = trim($input['username'] ?? '');
+            $password = trim($input['password'] ?? '');
+            $role = trim($input['role'] ?? 'U');
+
+            if (!$nan || !$name || !$lastname || !$username) {
+                throw new Exception('Datos incompletos para actualizar el usuario.');
+            }
+
+            $conn = DB::getConnection();
+
+            // Si se proporciona una contraseña nueva, la actualiza; si no, la deja igual
+            if ($password) {
+                $stmt = $conn->prepare("UPDATE erabiltzailea SET nan = ?, izena = ?, abizena = ?, pasahitza = ?, rola = ? WHERE erabiltzailea = ?");
+                if (!$stmt)
+                    throw new Exception('Error preparando la consulta.');
+                $stmt->bind_param('ssssss', $nan, $name, $lastname, $password, $role, $username);
+            } else {
+                $stmt = $conn->prepare("UPDATE erabiltzailea SET nan = ?, izena = ?, abizena = ?, rola = ? WHERE erabiltzailea = ?");
+                if (!$stmt)
+                    throw new Exception('Error preparando la consulta.');
+                $stmt->bind_param('sssss', $nan, $name, $lastname, $role, $username);
+            }
+
+            $stmt->execute();
+            $stmt->close();
+
+            $response['success'] = true;
+            $response['message'] = 'Usuario actualizado correctamente por administrador.';
             break;
 
         // =================================================
@@ -90,15 +128,21 @@ try {
             break;
 
         // =================================================
-        // ELIMINAR USUARIO
+        // ELIMINAR USUARIO POR NAN
         // =================================================
         case 'DELETE':
-            $username = trim($input['username'] ?? '');
-            if (!$username) throw new Exception('Falta el nombre de usuario.');
+            $nan = trim($input['nan'] ?? '');
+            if (!$nan) {
+                throw new Exception('Falta el NAN del usuario.');
+            }
 
             $conn = DB::getConnection();
-            $stmt = $conn->prepare("DELETE FROM erabiltzailea WHERE erabiltzailea = ?");
-            $stmt->bind_param("s", $username);
+            $stmt = $conn->prepare("DELETE FROM erabiltzailea WHERE nan = ?");
+            if (!$stmt) {
+                throw new Exception('Error al preparar la consulta.');
+            }
+
+            $stmt->bind_param("s", $nan);
             $stmt->execute();
             $stmt->close();
 
