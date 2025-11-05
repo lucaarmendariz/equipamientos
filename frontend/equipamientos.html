@@ -7,12 +7,13 @@
   <title>Santurtzi LHII - Dashboard</title>
 
   <!-- Estilos -->
-  <link rel="stylesheet" href="sass/global.scss" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <link rel="stylesheet" href="sass/global.scss" />
 
   <!-- Scripts globales -->
   <script src="js/validation.js"></script>
@@ -46,7 +47,6 @@
     <div class="nav-container">
       <a href="equipamientos.html" class="active">Ekipamenduak</a>
       <a href="inbentarioa.html">Inbentarioa</a>
-      <a href="erosketak.html">Erosketak</a>
       <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
     </div>
   </nav>
@@ -68,6 +68,10 @@
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipoModal">
         <i class="fa fa-plus"></i> Añadir Equipo
       </button>
+      <button type="button" class="btn btn-secondary" id="openCategoriasModalBtn">
+        <i class="fa fa-cog"></i> Gestionar Categorías
+      </button>
+
     </div>
 
     <!-- Listado de equipos -->
@@ -94,10 +98,6 @@
 
           <div class="modal-body">
             <div class="mb-3">
-              <label for="etiketa" class="form-label">Etiqueta</label>
-              <input type="text" class="form-control" id="etiketa" required placeholder="E000001">
-            </div>
-            <div class="mb-3">
               <label for="nombre" class="form-label">Nombre</label>
               <input type="text" class="form-control" id="nombre" required>
             </div>
@@ -121,9 +121,12 @@
                 <input type="number" class="form-control" id="stock" required>
               </div>
               <div class="col-md-6 mb-3">
-                <label for="categoria" class="form-label">Categoría</label>
+                <label for="categoria" class="form-label d-flex justify-content-between align-items-center">
+                  <span>Categoría</span>
+                </label>
                 <select class="form-select" id="categoria" required></select>
               </div>
+
             </div>
           </div>
 
@@ -175,9 +178,12 @@
                 <input type="number" class="form-control" id="edit-stock" required>
               </div>
               <div class="col-md-6 mb-3">
-                <label for="edit-categoria" class="form-label">Categoría</label>
+                <label for="edit-categoria" class="form-label d-flex justify-content-between align-items-center">
+                  <span>Categoría</span>
+                </label>
                 <select class="form-select" id="edit-categoria"></select>
               </div>
+
             </div>
           </div>
 
@@ -253,6 +259,143 @@
       </div>
     </div>
   </div>
+
+  <!-- ============================================================
+     MODAL: CONFIRMAR ELIMINAR
+  ============================================================ -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
+          <span id="confirmDeleteMessage">¿Seguro que deseas eliminar este equipo?</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     MODAL: GESTIÓN DE CATEGORÍAS
+============================================================ -->
+  <div class="modal fade" id="manageCategoriasModal" tabindex="-1" aria-labelledby="manageCategoriasModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="manageCategoriasModalLabel">Gestión de Categorías</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+
+          <!-- Botón para añadir nueva categoría -->
+          <div class="mb-3 text-end">
+            <button class="btn btn-primary btn-sm" id="addCategoriaModalBtn"><i class="fa fa-plus"></i> Nueva
+              Categoría</button>
+          </div>
+
+          <!-- Tabla de categorías -->
+          <table class="table table-bordered table-hover">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="categoriasTableBody">
+              <tr>
+                <td colspan="3" class="text-center">Cargando categorías...</td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+     MODAL: AÑADIR CATEGORÍA
+    ============================================================ -->
+  <div class="modal fade" id="addCategoriaModal" tabindex="-1" aria-labelledby="addCategoriaModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="addCategoriaForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="addCategoriaModalLabel">Nueva Categoría</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="categoria-nombre" class="form-label">Nombre de la categoría</label>
+              <input type="text" class="form-control" id="categoria-nombre" required>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Crear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CATEGORÍA ACTUALIZADA -->
+<div class="modal fade" id="categoriaSuccessModal" tabindex="-1" aria-labelledby="categoriaSuccessModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="categoriaSuccessModalLabel">¡Categoría actualizada!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
+        <span id="categoriaSuccessMessage">La categoría ha sido modificada correctamente.</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRMAR ELIMINAR CATEGORÍA -->
+<div class="modal fade" id="confirmCategoriaDeleteModal" tabindex="-1" aria-labelledby="confirmCategoriaDeleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmCategoriaDeleteModalLabel">Confirmar eliminación</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body text-center">
+        <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
+        <span id="confirmCategoriaDeleteMessage">¿Seguro que deseas eliminar esta categoría?</span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmCategoriaDeleteButton">Eliminar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
 
   <!-- ============================================================
