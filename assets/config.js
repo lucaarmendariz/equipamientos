@@ -1,6 +1,6 @@
 // Archivo de configuración global de URLs
 const CONFIG = {
-  BASE_URL: "http://localhost/equipamientos/",
+  BASE_URL: "http://localhost/E1T2-ERRONKA/equipamientos/",
 
   // Endpoints
   
