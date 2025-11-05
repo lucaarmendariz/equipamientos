@@ -44,6 +44,7 @@ class Kategoria
         $row = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
+        
         if ($row) {
             return new Kategoria((int)$row['id'], $row['izena']);
         }

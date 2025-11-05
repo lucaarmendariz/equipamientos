@@ -40,7 +40,6 @@ header {
 }
 
 .title {
-  flex-grow: 1;
   text-align: left;
 }
 
@@ -164,7 +163,9 @@ li.empty {
   font-style: italic;
 }
 
-
+span {
+    color: var(--text-color);
+}
 
 
 /* Responsive */

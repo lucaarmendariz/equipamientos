@@ -65,9 +65,7 @@ try {
         case 'DELETE':
             $id = (int)($input['id'] ?? 0);
             if (!$id) respond(false, [], 'Falta el ID de la categoría');
-
             $categoria = Kategoria::getById($id);
-            if (!$categoria) respond(false, [], 'Categoría no encontrada');
 
             if ($categoria->delete()) {
                 respond(true, [], 'Categoría eliminada correctamente');
