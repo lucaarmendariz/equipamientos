@@ -15,7 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const vaciarCestaBtn = document.getElementById('vaciar-cesta');
   const finalizarCompraBtn = document.getElementById('finalizar-compra');
 
-  // ===== CESTA =====
+  // ==================
+  // CESTA DE LA COMPRA
+  // ==================
   let cesta = [];
 
   function actualizarCesta() {
@@ -50,7 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
     cestaModal.show();
   });
 
-  // ================== INVENTARIO ==================
+  // ===========
+  // INVENTARIO 
+  // ===========
   function cargarInventario() {
     fetch('../backend/controladores/inbentarioController.php')
       .then(r => r.json())
@@ -70,9 +74,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <span>${item.etiketa}</span>
             <span>${item.gela ?? 'Kokaleku ezezaguna'}</span>
             <span class="col-ekintzak">
-              <button class="btn btn-sm btn-primary eliminar-btn">
-                <i class="bi bi-trash"></i>
-              </button>
+              <input type="checkbox" class="select-etiqueta"/>
+              <button class="btn btn-sm btn-outline-danger eliminar-btn">🗑️</button>
+              
             </span>
           `;
           inventoryList.appendChild(div);
@@ -81,9 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error('Error al cargar inventario:', err));
   }
 
-  // ============================================================
-  // BÚSQUEDA GLOBAL DE EQUIPOS (IGNORA MAYÚSCULAS Y LA CABECERA)
-  // ============================================================
+  // ============================
+  // BÚSQUEDA GLOBAL DE EQUIPOS
+  // ============================
   if (searchInput && inventoryList) {
     searchInput.addEventListener("input", () => {
       const filtro = searchInput.value.trim().toLowerCase();
@@ -96,7 +100,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ================== EQUIPAMIENTOS ==================
+  // ================
+  //  EQUIPAMIENTOS
+  // ================
   function cargarEquipamientos() {
     fetch('../backend/controladores/ekipamenduakController.php')
       .then(res => res.json())
@@ -116,7 +122,9 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error('Error fetching equipamientos:', err));
   }
 
-  // ================== MODAL DE COMPRA ==================
+  //==================
+  // MODAL DE COMPRA 
+  //==================
   nuevaCategoriaBtn.onclick = () => {
     nuevaCategoriaInput.value = '';
     guardarCategoriaBtn.textContent = 'Gehitu saskira';
@@ -146,7 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
     actualizarCesta();
   };
 
-  // ================== FINALIZAR COMPRA ==================
+  // ==================
+  // FINALIZAR COMPRA
+  // ==================
   finalizarCompraBtn.addEventListener('click', () => {
     if (cesta.length === 0) {
       Swal.fire({ icon: 'error', title: 'Errorea', text: 'Saskia hutsik dago!' });
@@ -183,6 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <span>${item.nombre}</span>
               <span>${etk}</span>
               <span>Kokaleku ezezaguna</span>
+              <div><input type="checkbox" class="select-etiqueta"/></div>
               <span class="col-ekintzak">
                 <button class="btn btn-sm btn-primary eliminar-btn">
                   <i class="bi bi-trash"></i>
@@ -212,7 +223,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // ================== FUNCIONALIDAD ELIMINAR ETIQUETA ==================
+  // ==================
+  // ELIMINAR ETIQUETA
+  // ==================
   async function eliminarEtiqueta(row, etiketa) {
     if (!confirm(`¿Deseas eliminar la etiqueta ${etiketa}?`)) return;
 
@@ -241,7 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Delegación de eventos para eliminar etiquetas (funciona con filas dinámicas)
+  // Delegación de eventos para eliminar etiquetas
   inventoryList.addEventListener('click', (e) => {
     const button = e.target.closest('.eliminar-btn');
     if (!button) return;
@@ -249,6 +262,39 @@ document.addEventListener("DOMContentLoaded", () => {
     const etiketa = row.dataset.etiketa;
     eliminarEtiqueta(row, etiketa);
   });
+
+  document.getElementById('eliminar-seleccionadas').addEventListener('click', async () => {
+  const selectedCheckboxes = document.querySelectorAll('.select-etiqueta:checked');
+  if (selectedCheckboxes.length === 0) {
+    alert('No hay etiquetas seleccionadas');
+    return;
+  }
+
+  if (!confirm(`¿Deseas eliminar ${selectedCheckboxes.length} etiquetas?`)) return;
+
+  const etiquetas = Array.from(selectedCheckboxes).map(cb => cb.closest('.data-row').dataset.etiketa);
+
+  try {
+    const response = await fetch('../backend/controladores/inbentarioController.php', {
+      method: 'POST', // Usamos POST para enviar array de etiquetas
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Eliminar filas visualmente
+      selectedCheckboxes.forEach(cb => cb.closest('.data-row').remove());
+      alert(data.message);
+    } else {
+      alert(data.message || 'Error al eliminar etiquetas');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error al contactar con el servidor');
+  }
+});
 
   // ===== INICIAL =====
   cargarInventario();
