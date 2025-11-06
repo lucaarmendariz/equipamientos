@@ -62,8 +62,8 @@
 
     <div id="overlay"></div>
 
-    <!-- Contenedor de botones arriba -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex align-items-center gap-2">
       <button id="nueva-categoria-btn" class="add-button">
         <i class="bi bi-plus-circle"></i> Erosi
       </button>
@@ -71,6 +71,14 @@
       <button id="carrito-btn" class="add-button">
         <i class="bi bi-cart-plus fs-5"></i>
       </button>
+    </div>
+
+    <button id="eliminar-seleccionadas" class="btn btn-danger">
+      <i class="bi bi-trash"></i> Ezabatu hautatutakoak
+    </button>
+
+  </div>
+
     </div>
     <!-- Contenedor de inventario y equipos lado a lado -->
     <div class="dashboard-grid">
@@ -132,5 +140,13 @@
 
   <script src="js/inbentarioa.js"></script>
 </body>
-
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer class="main-footer mt-5">
+    <div class="footer-content text-center py-3">
+      <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
+      <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+    </div>
+  </footer>
 </html>
