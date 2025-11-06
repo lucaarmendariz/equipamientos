@@ -77,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
       result.data.forEach(cat => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-        <td>${cat.id}</td>
         <td>
           <input type="text" class="form-control form-control-sm categoria-nombre" value="${cat.izena}" data-id="${cat.id}" disabled>
         </td>

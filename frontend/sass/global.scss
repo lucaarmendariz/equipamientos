@@ -9,9 +9,9 @@
 
 /* Body y contenedor general */
 body {
-  font-family: 'Inria Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--blue-bg-lightest);
-  color: var(--text-color);
+  font-family: 'Inria Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  background: var(--blue-bg-lightest) !important;
+  color: var(--text-color)!important;
   display: flex;
   flex-direction: column;
   width: 100%;
