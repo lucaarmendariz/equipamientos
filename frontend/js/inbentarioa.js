@@ -193,8 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
               <span>${item.nombre}</span>
               <span>${etk}</span>
               <span>Kokaleku ezezaguna</span>
-              <div><input type="checkbox" class="select-etiqueta"/></div>
               <span class="col-ekintzak">
+              <input type="checkbox" class="select-etiqueta"/>
                 <button class="btn btn-sm btn-primary eliminar-btn">
                   <i class="bi bi-trash"></i>
                 </button>
