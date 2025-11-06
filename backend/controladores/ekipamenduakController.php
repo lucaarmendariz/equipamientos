@@ -5,6 +5,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once 'conexion.php';
 require_once '../klaseak/ekipamenduak.php';
+require_once 'apiKey.php';
+
+ApiKeyManager::requireApiKey(); // <-- aquí se valida la sesión por API key
+
 
 // Función para enviar JSON limpio
 function respond(bool $success, array $data = [], string $message = ''): void

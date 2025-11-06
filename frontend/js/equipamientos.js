@@ -2,11 +2,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const backendURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
   const categoriasURL = CONFIG.BASE_URL + "backend/controladores/kategoriaController.php";
 
+  const apiKey = sessionStorage.getItem("apiKey");
+
   // Cargar categorías en select
   function cargarCategorias(selectId) {
     const select = document.getElementById(selectId);
     if (!select) return;
-    fetch(categoriasURL)
+
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    };
+    fetch(categoriasURL, { headers })
       .then(res => res.json())
       .then(data => {
         select.innerHTML = '<option value="">Seleccione una categoría</option>';
@@ -50,8 +57,14 @@ document.addEventListener("DOMContentLoaded", () => {
   async function cargarCategoriasTabla() {
     categoriasTableBody.innerHTML = `<tr><td colspan="4" class="text-center">Cargando categorías...</td></tr>`;
 
+
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    };
+
     try {
-      const res = await fetch(categoriasURL);
+      const res = await fetch(categoriasURL, { headers });
       const result = await res.json();
 
       if (!result.success || !Array.isArray(result.data) || result.data.length === 0) {
@@ -90,131 +103,137 @@ document.addEventListener("DOMContentLoaded", () => {
   // CONFIGURAR BOTONES DE LA TABLA
   // ============================================================
   function configurarBotonesCategorias() {
-  // EDITAR
-  document.querySelectorAll(".edit-categoria").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const row = btn.closest("tr");
-      const input = row.querySelector(".categoria-nombre");
-      input.disabled = false;
-      input.focus();
+    // EDITAR
+    document.querySelectorAll(".edit-categoria").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const row = btn.closest("tr");
+        const input = row.querySelector(".categoria-nombre");
+        input.disabled = false;
+        input.focus();
 
-      row.querySelector(".save-categoria").style.display = "inline-block";
-      row.querySelector(".cancel-categoria").style.display = "inline-block";
-      btn.style.display = "none";
-      row.querySelector(".delete-categoria").style.display = "none";
+        row.querySelector(".save-categoria").style.display = "inline-block";
+        row.querySelector(".cancel-categoria").style.display = "inline-block";
+        btn.style.display = "none";
+        row.querySelector(".delete-categoria").style.display = "none";
 
-      row.dataset.original = input.value;
+        row.dataset.original = input.value;
 
-      document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
-        if (r !== row) {
-          r.querySelector(".edit-categoria").disabled = true;
-          r.querySelector(".delete-categoria").disabled = true;
-        }
-      });
-    });
-  });
-
-  // CANCELAR
-  document.querySelectorAll(".cancel-categoria").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const row = btn.closest("tr");
-      const input = row.querySelector(".categoria-nombre");
-      input.value = row.dataset.original;
-      input.disabled = true;
-
-      row.querySelector(".save-categoria").style.display = "none";
-      row.querySelector(".cancel-categoria").style.display = "none";
-      row.querySelector(".edit-categoria").style.display = "inline-block";
-      row.querySelector(".delete-categoria").style.display = "inline-block";
-
-      document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
-        r.querySelector(".edit-categoria").disabled = false;
-        r.querySelector(".delete-categoria").disabled = false;
-      });
-    });
-  });
-
-  // GUARDAR
-  document.querySelectorAll(".save-categoria").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const row = btn.closest("tr");
-      const id = parseInt(btn.dataset.id);
-      const nombre = row.querySelector(".categoria-nombre").value.trim();
-      if (!nombre) return alert("El nombre no puede estar vacío");
-
-      try {
-        const res = await fetch(categoriasURL, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, izena: nombre })
+        document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
+          if (r !== row) {
+            r.querySelector(".edit-categoria").disabled = true;
+            r.querySelector(".delete-categoria").disabled = true;
+          }
         });
-        const data = await res.json();
-        if (!data.success) return alert(data.message);
+      });
+    });
 
-        const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
-        document.getElementById("categoriaSuccessMessage").textContent = data.message || "La categoría ha sido modificada correctamente.";
-        successModal.show();
+    // CANCELAR
+    document.querySelectorAll(".cancel-categoria").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const row = btn.closest("tr");
+        const input = row.querySelector(".categoria-nombre");
+        input.value = row.dataset.original;
+        input.disabled = true;
 
-        row.querySelector(".categoria-nombre").disabled = true;
         row.querySelector(".save-categoria").style.display = "none";
         row.querySelector(".cancel-categoria").style.display = "none";
         row.querySelector(".edit-categoria").style.display = "inline-block";
         row.querySelector(".delete-categoria").style.display = "inline-block";
 
         document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
-          if (r !== row) {
-            r.querySelector(".edit-categoria").disabled = false;
-            r.querySelector(".delete-categoria").disabled = false;
-          }
+          r.querySelector(".edit-categoria").disabled = false;
+          r.querySelector(".delete-categoria").disabled = false;
         });
-
-        await cargarCategorias(); // actualizar selects
-      } catch (error) {
-        console.error("Error al actualizar categoría:", error);
-        alert("Error al actualizar categoría");
-      }
+      });
     });
-  });
 
-  // ELIMINAR (solo abre modal, no hace DELETE directamente)
-  document.querySelectorAll(".delete-categoria").forEach(btn => {
-    btn.addEventListener("click", () => {
-      categoriaAEliminarId = parseInt(btn.dataset.id);
-      const nombre = btn.closest("tr").querySelector(".categoria-nombre").value;
+    // GUARDAR
+    document.querySelectorAll(".save-categoria").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const row = btn.closest("tr");
+        const id = parseInt(btn.dataset.id);
+        const nombre = row.querySelector(".categoria-nombre").value.trim();
+        if (!nombre) return alert("El nombre no puede estar vacío");
 
-      document.getElementById("confirmCategoriaDeleteMessage").textContent =
-        `¿Seguro que deseas eliminar la categoría "${nombre}"?`;
+        try {
+          const res = await fetch(categoriasURL, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify({ id, izena: nombre })
+          });
+          const data = await res.json();
+          if (!data.success) return alert(data.message);
 
-      new bootstrap.Modal(document.getElementById("confirmCategoriaDeleteModal")).show();
+          const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
+          document.getElementById("categoriaSuccessMessage").textContent = data.message || "La categoría ha sido modificada correctamente.";
+          successModal.show();
+
+          row.querySelector(".categoria-nombre").disabled = true;
+          row.querySelector(".save-categoria").style.display = "none";
+          row.querySelector(".cancel-categoria").style.display = "none";
+          row.querySelector(".edit-categoria").style.display = "inline-block";
+          row.querySelector(".delete-categoria").style.display = "inline-block";
+
+          document.querySelectorAll("#categoriasTableBody tr").forEach(r => {
+            if (r !== row) {
+              r.querySelector(".edit-categoria").disabled = false;
+              r.querySelector(".delete-categoria").disabled = false;
+            }
+          });
+
+          await cargarCategorias(); // actualizar selects
+        } catch (error) {
+          console.error("Error al actualizar categoría:", error);
+          alert("Error al actualizar categoría");
+        }
+      });
     });
-  });
-}
 
-document.getElementById("confirmCategoriaDeleteButton").addEventListener("click", async () => {
-  if (!categoriaAEliminarId) return;
+    // ELIMINAR (solo abre modal, no hace DELETE directamente)
+    document.querySelectorAll(".delete-categoria").forEach(btn => {
+      btn.addEventListener("click", () => {
+        categoriaAEliminarId = parseInt(btn.dataset.id);
+        const nombre = btn.closest("tr").querySelector(".categoria-nombre").value;
 
-  try {
-    const res = await fetch(categoriasURL, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: categoriaAEliminarId })
+        document.getElementById("confirmCategoriaDeleteMessage").textContent =
+          `¿Seguro que deseas eliminar la categoría "${nombre}"?`;
+
+        new bootstrap.Modal(document.getElementById("confirmCategoriaDeleteModal")).show();
+      });
     });
-    const data = await res.json();
-    if (!data.success) return alert(data.message);
-
-    const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
-    document.getElementById("categoriaSuccessMessage").textContent = data.message || "Categoría eliminada correctamente.";
-    successModal.show();
-
-    cargarCategoriasTabla();
-    cargarCategorias();
-  } catch (error) {
-    console.error("Error al eliminar categoría:", error);
-  } finally {
-    categoriaAEliminarId = null;
-    bootstrap.Modal.getInstance(document.getElementById("confirmCategoriaDeleteModal")).hide();
   }
-});
+
+  document.getElementById("confirmCategoriaDeleteButton").addEventListener("click", async () => {
+    if (!categoriaAEliminarId) return;
+
+    try {
+      const res = await fetch(categoriasURL, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({ id: categoriaAEliminarId })
+      });
+      const data = await res.json();
+      if (!data.success) return alert(data.message);
+
+      const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
+      document.getElementById("categoriaSuccessMessage").textContent = data.message || "Categoría eliminada correctamente.";
+      successModal.show();
+
+      cargarCategoriasTabla();
+      cargarCategorias();
+    } catch (error) {
+      console.error("Error al eliminar categoría:", error);
+    } finally {
+      categoriaAEliminarId = null;
+      bootstrap.Modal.getInstance(document.getElementById("confirmCategoriaDeleteModal")).hide();
+    }
+  });
 
 
 
@@ -223,7 +242,12 @@ document.getElementById("confirmCategoriaDeleteButton").addEventListener("click"
     const container = document.getElementById("equipamientos-list");
     container.innerHTML = `<div class="data-row text-center py-2">Cargando datos...</div>`;
 
-    fetch(backendURL)
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    };
+
+    fetch(backendURL, { headers })
       .then(res => res.json())
       .then(data => {
         if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
@@ -294,7 +318,10 @@ document.getElementById("confirmCategoriaDeleteButton").addEventListener("click"
     console.log(payload)
     fetch(backendURL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
       body: JSON.stringify(payload)
     })
       .then(res => res.json())
@@ -310,8 +337,11 @@ document.getElementById("confirmCategoriaDeleteButton").addEventListener("click"
 
   // Editar equipo
   function editarEquipo(id) {
-
-    fetch(`${backendURL}?id=${id}`)
+    const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    };
+    fetch(`${backendURL}?id=${id}`, { headers })
       .then(res => res.json())
       .then(data => {
         if (!data.success || !data.data) return alert("Equipo no encontrado");
@@ -341,9 +371,13 @@ document.getElementById("confirmCategoriaDeleteButton").addEventListener("click"
 
     console.log(JSON.stringify(payload) + 'a enviar')
 
+
     fetch(backendURL, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
       body: JSON.stringify(payload)
     })
       .then(res => res.json())
@@ -368,9 +402,13 @@ document.getElementById("confirmCategoriaDeleteButton").addEventListener("click"
   document.getElementById("confirmDeleteButton").addEventListener("click", () => {
     if (!equipoAEliminarId) return;
 
+
     fetch(backendURL, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
       body: JSON.stringify({ id: parseInt(equipoAEliminarId) })
     })
       .then(res => res.json())
@@ -425,7 +463,10 @@ document.getElementById("confirmCategoriaDeleteButton").addEventListener("click"
     try {
       const response = await fetch(categoriasURL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
         body: JSON.stringify({ izena })
       });
 
@@ -460,10 +501,15 @@ document.getElementById("confirmCategoriaDeleteButton").addEventListener("click"
   //  CARGAR TODAS LAS CATEGORÍAS DESDE EL BACKEND
   // ============================================================
   async function cargarCategorias() {
+
+
     try {
       const response = await fetch(categoriasURL, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        }
       });
 
       const result = await response.json();

@@ -4,7 +4,9 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once  '../klaseak/kategoriak.php';
 require_once  'conexion.php';
+require_once 'apiKey.php';
 
+ApiKeyManager::requireApiKey(); // <-- aquí se valida la sesión por API key
 function respond(bool $success, array $data = [], string $message = ''): void {
     echo json_encode(['success' => $success, 'data' => $data, 'message' => $message]);
     exit;
