@@ -1,4 +1,5 @@
 const erabiltzaileakURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
+  const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -10,7 +11,12 @@ document.addEventListener("DOMContentLoaded", () => {
     container.innerHTML = `<div class="data-row text-center py-2">Kargatzen erabiltzaileak...</div>`;
 
     try {
-      const res = await fetch(erabiltzaileakURL);
+      const res = await fetch(erabiltzaileakURL, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        }
+      });
       const data = await res.json();
 
       if (!data.success || !Array.isArray(data.data) || data.data.length === 0) {
@@ -56,11 +62,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // EVENTOS DE BOTONES
       document.querySelectorAll(".edit-user-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const user = JSON.parse(btn.dataset.user);
-    editarErabiltzailea(user);
-  });
-});
+        btn.addEventListener("click", () => {
+          const user = JSON.parse(btn.dataset.user);
+          editarErabiltzailea(user);
+        });
+      });
 
 
       document.querySelectorAll(".delete-user-btn").forEach(btn =>
@@ -98,7 +104,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const res = await fetch(erabiltzaileakURL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
       body: JSON.stringify(payload)
     });
 
@@ -119,52 +128,55 @@ document.addEventListener("DOMContentLoaded", () => {
   // EDITAR USUARIO
   // ============================================================
   function editarErabiltzailea(user) {
-  console.log("Editatzen erabiltzailea:", user.nan);
+    console.log("Editatzen erabiltzailea:", user.nan);
 
-  // Rellenar los campos del formulario con los datos actuales
-  document.getElementById("edit-nan").value = user.nan || "";
-  document.getElementById("edit-name").value = user.izena || "";
-  document.getElementById("edit-lastname").value = user.abizena || "";
-  document.getElementById("edit-username").value = user.erabiltzailea || "";
-  document.getElementById("edit-role").value = user.rola || "U";
+    // Rellenar los campos del formulario con los datos actuales
+    document.getElementById("edit-nan").value = user.nan || "";
+    document.getElementById("edit-name").value = user.izena || "";
+    document.getElementById("edit-lastname").value = user.abizena || "";
+    document.getElementById("edit-username").value = user.erabiltzailea || "";
+    document.getElementById("edit-role").value = user.rola || "U";
 
-  // Mostrar la modal
-  const modal = new bootstrap.Modal(document.getElementById("editUserModal"));
-  modal.show();
+    // Mostrar la modal
+    const modal = new bootstrap.Modal(document.getElementById("editUserModal"));
+    modal.show();
 
-  // Guardar cambios
-  const form = document.getElementById("editUserForm");
-  form.onsubmit = e => {
-    e.preventDefault();
+    // Guardar cambios
+    const form = document.getElementById("editUserForm");
+    form.onsubmit = e => {
+      e.preventDefault();
 
-    const updatedUser = {
-      nan: document.getElementById("edit-nan").value,
-      name: document.getElementById("edit-name").value,
-      lastname: document.getElementById("edit-lastname").value,
-      username: document.getElementById("edit-username").value,
-      role: document.getElementById("edit-role").value,
-    };
+      const updatedUser = {
+        nan: document.getElementById("edit-nan").value,
+        name: document.getElementById("edit-name").value,
+        lastname: document.getElementById("edit-lastname").value,
+        username: document.getElementById("edit-username").value,
+        role: document.getElementById("edit-role").value,
+      };
 
-    fetch(erabiltzaileakURL, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedUser),
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          modal.hide();
-          cargarErabiltzaileak(); // refrescar la lista
-        } else {
-          alert(data.message || "Errorea eguneratzean.");
-        }
+      fetch(erabiltzaileakURL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(updatedUser),
       })
-      .catch(err => {
-        console.error("Errorea eguneratzean:", err);
-        alert("Errorea eguneratzean.");
-      });
-  };
-}
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            modal.hide();
+            cargarErabiltzaileak(); // refrescar la lista
+          } else {
+            alert(data.message || "Errorea eguneratzean.");
+          }
+        })
+        .catch(err => {
+          console.error("Errorea eguneratzean:", err);
+          alert("Errorea eguneratzean.");
+        });
+    };
+  }
 
 
 
@@ -184,7 +196,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const res = await fetch(erabiltzaileakURL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
       body: JSON.stringify(payload)
     });
 
@@ -215,7 +230,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const res = await fetch(erabiltzaileakURL, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
       body: JSON.stringify({ action: "DELETE", nan: nanEzabatzeko })
     });
 

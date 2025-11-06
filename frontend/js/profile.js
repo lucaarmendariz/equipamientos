@@ -1,3 +1,5 @@
+const apiKey = sessionStorage.getItem("apiKey");
+
 document.addEventListener("DOMContentLoaded", () => {
   const username = sessionStorage.getItem("username");
   const name = sessionStorage.getItem("name");
@@ -49,10 +51,13 @@ document.addEventListener("DOMContentLoaded", () => {
       alert("Por favor, completa todos los campos.");
       return;
     }
-
+const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    };
 fetch("../backend/controladores/erabiltzaileController.php", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         action: "PUT",
         username,

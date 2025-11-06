@@ -1,3 +1,5 @@
+const apiKey = sessionStorage.getItem("apiKey");
+
 document.addEventListener("DOMContentLoaded", () => {
   // ===== ELEMENTOS =====
   const inventoryList = document.getElementById('inventory-list');
@@ -52,11 +54,14 @@ document.addEventListener("DOMContentLoaded", () => {
     cestaModal.show();
   });
 
-  // ===========
-  // INVENTARIO 
-  // ===========
+  // ================== INVENTARIO ==================
+
+  const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    };
   function cargarInventario() {
-    fetch('../backend/controladores/inbentarioController.php')
+    fetch('../backend/controladores/inbentarioController.php', {headers})
       .then(r => r.json())
       .then(res => {
         if (!res.success) {
@@ -104,7 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //  EQUIPAMIENTOS
   // ================
   function cargarEquipamientos() {
-    fetch('../backend/controladores/ekipamenduakController.php')
+    fetch('../backend/controladores/ekipamenduakController.php', {headers})
       .then(res => res.json())
       .then(data => {
         if (!data.success) {
@@ -168,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       fetch('../backend/controladores/inbentarioController.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           action: 'STOCK',
           idEkipamendu: item.id,
@@ -232,7 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch('../backend/controladores/inbentarioController.php', {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({ action: 'DELETE', etiketa })
       });
 
