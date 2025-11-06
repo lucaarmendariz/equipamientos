@@ -4,7 +4,9 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once '../klaseak/inbentarioa.php';
 require_once 'conexion.php';
+require_once 'apiKey.php';
 
+ApiKeyManager::requireApiKey(); // <-- aquí se valida la sesión por API key
 $conn = DB::getConnection();
 
 $input = json_decode(file_get_contents('php://input'), true);

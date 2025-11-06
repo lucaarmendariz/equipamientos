@@ -1,9 +1,12 @@
 <?php
 declare(strict_types=1);
 session_start();
-header('Content-Type: application/json; charset=utf-8');
+header(header: 'Content-Type: application/json; charset=utf-8');
 
-require_once '../klaseak/erabiltzailea.php'; // Asegúrate de que la ruta sea correcta
+require_once '../klaseak/erabiltzailea.php';
+require_once 'apiKey.php'; // añadimos el sistema de API keys
+
+
 
 $response = [
     'success' => false,
@@ -11,7 +14,6 @@ $response = [
     'redirect' => '',
 ];
 
-// Solo aceptar método POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $response['message'] = 'Método no permitido.';
     echo json_encode($response);
@@ -28,7 +30,6 @@ if ($username === '' || $password === '') {
 }
 
 try {
-    // Obtener conexión
     $conn = DB::getConnection();
     $stmt = $conn->prepare("SELECT nan, izena, abizena, erabiltzailea, pasahitza, rola 
                             FROM erabiltzailea 
@@ -48,20 +49,21 @@ try {
         );
 
         // Comparación simple (sin hash)
-        $isValid = ($password === $user->getPasahitza());
+        if ($password === $user->getPasahitza()) {
 
-        if ($isValid) {
-            session_regenerate_id(true);
-            $_SESSION['username'] = $user->getErabiltzailea();
-            $_SESSION['rola'] = $user->getRola();
+            // ✅ Generar o asignar API key al usuario
+            $apiKey = ApiKeyManager::assignApiKey($user->getErabiltzailea(), false);
 
-            $response['success'] = true;
-            $response['message'] = 'Inicio de sesión correcto. Redirigiendo...';
-            $response['redirect'] = '../frontend/menu.html';
-            $response['rola'] = $user->getRola();
-            $response['erabiltzailea'] = $user->getErabiltzailea();
-            $response['izena'] = $user->getIzena();
-            $response['abizena'] = $user->getAbizena();
+            $response = [
+                'success' => true,
+                'message' => 'Inicio de sesión correcto.',
+                'redirect' => '../frontend/menu.html',
+                'rola' => $user->getRola(),
+                'erabiltzailea' => $user->getErabiltzailea(),
+                'izena' => $user->getIzena(),
+                'abizena' => $user->getAbizena(),
+                'apiKey' => $apiKey // 👈 devolvemos la clave
+            ];
         } else {
             $response['message'] = 'Usuario o contraseña incorrectos.';
         }
@@ -71,7 +73,6 @@ try {
 
     $stmt->close();
 } catch (Throwable $e) {
-    $response['success'] = false;
     $response['message'] = 'Error del servidor: ' . $e->getMessage();
 }
 

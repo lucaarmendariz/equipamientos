@@ -12,10 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
         body: formData,
       });
 
+      // Intentar parsear JSON
       const data = await response.json();
 
       if (data.success) {
-        // Guardar datos del usuario en sessionStorage
+        // ✅ Guardar datos del usuario y apiKey en sessionStorage
+        sessionStorage.setItem("apiKey", data.apiKey); // 🔑 añadimos la API key
         sessionStorage.setItem("userRole", data.rola);
         sessionStorage.setItem("username", data.erabiltzailea);
         sessionStorage.setItem("name", data.izena);
@@ -24,17 +26,18 @@ document.addEventListener("DOMContentLoaded", () => {
         // Redirigir al dashboard o menú principal
         window.location.href = data.redirect;
       } else {
-        // Mostrar mensaje de error
+        // ❌ Mostrar mensaje de error en el label o con alert
         const errorLabel = document.getElementById("error-message");
         if (errorLabel) {
-          errorLabel.textContent = data.message;
+          errorLabel.textContent = data.message || "Errorea saioan sartzean.";
+          errorLabel.style.display = "block";
         } else {
-          alert(data.message);
+          alert(data.message || "Errorea saioan sartzean.");
         }
       }
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
-      alert("Error en el servidor. Inténtalo de nuevo más tarde.");
+      alert("Errorea zerbitzarian. Saiatu berriro geroago.");
     }
   });
 });
