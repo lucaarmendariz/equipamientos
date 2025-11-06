@@ -1,4 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
+
+  const apiKey = sessionStorage.getItem("apiKey");
+  if (!apiKey) {
+    alert("No se ha encontrado una API key válida. Por favor, inicia sesión nuevamente.");
+    window.location.href = "login.html"; // o la ruta de tu login
+    return;
+  }
   const ekipamenduakURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
   const inbentarioURL = CONFIG.BASE_URL + "backend/controladores/inbentarioController.php";
   const erabiltzaileakURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
@@ -6,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // --- Helper para escapar HTML ---
   function escapeHtml(str) {
     if (typeof str !== "string") return str;
-    return str.replace(/[&<>"']/g, (m) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[m]);
+    return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
   }
 
   // --- Función general para cargar datos ---
@@ -17,7 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
     let fetchURL = url;
     let fetchOptions = {
       method,
-      headers: { "Content-Type": "application/json" }
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      }
     };
 
     if (method === "GET") {
