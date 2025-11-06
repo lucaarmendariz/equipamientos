@@ -19,9 +19,9 @@ $response = [
 try {
     switch ($action) {
 
-        // =================================================
+        // =====================
         // LISTAR INVENTARIO
-        // =================================================
+        // =====================
         case 'GET':
             $sql = "
                 SELECT 
@@ -48,9 +48,9 @@ try {
             $response['data'] = $inventario;
             break;
 
-        // =================================================
+        // =============================
         // AÑADIR ITEM AL INVENTARIO
-        // =================================================
+        // =============================
         case 'POST':
             $etiketa = $input['etiketa'] ?? '';
             $idEkipamendu = (int) ($input['idEkipamendu'] ?? 0);
@@ -67,9 +67,9 @@ try {
             $response['data'] = $item->toArray();
             break;
 
-        // =================================================
+        // ==================================
         // ACTUALIZAR ITEM DEL INVENTARIO
-        // =================================================
+        // ==================================
         case 'PUT':
             $etiketa = $input['etiketa'] ?? '';
             $idEkipamendu = (int) ($input['idEkipamendu'] ?? 0);
@@ -135,9 +135,85 @@ try {
             $response['nuevo_stock'] = $nuevo_stock;
             break;
 
+       
         // =================================================
+        // ELIMINAR ETIQUETAS MASIVAS
+        // =================================================
+        case 'DELETE_MULTIPLE':
+            $etiquetas = $input['etiquetas'] ?? [];
+            if (!is_array($etiquetas) || count($etiquetas) === 0)
+                throw new Exception("No se enviaron etiquetas para eliminar");
+
+            $conn->begin_transaction();
+
+            try {
+                // 1. Contar cuántas etiquetas de cada equipo se eliminarán
+                $placeholders = implode(',', array_fill(0, count($etiquetas), '?'));
+                $types = str_repeat('s', count($etiquetas));
+
+                $stmt = $conn->prepare("SELECT idEkipamendu, COUNT(*) as cnt FROM inbentarioa WHERE etiketa IN ($placeholders) GROUP BY idEkipamendu");
+                $stmt->bind_param($types, ...$etiquetas);
+                $stmt->execute();
+                $result = $stmt->get_result();
+
+                $equipos = [];
+                while ($row = $result->fetch_assoc()) {
+                    $equipos[intval($row['idEkipamendu'])] = intval($row['cnt']);
+                }
+                $stmt->close();
+
+                if (empty($equipos)) {
+                    $conn->commit();
+                    $response['success'] = true;
+                    $response['message'] = "No se encontraron etiquetas para eliminar";
+                    break;
+                }
+
+                // 2. Eliminar etiquetas
+                $stmt = $conn->prepare("DELETE FROM inbentarioa WHERE etiketa IN ($placeholders)");
+                $stmt->bind_param($types, ...$etiquetas);
+                $stmt->execute();
+                $stmt->close();
+
+                // 3. Actualizar stock y obtener stock final
+                $stocks_finales = [];
+                foreach ($equipos as $idEkipamendu => $cantidad) {
+                    // Actualizar stock
+                    $update = $conn->prepare("UPDATE ekipamendua SET stock = GREATEST(stock - ?, 0) WHERE id = ?");
+                    $update->bind_param("ii", $cantidad, $idEkipamendu);
+                    $update->execute();
+                    $update->close();
+
+                    // Obtener stock final
+                    $stmt = $conn->prepare("SELECT stock FROM ekipamendua WHERE id = ?");
+                    $stmt->bind_param("i", $idEkipamendu);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                    $nuevo_stock = $result->fetch_assoc()['stock'] ?? 0;
+                    $stmt->close();
+
+                    $stocks_finales[$idEkipamendu] = $nuevo_stock;
+                }
+
+                $conn->commit();
+
+                $response['success'] = true;
+                $response['message'] = count($etiquetas) . " etiquetas eliminadas correctamente";
+                $response['stocks_finales'] = $stocks_finales;
+
+            } catch (Exception $e) {
+                $conn->rollback();
+                throw $e;
+            }
+
+            break;
+
+       
+
+
+        // ============================================
         // ACTUALIZAR STOCK Y CREAR NUEVAS ETIQUETAS
-        // =================================================
+        // ============================================
         case 'STOCK':
             $idEkipamendu = intval($input['idEkipamendu'] ?? 0);
             $cantidad = intval($input['cantidad'] ?? 0);
@@ -158,21 +234,19 @@ try {
             $hoy = date('Y-m-d');
             $nuevas_etiquetas = [];
 
+            // 🔹 Obtener el último número usado en las etiquetas
+            $sql = "SELECT etiketa FROM inbentarioa WHERE etiketa LIKE 'ETK%' ORDER BY etiketa DESC LIMIT 1";
+            $result = $conn->query($sql);
+            $last_num = 0;
+            if ($row = $result->fetch_assoc()) {
+                $last_code = $row['etiketa'];       // Ej: "ETK0007"
+                $last_num = intval(substr($last_code, 3)); // Extrae "7"
+            }
+
+            // 🔹 Crear nuevas etiquetas autoincrementales
             for ($i = 0; $i < $cantidad; $i++) {
-                $rand = function_exists('random_int') ? random_int(1, 9999) : mt_rand(1, 9999);
-                $nuevo_codigo = 'ETK' . sprintf('%04d', $rand);
-
-                // Evitar duplicados
-                $check = $conn->prepare("SELECT 1 FROM inbentarioa WHERE etiketa = ?");
-                $check->bind_param("s", $nuevo_codigo);
-                $check->execute();
-                $exists = $check->get_result()->num_rows > 0;
-                $check->close();
-
-                if ($exists) {
-                    $i--;
-                    continue;
-                }
+                $last_num++;
+                $nuevo_codigo = 'ETK' . sprintf('%04d', $last_num);
 
                 $nuevo_item = Inbentarioa::create($nuevo_codigo, $idEkipamendu, $hoy);
                 if (!$nuevo_item)
@@ -180,6 +254,7 @@ try {
 
                 $nuevas_etiquetas[] = $nuevo_codigo;
             }
+
 
             // Actualizar stock
             $nuevo_stock = $stock_actual + $cantidad;

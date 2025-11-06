@@ -31,7 +31,22 @@ header {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+.menu-icon,
+.user-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
 
+.title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.title a {
+  color: white;
+  text-decoration: none;
+}
 
 /* === TEXTO DE BIENVENIDA === */
 .welcome-text {
@@ -100,11 +115,12 @@ header {
 .data-row,
 .data-header {
   display: grid;
-  grid-template-columns:  2fr 1fr 1fr 0.5fr;
+  grid-template-columns: 2fr 1.2fr 1.5fr 0.5fr; /* Ajusta según tu necesidad */
   align-items: center;
   padding: 0.6rem 1rem;
   border-radius: 6px;
   font-weight: 500;
+  gap: 0.5rem; /* espacio entre columnas */
 }
 
 .data-header {
@@ -114,18 +130,6 @@ header {
 }
 
 /* === CELDAS === */
-.data-row span {
-  flex: 1;
-}
-
-.data-row span:last-child {
-  flex: 0 0 auto;
-}
-
-.data-row button {
-  margin-left: 4px;
-}
-
 .data-row span,
 .data-header span {
   white-space: nowrap;
@@ -133,19 +137,16 @@ header {
   text-overflow: ellipsis;
 }
 
+.data-row span:last-child {
+  flex: 0 0 auto; /* que no se encoja el botón */
+}
+
 /* === COLUMNA DE ACCIONES === */
 .col-ekintzak {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
-  white-space: nowrap;
-}
-
-.data-row .col-ekintzak {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 0.3rem;
+  gap: 0.7rem;
   white-space: nowrap;
 }
 
@@ -168,12 +169,12 @@ header {
   align-items: center;
   justify-content: center;
 }
+
 .col-ekintzak button:hover {
   background-color: var(--blue-medium);
 }
 
-
-/* === FILAS ALTERNAS === */
+/* === FILAS ALTERNAS Y HOVER === */
 .data-row:nth-child(even) {
   background-color: #cce4f6;
 }
