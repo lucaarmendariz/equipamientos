@@ -10,7 +10,7 @@
 /* === BASE === */
 body {
   font-family: 'Inria Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: var(--blue-bg-lightest);
+  background-color: var(--blue-bg-lightest);
   color: var(--text-color);
   display: flex;
   flex-direction: column;
@@ -38,15 +38,7 @@ header {
   user-select: none;
 }
 
-.title {
-  flex-grow: 1;
-  text-align: center;
-}
 
-.title a {
-  color: white;
-  text-decoration: none;
-}
 
 /* === TEXTO DE BIENVENIDA === */
 .welcome-text {
