@@ -3,107 +3,114 @@ declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
 
-require_once 'conexion.php'; // conexión $mysqli
-require_once 'apiKey.php';   // validación de API key
+require_once 'conexion.php';
+require_once '../klaseak/Gela.php';
+require_once 'apiKey.php';
 
-// 🔒 Requiere API Key para acceder a cualquier funcionalidad
-ApiKeyManager::requireApiKey();
+ApiKeyManager::requireApiKey(); // Validación API key
 
-// Recibir datos JSON
-$input = json_decode(file_get_contents('php://input'), true);
-$action = $_GET['action'] ?? $input['action'] ?? 'GET';
+// Función para enviar JSON limpio
+function respond(bool $success, array $data = [], string $message = ''): void
+{
+    echo json_encode(['success' => $success, 'data' => $data, 'message' => $message]);
+    exit;
+}
 
-$response = [
-    'success' => false,
-    'data' => [],
-    'message' => ''
-];
+$method = $_SERVER['REQUEST_METHOD'];
+$input = json_decode(file_get_contents('php://input'), true) ?? [];
 
 try {
-    switch (strtoupper($action)) {
+    switch ($method) {
 
-        // =================================================
         // LISTAR GELAS
-        // =================================================
         case 'GET':
-            $query = "SELECT id, izena, taldea FROM gela ORDER BY izena ASC";
-            $result = $mysqli->query($query);
-
-            if ($result) {
-                $gelas = [];
-                while ($row = $result->fetch_assoc()) {
-                    $gelas[] = $row;
+            if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                $id = (int) $_GET['id'];
+                $gela = Gela::getById($id);
+                if ($gela) {
+                    respond(true, $gela->toArray());
+                } else {
+                    respond(false, [], 'Gela no encontrada');
                 }
-                $response['success'] = true;
-                $response['data'] = $gelas;
             } else {
-                $response['message'] = "Error en la consulta: " . $mysqli->error;
+                $allGelak = Gela::getAll();
+                $gelak = array_map(fn($g) => $g->toArray(), $allGelak);
+                respond(true, $gelak);
             }
             break;
 
-        // =================================================
-        // AÑADIR GELA
-        // =================================================
+        // CREAR GELA
         case 'POST':
             $izena = $input['izena'] ?? null;
             $taldea = $input['taldea'] ?? null;
 
-            if (!$izena) throw new Exception("Falta el nombre de la gela");
+            if (!$izena) {
+                respond(false, [], 'Falta el nombre de la gela');
+            }
 
-            $stmt = $mysqli->prepare("INSERT INTO gela (izena, taldea) VALUES (?, ?)");
-            $stmt->bind_param("ss", $izena, $taldea);
-            $stmt->execute();
-            $stmt->close();
-
-            $response['success'] = true;
-            $response['message'] = "Gela añadida correctamente";
+            $gela = Gela::create($izena, $taldea);
+            if ($gela) {
+                respond(true, $gela->toArray(), 'Gela creada correctamente');
+            } else {
+                respond(false, [], 'Error al crear la gela');
+            }
             break;
 
-        // =================================================
         // ACTUALIZAR GELA
-        // =================================================
         case 'PUT':
-            $id = $input['id'] ?? null;
+            $id = isset($input['id']) ? (int) $input['id'] : null;
             $izena = $input['izena'] ?? null;
             $taldea = $input['taldea'] ?? null;
 
-            if (!$id || !$izena)
-                throw new Exception("Faltan campos obligatorios");
+            if (!$id || !$izena) {
+                respond(false, [], 'Faltan campos obligatorios');
+            }
 
-            $stmt = $mysqli->prepare("UPDATE gela SET izena = ?, taldea = ? WHERE id = ?");
-            $stmt->bind_param("ssi", $izena, $taldea, $id);
-            $stmt->execute();
+            $gela = Gela::getById($id);
+            if (!$gela) {
+                respond(false, [], 'Gela no encontrada');
+            }
+
+            // Actualizar propiedades directamente
+            $gela->izena = $izena;
+            $gela->taldea = $taldea;
+
+            // Guardar cambios
+            $stmt = DB::getConnection()->prepare("UPDATE gela SET izena = ?, taldea = ? WHERE id = ?");
+            $stmt->bind_param("ssi", $gela->izena, $gela->taldea, $gela->id);
+            $success = $stmt->execute();
             $stmt->close();
 
-            $response['success'] = true;
-            $response['message'] = "Gela actualizada correctamente";
+            if ($success) {
+                respond(true, $gela->toArray(), 'Gela actualizada correctamente');
+            } else {
+                respond(false, [], 'Error al actualizar la gela');
+            }
             break;
 
-        // =================================================
         // ELIMINAR GELA
-        // =================================================
         case 'DELETE':
-            $id = $input['id'] ?? null;
-            if (!$id) throw new Exception("Falta el ID de la gela");
+            $id = isset($input['id']) ? (int) $input['id'] : null;
+            if (!$id) {
+                respond(false, [], 'Falta el ID de la gela');
+            }
 
-            $stmt = $mysqli->prepare("DELETE FROM gela WHERE id = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $stmt->close();
+            $gela = Gela::getById($id);
+            if (!$gela) {
+                respond(false, [], 'Gela no encontrada');
+            }
 
-            $response['success'] = true;
-            $response['message'] = "Gela eliminada correctamente";
+            if ($gela->delete()) {
+                respond(true, [], 'Gela eliminada correctamente');
+            } else {
+                respond(false, [], 'Error al eliminar la gela');
+            }
             break;
 
         default:
-            $response['message'] = "Acción no reconocida";
+            respond(false, [], 'Método no soportado');
     }
 
 } catch (Exception $e) {
-    $response['success'] = false;
-    $response['message'] = "Error: " . $e->getMessage();
+    respond(false, [], 'Error: ' . $e->getMessage());
 }
-
-$mysqli->close();
-echo json_encode($response);
-exit;
