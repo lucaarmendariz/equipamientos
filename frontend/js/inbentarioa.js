@@ -282,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
   try {
     const response = await fetch('../backend/controladores/inbentarioController.php', {
       method: 'POST', // Usamos POST para enviar array de etiquetas
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
     });
 
