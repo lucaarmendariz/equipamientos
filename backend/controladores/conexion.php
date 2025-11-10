@@ -16,7 +16,7 @@ class DB
             $host = 'localhost';
             $user = 'root';
             $pass = 'ikasle123';
-            $db = 'erronka';
+            $db = '3wag2e1';
 
             self::$conn = new mysqli($host, $user, $pass, $db);
             if (self::$conn->connect_errno) {
