@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-header('Content-Type: application/json; charset=utf-8');require_once 'conexion.php'; // conexión $mysqli
+header('Content-Type: application/json; charset=utf-8');
+require_once 'conexion.php'; // conexión $mysqli
 
 // Recibir datos JSON
 $input = json_decode(file_get_contents('php://input'), true);
