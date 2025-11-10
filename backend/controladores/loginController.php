@@ -62,7 +62,7 @@ try {
                 'erabiltzailea' => $user->getErabiltzailea(),
                 'izena' => $user->getIzena(),
                 'abizena' => $user->getAbizena(),
-                'apiKey' => $apiKey // 👈 devolvemos la clave
+                'apiKey' => $apiKey // devolvemos la clave
             ];
         } else {
             $response['message'] = 'Usuario o contraseña incorrectos.';
