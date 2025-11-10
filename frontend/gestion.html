@@ -1,47 +1,117 @@
 <!DOCTYPE html>
 <html lang="eu">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Santurtzi LHII - Dashboard</title>
-  <link rel="stylesheet" href="sass/global.scss" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Santurtzi LHII - Gestioak</title>
 
+  <link rel="stylesheet" href="sass/global.scss" />
+  <link rel="stylesheet" href="sass/gestion.scss" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
   <script src="js/menu.js"></script>
   <script src="js/validation.js"></script>
-
 </head>
-
 <body>
-    <header>
-    <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
-    <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
-    <div class="user-icon">
-      <span class="user-name" id="user-name"></span> <!-- Aquí aparecerá nombre + apellido -->
 
-      <i class="fas fa-user"></i>
-      <div class="user-menu">
-        <a href="perfil.html">Ver perfil</a>
-        <a href="perfil.html#editar">Modificar perfil</a>
-        <a href="#" id="logout-button">Cerrar sesión</a>
+<header>
+  <div class="menu-icon"><i class="fas fa-bars"></i></div>
+  <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
+  <div class="user-icon">
+    <span id="user-name"></span>
+    <i class="fas fa-user"></i>
+    <div class="user-menu">
+      <a href="perfil.html">Ver perfil</a>
+      <a href="perfil.html#editar">Modificar perfil</a>
+      <a href="#" id="logout-button">Cerrar sesión</a>
+    </div>
+  </div>
+</header>
+
+<nav id="main-nav">
+  <div class="nav-container">
+    <a href="equipamientos.html">Ekipamenduak</a>
+    <a href="inbentarioa.html">Inbentarioa</a>
+    <a href="erosketak.html">Erosketak</a>
+    <a href="usuarios.html">Erabiltzaileak</a>
+    <a href="gestion.html" class="active">Gestioak</a>
+  </div>
+</nav>
+
+<main class="dashboard-container container py-4">
+
+  <h2 class="mb-3 text-center">Ekipamendu Kokapena</h2>
+
+  <!-- Buscador -->
+  <div class="mb-3">
+    <input type="text" id="searchInput" class="form-control" placeholder="Bilatu ekipamendu, gela edo taldea...">
+  </div>
+
+  <!-- Botón añadir -->
+  <div class="text-end mb-3">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addKokapenaModal">
+      <i class="fa fa-plus"></i> Kokatu Ekipamendua
+    </button>
+  </div>
+
+  <!-- LISTA -->
+  <div id="kokapena-container" class="dashboard-column">
+
+    <!-- Cabecera -->
+    <div class="data-row data-header">
+      <span>Ekipamendua</span>
+      <span>Gela</span>
+      <span>Taldea</span>
+    </div>
+
+    <ul id="kokapena-list" class="list-unstyled m-0 p-0">
+      <li class="data-row text-center py-2">Kargatzen...</li>
+    </ul>
+
+  </div>
+</main>
+
+<!-- MODAL AÑADIR -->
+<div class="modal fade" id="addKokapenaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Kokatu Ekipamendua</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+
+      <div class="modal-body">
+
+        <label class="form-label mt-2">Ekipamendua</label>
+        <select id="select-equipo" class="form-select"></select>
+
+        <label class="form-label mt-3">Gela</label>
+        <select id="select-gela" class="form-select"></select>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Utzi</button>
+        <button type="button" id="guardar-kokapena-btn" class="btn btn-primary">Gorde</button>
+      </div>
+
     </div>
-  </header>
-  <nav id="main-nav">
-    <div class="nav-container">
-      <a href="equipamientos.html">Ekipamenduak</a>
-      <a href="inbentarioa.html">Inbentarioa</a>
-      <a href="erosketak.html">Erosketak</a>
-      <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
-      <a href="gestion.html">Gestioak</a>
-    </div>
-  </nav>
+  </div>
+</div>
+
+<footer class="main-footer mt-5">
+        <div class="footer-content text-center py-3">
+            <p>&copy; 2025 Santurtzi LHII. Eskubide guztiak erreserbatuta.</p>
+            <p>Kontaktua: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+        </div>
+    </footer>
+
+<script src="../assets/config.js"></script>
+<script src="js/gestion.js"></script>
 </body>
-<footer class="main-footer">
-    <div class="footer-content">
-      <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
-      <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
-    </div>
-  </footer>
 </html>
