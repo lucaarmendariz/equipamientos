@@ -1,80 +1,80 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../controladores/conexion.php';
+require_once "../controladores/conexion.php";
 
-class Kokalekua
-{
+class Kokaleku {
     public string $etiketa;
     public int $idGela;
     public string $hasieraData;
-    public ?string $amaieraData;
+    public ?string $amaieraData; // Nuevo atributo opcional
 
-    public function __construct(string $etiketa, int $idGela, string $hasieraData, ?string $amaieraData = null)
-    {
+    public function __construct(string $etiketa, int $idGela, string $hasieraData, ?string $amaieraData = null) {
         $this->etiketa = $etiketa;
         $this->idGela = $idGela;
         $this->hasieraData = $hasieraData;
         $this->amaieraData = $amaieraData;
     }
 
-    public static function getAll(): array
-    {
+    // Listar todos los kokalekus con info de gela y equipo
+    public static function getAll(): array {
         $conn = DB::getConnection();
-        $sql = "
-            SELECT k.etiketa, k.idGela, g.izena AS gela_izena, g.taldea, 
-                   k.hasieraData, k.amaieraData
-            FROM kokalekua k
-            INNER JOIN gela g ON k.idGela = g.id
-            ORDER BY k.hasieraData DESC
-        ";
+        $sql = "SELECT k.etiketa, k.idGela, g.izena AS gela_izena, g.taldea, 
+                       i.idEkipamendu, e.izena AS ekipamendu,
+                       k.hasieraData, k.amaieraData
+                FROM kokalekua k
+                JOIN gela g ON k.idGela = g.id
+                JOIN inbentarioa i ON k.etiketa = i.etiketa
+                JOIN ekipamendua e ON i.idEkipamendu = e.id
+                ORDER BY g.izena ASC";
         $res = $conn->query($sql);
-        $kokalekuak = [];
+        $data = [];
         while ($row = $res->fetch_assoc()) {
-            $kokalekuak[] = $row;
+            $data[] = $row;
         }
-        return $kokalekuak;
+        return $data;
     }
 
-    public static function getByEtiketa(string $etiketa): ?Kokalekua
-    {
+    // Crear múltiples kokalekus según la cantidad indicada (no se guarda la cantidad)
+    public static function create(int $idGela, int $idEkipamendu, int $cantidad, string $hasieraData = null, ?string $amaieraData = null): bool {
         $conn = DB::getConnection();
-        $stmt = $conn->prepare("SELECT * FROM kokalekua WHERE etiketa = ?");
-        $stmt->bind_param("s", $etiketa);
+        $hasieraData = $hasieraData ?? date("Y-m-d");
+
+        // Obtener etiquetas disponibles
+        $stmt = $conn->prepare("SELECT etiketa FROM inbentarioa WHERE idEkipamendu=? LIMIT ?");
+        $stmt->bind_param("ii", $idEkipamendu, $cantidad);
         $stmt->execute();
-        $result = $stmt->get_result()->fetch_assoc();
-        if (!$result) return null;
+        $res = $stmt->get_result();
+        $etiketas = [];
+        while ($row = $res->fetch_assoc()) $etiketas[] = $row['etiketa'];
+        $stmt->close();
 
-        return new Kokalekua($result['etiketa'], (int)$result['idGela'], $result['hasieraData'], $result['amaieraData']);
-    }
+        if (count($etiketas) < $cantidad) return false; // no hay suficientes unidades
 
-    public static function create(string $etiketa, int $idGela, string $hasieraData): ?Kokalekua
-    {
-        $conn = DB::getConnection();
-        $stmt = $conn->prepare("INSERT INTO kokalekua (etiketa, idGela, hasieraData) VALUES (?, ?, ?)");
-        $stmt->bind_param("sis", $etiketa, $idGela, $hasieraData);
-
-        if ($stmt->execute()) {
-            return new Kokalekua($etiketa, $idGela, $hasieraData);
+        $stmt = $conn->prepare("INSERT INTO kokalekua (etiketa, idGela, hasieraData, amaieraData) VALUES (?, ?, ?, ?)");
+        foreach ($etiketas as $etiketa) {
+            $stmt->bind_param("siss", $etiketa, $idGela, $hasieraData, $amaieraData);
+            $stmt->execute();
         }
-        return null;
+        $stmt->close();
+        return true;
     }
 
-    public static function delete(string $etiketa, string $hasieraData): bool
-    {
+    // Eliminar kokaleku por etiketa, hasieraData y opcionalmente amaieraData
+    public static function delete(string $etiketa, string $hasieraData, ?string $amaieraData = null): bool {
         $conn = DB::getConnection();
-        $stmt = $conn->prepare("DELETE FROM kokalekua WHERE etiketa = ? AND hasieraData = ?");
-        $stmt->bind_param("ss", $etiketa, $hasieraData);
-        return $stmt->execute();
+
+        if ($amaieraData !== null) {
+            $stmt = $conn->prepare("DELETE FROM kokalekua WHERE etiketa=? AND hasieraData=? AND amaieraData=?");
+            $stmt->bind_param("sss", $etiketa, $hasieraData, $amaieraData);
+        } else {
+            $stmt = $conn->prepare("DELETE FROM kokalekua WHERE etiketa=? AND hasieraData=?");
+            $stmt->bind_param("ss", $etiketa, $hasieraData);
+        }
+
+        $success = $stmt->execute();
+        $stmt->close();
+        return $success;
     }
 
-    public function toArray(): array
-    {
-        return [
-            'etiketa' => $this->etiketa,
-            'idGela' => $this->idGela,
-            'hasieraData' => $this->hasieraData,
-            'amaieraData' => $this->amaieraData,
-        ];
-    }
 }
