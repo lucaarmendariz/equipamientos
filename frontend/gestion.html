@@ -80,6 +80,10 @@
           <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addAsignacionModal">
             <i class="fa fa-plus"></i> Asignar Equipo
           </button>
+          <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#historialModal"
+            id="openHistorialBtn">
+            <i class="fa fa-clock-rotate-left"></i> Ver Historial
+          </button>
         </div>
         <div id="asignaciones-list">
           <div class="data-row text-center py-2">Cargando asignaciones...</div>
@@ -146,7 +150,8 @@
   </div>
 
   <!-- MODAL: Asignar Kokaleku -->
-  <div class="modal fade" id="addAsignacionModal" tabindex="-1" aria-labelledby="addAsignacionModalLabel" aria-hidden="true">
+  <div class="modal fade" id="addAsignacionModal" tabindex="-1" aria-labelledby="addAsignacionModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <form id="addAsignacionForm">
@@ -172,10 +177,6 @@
               <label for="cantidad" class="form-label">Cantidad</label>
               <input type="number" class="form-control" id="cantidad" min="1" value="1" required>
             </div>
-            <div class="mb-3">
-              <label for="amaieraData" class="form-label">Fecha fin (opcional)</label>
-              <input type="date" class="form-control" id="amaieraData">
-            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -185,6 +186,64 @@
       </div>
     </div>
   </div>
+
+  <!-- MODAL: Editar Asignación -->
+  <div class="modal fade" id="editAsignacionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="editAsignacionForm">
+          <input type="hidden" id="edit-etiketa">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Asignación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="edit-etiketa">
+
+            <div class="mb-3">
+              <label for="edit-select-gela" class="form-label">Gela</label>
+              <select id="edit-select-gela" class="form-select" required></select>
+            </div>
+
+            <div class="mb-3">
+              <label for="edit-amaieraData" class="form-label">Fecha fin</label>
+              <input type="date" id="edit-amaieraData" class="form-control">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Finalizar Asignación -->
+  <div class="modal fade" id="endAsignacionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="endAsignacionForm">
+          <input type="hidden" id="end-etiketa">
+          <div class="modal-header">
+            <h5 class="modal-title">Finalizar Asignación</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="end-amaieraData" class="form-label">Fecha fin</label>
+              <input type="date" id="end-amaieraData" class="form-control" required>
+            </div>
+            <p class="text-muted small">Al asignar una fecha de finalización, la asignación se registra en el historial
+              de kokalekus.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-warning">Finalizar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
 
   <!-- MODAL: Éxito -->
   <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
@@ -212,6 +271,31 @@
       </div>
     </div>
   </div>
+
+  <div class="modal fade" id="historialModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Historial de Kokalekus</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="filters mb-2">
+          <select id="filterGela" class="form-select form-select-sm">
+            <option value="">Todas las gelak</option>
+          </select>
+          <input type="date" id="filterStartDate" class="form-control form-control-sm mt-1">
+          <input type="date" id="filterEndDate" class="form-control form-control-sm mt-1">
+          <button id="applyFilters" class="btn btn-sm btn-primary mt-1">Filtrar</button>
+        </div>
+        <div id="historialList"></div>
+        <div id="loadingHistorial" class="text-center my-2">Cargando...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
   <!-- FOOTER -->
   <footer class="main-footer mt-5">
