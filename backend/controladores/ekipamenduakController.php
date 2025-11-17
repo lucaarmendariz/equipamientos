@@ -1,147 +1,128 @@
 <?php
 declare(strict_types=1);
-
 header('Content-Type: application/json; charset=utf-8');
 
-require_once 'conexion.php';
 require_once '../klaseak/ekipamenduak.php';
+require_once '../klaseak/inbentarioa.php';
+require_once 'conexion.php';
 require_once 'apiKey.php';
 
-ApiKeyManager::requireApiKey(); // <-- aquí se valida la sesión por API key
+ApiKeyManager::requireApiKey(); // Valida API key
+$conn = DB::getConnection();
 
-
-// Función para enviar JSON limpio
-function respond(bool $success, array $data = [], string $message = ''): void
-{
-    echo json_encode(['success' => $success, 'data' => $data, 'message' => $message]);
-    exit;
-}
-
+$input = json_decode(file_get_contents('php://input'), true);
 $method = $_SERVER['REQUEST_METHOD'];
-$input = json_decode(file_get_contents('php://input'), true) ?? [];
+
+$response = [
+    'success' => false,
+    'data' => [],
+    'message' => ''
+];
 
 try {
     switch ($method) {
-        // LISTAR
         case 'GET':
-            $conn = DB::getConnection();
+            // Listar todos los equipamientos
+            $sql = "SELECT id, izena, deskribapena, marka, modelo, stock, idKategoria FROM ekipamendua ORDER BY izena";
+            $result = $conn->query($sql);
+            if (!$result) throw new Exception("Error al obtener equipos: " . $conn->error);
 
-            if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-                $id = (int) $_GET['id'];
-                $stmt = $conn->prepare("
-                    SELECT e.id, e.izena, e.deskribapena, e.marka, e.modelo, e.stock, e.idKategoria, k.izena AS kategoria
-                    FROM ekipamendua e
-                    LEFT JOIN kategoria k ON e.idKategoria = k.id
-                    WHERE e.id = ?
-                ");
-                $stmt->bind_param("i", $id);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $equipo = $result->fetch_assoc();
-                $stmt->close();
-
-                if ($equipo)
-                    respond(true, $equipo);
-                else
-                    respond(false, [], 'Equipo no encontrado');
-
-            } else {
-                $sql = "
-                    SELECT e.id, e.izena, e.deskribapena, e.marka, e.modelo, e.stock, e.idKategoria, k.izena AS kategoria
-                    FROM ekipamendua e
-                    LEFT JOIN kategoria k ON e.idKategoria = k.id
-                    ORDER BY e.izena
-                ";
-                $result = $conn->query($sql);
-                $equipos = [];
-                while ($row = $result->fetch_assoc()) {
-                    $equipos[] = $row;
-                }
-                respond(true, $equipos);
+            $equipos = [];
+            while ($row = $result->fetch_assoc()) {
+                $equipos[] = $row;
             }
+
+            $response['success'] = true;
+            $response['data'] = $equipos;
             break;
 
-        // CREAR
         case 'POST':
-            $izena = $input['izena'] ?? '';
-            $deskribapena = $input['deskribapena'] ?? '';
-            $marka = $input['marca'] ?? null;
-            $modelo = $input['modelo'] ?? null;
-            $stock = (int) ($input['stock'] ?? 0);
-            $idKategoria = (int) ($input['idKategoria'] ?? 0);
-            
+            // Crear nuevo equipamiento
+            $nombre = trim($input['izena'] ?? '');
+            $descripcion = trim($input['deskribapena'] ?? '');
+            $marka = trim($input['marka'] ?? '') ?: null;
+            $modelo = trim($input['modelo'] ?? '') ?: null;
+            $stock = intval($input['stock'] ?? 0); // si no hay stock, 0
+            $idKategoria = intval($input['idKategoria'] ?? 0);
 
-            if (!$izena || !$deskribapena || !$stock || !$idKategoria) {
-                respond(false, [], 'Faltan campos obligatorios');
-            }
+            if (!$nombre) throw new Exception("El nombre del equipo es obligatorio");
 
-            $equipo = Ekipamendua::create($izena, $deskribapena, $marka, $modelo, $stock, $idKategoria);
-            
-            if ($equipo)
-                respond(true, $equipo->toArray(), 'Equipo creado correctamente');
-            else
-                respond(false, [], 'Error al crear equipo');
-            break;
+            $stmt = $conn->prepare("INSERT INTO ekipamendua (izena, deskribapena, marka, modelo, stock, idKategoria) VALUES (?, ?, ?, ?, ?, ?)");
+            if (!$stmt) throw new Exception("Error en prepare: " . $conn->error);
+            $stmt->bind_param("ssssii", $nombre, $descripcion, $marka, $modelo, $stock, $idKategoria);
+            $stmt->execute();
+            $nuevoId = $stmt->insert_id;
+            $stmt->close();
 
-        // EDITAR
-        case 'PUT':
-            // Leer el body JSON
-            $rawInput = file_get_contents('php://input');
-            $input = json_decode($rawInput, true);
+            // Crear inventario automáticamente según el stock
+            if ($stock > 0) {
+                $hoy = date('Y-m-d');
+                // Obtener el último número de etiqueta
+                $result = $conn->query("SELECT etiketa FROM inbentarioa WHERE etiketa LIKE 'ETK%' ORDER BY etiketa DESC LIMIT 1");
+                $lastNum = 0;
+                if ($row = $result->fetch_assoc()) {
+                    $lastNum = intval(substr($row['etiketa'], 3));
+                }
 
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                respond(false, [], 'JSON inválido en la solicitud PUT');
-            }
-
-            // Verificar ID
-            $id = isset($input['id']) ? (int) $input['id'] : 0;
-            if ($id <= 0)
-                respond(false, [], 'ID requerido');
-
-            // Buscar equipo
-            $equipo = Ekipamendua::getById($id);
-            if (!$equipo)
-                respond(false, [], 'Equipo no encontrado');
-
-            // Actualizar campos permitidos
-            $campos = ['izena', 'deskribapena', 'marka', 'modelo', 'stock', 'idKategoria'];
-            foreach ($campos as $prop) {
-                if (array_key_exists($prop, $input)) {
-                    if ($prop === 'stock' || $prop === 'idKategoria') {
-                        $equipo->$prop = (int) $input[$prop];
-                    } else {
-                        $equipo->$prop = $input[$prop];
-                    }
+                $nuevasEtiquetas = [];
+                for ($i = 0; $i < $stock; $i++) {
+                    $lastNum++;
+                    $codigo = 'ETK' . sprintf('%04d', $lastNum);
+                    $item = Inbentarioa::create($codigo, $nuevoId, $hoy);
+                    if (!$item) throw new Exception("Error al crear inventario para etiqueta $codigo");
+                    $nuevasEtiquetas[] = $codigo;
                 }
             }
 
-            // Guardar cambios
-            if ($equipo->update()) {
-                respond(true, $equipo->toArray(), 'Equipo actualizado correctamente');
-            } else {
-                respond(false, [], 'Error al actualizar equipo');
-            }
+            $response['success'] = true;
+            $response['message'] = "Equipo creado correctamente";
+            $response['data'] = ['id' => $nuevoId, 'stock' => $stock ?? 0];
             break;
-        // ELIMINAR
+
+        case 'PUT':
+            // Editar equipamiento (no permite cambiar stock)
+            $id = intval($input['id'] ?? 0);
+            if (!$id) throw new Exception("ID del equipo requerido");
+
+            $nombre = trim($input['izena'] ?? '');
+            $descripcion = trim($input['deskribapena'] ?? '');
+            $marka = trim($input['marka'] ?? '') ?: null;
+            $modelo = trim($input['modelo'] ?? '') ?: null;
+            $idKategoria = intval($input['idKategoria'] ?? 0);
+
+            $stmt = $conn->prepare("UPDATE ekipamendua SET izena = ?, deskribapena = ?, marka = ?, modelo = ?, idKategoria = ? WHERE id = ?");
+            if (!$stmt) throw new Exception("Error en prepare: " . $conn->error);
+            $stmt->bind_param("ssssii", $nombre, $descripcion, $marka, $modelo, $idKategoria, $id);
+            $stmt->execute();
+            $stmt->close();
+
+            $response['success'] = true;
+            $response['message'] = "Equipo actualizado correctamente";
+            break;
+
         case 'DELETE':
-            $id = (int) ($input['id'] ?? 0);
-            if (!$id)
-                respond(false, [], 'ID requerido');
+            $id = intval($input['id'] ?? 0);
+            if (!$id) throw new Exception("ID del equipo requerido para eliminar");
 
-            $equipo = Ekipamendua::getById($id);
-            if (!$equipo)
-                respond(false, [], 'Equipo no encontrado');
+            $stmt = $conn->prepare("DELETE FROM ekipamendua WHERE id = ?");
+            if (!$stmt) throw new Exception("Error en prepare: " . $conn->error);
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $stmt->close();
 
-            if ($equipo->delete())
-                respond(true, [], 'Equipo eliminado correctamente');
-            else
-                respond(false, [], 'Error al eliminar equipo');
+            $response['success'] = true;
+            $response['message'] = "Equipo eliminado correctamente";
             break;
 
         default:
-            respond(false, [], 'Método no soportado');
+            throw new Exception("Método no soportado");
     }
 
 } catch (Exception $e) {
-    respond(false, [], 'Error: ' . $e->getMessage());
+    $response['success'] = false;
+    $response['message'] = $e->getMessage();
 }
+
+echo json_encode($response);
+$conn->close();
+exit;
