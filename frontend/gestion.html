@@ -74,7 +74,8 @@
       <div class="col-md-6">
         <h4>Asignaciones por Etiqueta</h4>
         <div class="mb-3">
-          <input type="text" id="searchAsignaciones" class="form-control" placeholder="Buscar por etiqueta, gela o taldea">
+          <input type="text" id="searchAsignaciones" class="form-control"
+            placeholder="Buscar por etiqueta, gela o taldea">
         </div>
         <div class="text-end mb-3">
           <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addAsignacionModal">
@@ -291,23 +292,29 @@
   </div>
 
   <!-- Modal de confirmación -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmModalLabel">Confirmar acción</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-      </div>
-      <div class="modal-body">
-        ¿Estás seguro de que deseas finalizar esta asignación? Esto significa que el equipo que has seleccionado esta fuera de servicio y no podras deshacer esta accion.
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" id="confirmBtn" class="btn btn-danger">Finalizar</button>
+  <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="confirmModalLabel">Confirmar acción</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas mover esta asignación?</p>
+          <label for="nuevoKokalekuSelect" class="form-label">Selecciona la nueva gela:</label>
+          <select id="nuevoKokalekuSelect" class="form-select">
+            <option value="">-- Selecciona --</option>
+            <!-- Opciones generadas dinámicamente desde el backend -->
+          </select>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" id="confirmBtn" class="btn btn-danger">Finalizar</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
 
 
