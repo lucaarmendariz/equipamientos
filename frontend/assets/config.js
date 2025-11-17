@@ -1,6 +1,6 @@
 // Archivo de configuración global de URLs
 const CONFIG = {
-  BASE_URL: "http://localhost/equipamientos/",
+  BASE_URL: "http://zerbitzari2.edu/srv/repos/equipamientos/",
 
   // Endpoints
   
