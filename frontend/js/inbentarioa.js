@@ -1,21 +1,40 @@
 const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ===== ELEMENTOS =====
+  // ===== ELEMENTOS DEL DOM =====
   const inventoryList = document.getElementById('inventory-list');
   const equipoSelect = document.getElementById('equipo-select');
   const nuevaCategoriaBtn = document.getElementById('nueva-categoria-btn');
-  const nuevaCategoriaModal = new bootstrap.Modal(document.getElementById('nuevaCategoriaModal'));
+  const nuevaCategoriaModalEl = document.getElementById('nuevaCategoriaModal');
   const nuevaCategoriaInput = document.getElementById('nueva-categoria-input');
   const guardarCategoriaBtn = document.getElementById('guardar-categoria');
-  const searchInput = document.getElementById("searchInput");
+  const searchInput = document.getElementById('searchInput');
 
   const carritoBtn = document.getElementById('carrito-btn');
   const cestaModalEl = document.getElementById('cestaModal');
-  const cestaModal = new bootstrap.Modal(cestaModalEl);
   const cestaList = document.getElementById('cesta-list');
   const vaciarCestaBtn = document.getElementById('vaciar-cesta');
   const finalizarCompraBtn = document.getElementById('finalizar-compra');
+  const eliminarSeleccionadasBtn = document.getElementById('eliminar-seleccionadas');
+
+  // ===== Inicializamos modales de Bootstrap solo si existen =====
+  const nuevaCategoriaModal = nuevaCategoriaModalEl ? new bootstrap.Modal(nuevaCategoriaModalEl) : null;
+  const cestaModal = cestaModalEl ? new bootstrap.Modal(cestaModalEl) : null;
+
+  const eliminarEtiquetaModalEl = document.getElementById('eliminarEtiquetaModal');
+  const eliminarEtiquetaModal = eliminarEtiquetaModalEl ? new bootstrap.Modal(eliminarEtiquetaModalEl) : null;
+
+  const eliminarEtiquetasMasivasModalEl = document.getElementById('eliminarEtiquetasMasivasModal');
+  const eliminarEtiquetasMasivasModal = eliminarEtiquetasMasivasModalEl ? new bootstrap.Modal(eliminarEtiquetasMasivasModalEl) : null;
+
+  const etiquetaAEliminarSpan = document.getElementById('etiqueta-a-eliminar');
+  const confirmarEliminarEtiquetaBtn = document.getElementById('confirmarEliminarEtiqueta');
+  const cantidadEtiquetasSpan = document.getElementById('cantidad-etiquetas');
+  const confirmarEliminarEtiquetasMasivasBtn = document.getElementById('confirmarEliminarEtiquetasMasivas');
+
+  let etiquetaSeleccionada = null;
+  let filaSeleccionada = null;
+  let etiquetasSeleccionadas = [];
 
   // ==================
   // CESTA DE LA COMPRA
@@ -23,16 +42,17 @@ document.addEventListener("DOMContentLoaded", () => {
   let cesta = [];
 
   function actualizarCesta() {
+    if (!cestaList) return;
     cestaList.innerHTML = '';
     if (cesta.length === 0) {
-      cestaList.innerHTML = '<li class="list-group-item">La cesta está vacía</li>';
+      cestaList.innerHTML = '<li class="list-group-item">Saskia hutsik dago</li>';
       return;
     }
     cesta.forEach((item, index) => {
       const li = document.createElement('li');
       li.className = 'list-group-item d-flex justify-content-between align-items-center';
       li.innerHTML = `
-        ${item.nombre} - Cantidad: ${item.cantidad}
+        ${item.nombre} - Kantitatea: ${item.cantidad}
         <button class="btn btn-sm btn-outline-danger" onclick="eliminarItem(${index})">&times;</button>
       `;
       cestaList.appendChild(li);
@@ -44,16 +64,18 @@ document.addEventListener("DOMContentLoaded", () => {
     actualizarCesta();
   };
 
-  vaciarCestaBtn.addEventListener('click', () => {
+  vaciarCestaBtn?.addEventListener('click', () => {
     cesta = [];
     actualizarCesta();
   });
 
-  carritoBtn.addEventListener('click', () => {
+  carritoBtn?.addEventListener('click', () => {
     actualizarCesta();
-    cestaModal.show();
+    cestaModal?.show();
   });
 
+  // =========== INVENTARIO ===========
+=======
   // ================== INVENTARIO ==================
 
   const headers = {
@@ -68,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error('Error al cargar inventario:', res.message);
           return;
         }
-        console.log('Inventario cargado:', res.data);
         inventoryList.innerHTML = '';
         res.data.forEach(item => {
           const div = document.createElement('div');
@@ -81,7 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="col-ekintzak">
               <input type="checkbox" class="select-etiqueta"/>
               <button class="btn btn-sm btn-outline-danger eliminar-btn">🗑️</button>
-              
             </span>
           `;
           inventoryList.appendChild(div);
@@ -90,24 +110,17 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error('Error al cargar inventario:', err));
   }
 
-  // ============================
-  // BÚSQUEDA GLOBAL DE EQUIPOS
-  // ============================
-  if (searchInput && inventoryList) {
-    searchInput.addEventListener("input", () => {
-      const filtro = searchInput.value.trim().toLowerCase();
-      const filas = inventoryList.querySelectorAll(".data-row");
-
-      filas.forEach(fila => {
-        const textoFila = fila.innerText.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
+  // ======= BÚSQUEDA GLOBAL =======
+  searchInput?.addEventListener("input", () => {
+    const filtro = searchInput.value.trim().toLowerCase();
+    const filas = inventoryList.querySelectorAll(".data-row");
+    filas.forEach(fila => {
+      const textoFila = fila.innerText.toLowerCase();
+      fila.style.display = textoFila.includes(filtro) ? "" : "none";
     });
-  }
+  });
 
-  // ================
-  //  EQUIPAMIENTOS
-  // ================
+  // ======= CARGAR EQUIPOS =======
   function cargarEquipamientos() {
     fetch('../backend/controladores/ekipamenduakController.php', {headers})
       .then(res => res.json())
@@ -127,16 +140,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error('Error fetching equipamientos:', err));
   }
 
-  //==================
-  // MODAL DE COMPRA 
-  //==================
-  nuevaCategoriaBtn.onclick = () => {
+  // ===== MODAL DE COMPRA =====
+  nuevaCategoriaBtn?.addEventListener('click', () => {
     nuevaCategoriaInput.value = '';
     guardarCategoriaBtn.textContent = 'Gehitu saskira';
-    nuevaCategoriaModal.show();
-  };
+    nuevaCategoriaModal?.show();
+  });
 
-  guardarCategoriaBtn.onclick = () => {
+  guardarCategoriaBtn?.addEventListener('click', () => {
     const idEquipo = parseInt(equipoSelect.value);
     const cantidad = parseInt(nuevaCategoriaInput.value.trim());
 
@@ -150,27 +161,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const nombreEquipo = equipoSelect.options[equipoSelect.selectedIndex].text;
-
     cesta.push({ id: idEquipo, nombre: nombreEquipo, cantidad });
-    Swal.fire({ icon: 'success', title: 'Añadido', text: `${nombreEquipo} Saskira gehituta` });
-    nuevaCategoriaModal.hide();
+    Swal.fire({ icon: 'success', title: 'Gehituta', text: `${nombreEquipo} Saskira gehituta` });
+    nuevaCategoriaModal?.hide();
     nuevaCategoriaInput.value = '';
     equipoSelect.value = '';
     actualizarCesta();
-  };
+  });
 
-  // ==================
-  // FINALIZAR COMPRA
-  // ==================
-  finalizarCompraBtn.addEventListener('click', () => {
+  // ===== FINALIZAR COMPRA =====
+  finalizarCompraBtn?.addEventListener('click', () => {
     if (cesta.length === 0) {
       Swal.fire({ icon: 'error', title: 'Errorea', text: 'Saskia hutsik dago!' });
       return;
     }
 
     cesta.forEach(item => {
-      console.log("Enviando compra:", item);
-
       fetch('../backend/controladores/inbentarioController.php', {
         method: 'POST',
         headers,
@@ -182,14 +188,11 @@ document.addEventListener("DOMContentLoaded", () => {
       })
         .then(res => res.json())
         .then(data => {
-          console.log("Respuesta JSON:", data);
-
           if (!data.success) {
             Swal.fire({ icon: 'error', title: 'Errorea', text: data.message });
             return;
           }
 
-          // Mostrar etiquetas recién creadas en inventario con botón eliminar
           data.nuevas_etiquetas.forEach(etk => {
             const etiquetaDiv = document.createElement('div');
             etiquetaDiv.classList.add('data-row');
@@ -198,19 +201,13 @@ document.addEventListener("DOMContentLoaded", () => {
               <span>${item.nombre}</span>
               <span>${etk}</span>
               <span>Kokaleku ezezaguna</span>
-              <span class="col-ekintzak">
-              <input type="checkbox" class="select-etiqueta"/>
-                <button class="btn btn-sm btn-primary eliminar-btn">
-                  <i class="bi bi-trash"></i>
-                </button>
+              <span class="col-ekintzak d-inline-flex align-items-center">
+                <input type="checkbox" class=" form-check-input select-etiqueta me-5"/>
+                <button class="btn btn-sm btn-outline-danger eliminar-btn">🗑️</button>
               </span>
             `;
             inventoryList.appendChild(etiquetaDiv);
           });
-
-          // Actualizar stock visual si existe
-          const stockSpan = document.querySelector(`#stock-${item.id}`);
-          if (stockSpan) stockSpan.textContent = data.nuevo_stock;
 
           Swal.fire({
             icon: 'success',
@@ -229,56 +226,68 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ==================
-  // ELIMINAR ETIQUETA
+  // ELIMINAR ETIQUETA INDIVIDUAL
   // ==================
-  async function eliminarEtiqueta(row, etiketa) {
-    if (!confirm(`¿Deseas eliminar la etiqueta ${etiketa}?`)) return;
+  inventoryList?.addEventListener('click', (e) => {
+    const button = e.target.closest('.eliminar-btn');
+    if (!button) return;
+
+    const row = button.closest('.data-row');
+    const etiketa = row.dataset.etiketa;
+
+    etiquetaSeleccionada = etiketa;
+    filaSeleccionada = row;
+    if (etiquetaAEliminarSpan) etiquetaAEliminarSpan.textContent = etiketa;
+
+    eliminarEtiquetaModal?.show();
+  });
+
+  confirmarEliminarEtiquetaBtn?.addEventListener('click', async () => {
+    if (!etiquetaSeleccionada || !filaSeleccionada) return;
 
     try {
-      const response = await fetch('../backend/controladores/inbentarioController.php', {
+      const response = await fetch(`../backend/controladores/inbentarioController.php`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DELETE', etiketa: etiquetaSeleccionada })
         headers,
         body: JSON.stringify({ action: 'DELETE', etiketa })
       });
-
       const data = await response.json();
 
       if (data.success) {
-        row.remove();
-
-        const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
-        if (stockCell) stockCell.textContent = data.nuevo_stock;
-
-        console.log(data.message);
+        filaSeleccionada.remove();
+        Swal.fire({ icon: 'success', title: 'Ezabatu', text: data.message });
       } else {
-        alert(data.message || 'Error al eliminar la etiqueta');
+        Swal.fire({ icon: 'error', title: 'Errorea', text: data.message || 'Ezin izan da ezabatu' });
       }
     } catch (err) {
       console.error(err);
-      alert('Error en la petición al servidor');
+      Swal.fire({ icon: 'error', title: 'Errorea', text: 'Errorea zerbitzarira konektatzean' });
+    } finally {
+      eliminarEtiquetaModal?.hide();
+      etiquetaSeleccionada = null;
+      filaSeleccionada = null;
     }
-  }
-
-  // Delegación de eventos para eliminar etiquetas
-  inventoryList.addEventListener('click', (e) => {
-    const button = e.target.closest('.eliminar-btn');
-    if (!button) return;
-    const row = button.closest('.data-row');
-    const etiketa = row.dataset.etiketa;
-    eliminarEtiqueta(row, etiketa);
   });
 
-  document.getElementById('eliminar-seleccionadas').addEventListener('click', async () => {
-  const selectedCheckboxes = document.querySelectorAll('.select-etiqueta:checked');
-  if (selectedCheckboxes.length === 0) {
-    alert('No hay etiquetas seleccionadas');
-    return;
-  }
+  // ==================
+  // ELIMINAR ETIQUETAS MASIVAS
+  // ==================
+  eliminarSeleccionadasBtn?.addEventListener('click', () => {
+    const selected = document.querySelectorAll('.select-etiqueta:checked');
+    if (selected.length === 0) {
+      Swal.fire({ icon: 'info', title: 'Hautaturik gabe', text: 'Ez daude etiketa hautatuta' });
+      return;
+    }
 
-  if (!confirm(`¿Deseas eliminar ${selectedCheckboxes.length} etiquetas?`)) return;
+    etiquetasSeleccionadas = Array.from(selected).map(cb => cb.closest('.data-row').dataset.etiketa);
+    if (cantidadEtiquetasSpan) cantidadEtiquetasSpan.textContent = etiquetasSeleccionadas.length;
+    eliminarEtiquetasMasivasModal?.show();
+  });
 
-  const etiquetas = Array.from(selectedCheckboxes).map(cb => cb.closest('.data-row').dataset.etiketa);
-
+  confirmarEliminarEtiquetasMasivasBtn?.addEventListener('click', async () => {
+    if (etiquetasSeleccionadas.length === 0) return;
   try {
     const response = await fetch('../backend/controladores/inbentarioController.php', {
       method: 'POST', // Usamos POST para enviar array de etiquetas
@@ -286,20 +295,31 @@ document.addEventListener("DOMContentLoaded", () => {
       body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
     });
 
-    const data = await response.json();
+    try {
+      const response = await fetch(`../backend/controladores/inbentarioController.php`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas: etiquetasSeleccionadas })
+      });
+      const data = await response.json();
 
-    if (data.success) {
-      // Eliminar filas visualmente
-      selectedCheckboxes.forEach(cb => cb.closest('.data-row').remove());
-      alert(data.message);
-    } else {
-      alert(data.message || 'Error al eliminar etiquetas');
+      if (data.success) {
+        etiquetasSeleccionadas.forEach(et => {
+          const fila = inventoryList.querySelector(`.data-row[data-etiketa="${et}"]`);
+          if (fila) fila.remove();
+        });
+        Swal.fire({ icon: 'success', title: 'Ezabatuak', text: data.message });
+      } else {
+        Swal.fire({ icon: 'error', title: 'Errorea', text: data.message || 'Errorea ezabatzean' });
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: 'error', title: 'Errorea', text: 'Errorea zerbitzarira konektatzean' });
+    } finally {
+      eliminarEtiquetasMasivasModal?.hide();
+      etiquetasSeleccionadas = [];
     }
-  } catch (err) {
-    console.error(err);
-    alert('Error al contactar con el servidor');
-  }
-});
+  });
 
   // ===== INICIAL =====
   cargarInventario();
