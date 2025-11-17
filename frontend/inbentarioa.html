@@ -50,103 +50,136 @@
     </div>
   </nav>
 
+    <!-- ============================================================
+       CONTENIDO PRINCIPAL
+  ============================================================ -->
   <main class="dashboard-container container py-4">
     <h2 class="mb-3 text-center">Inbentarioa</h2>
 
-  <br>
-  <div class="mb-3">
-      <input type="text" id="searchInput" class="form-control"
-        placeholder="Bilatu izena, etiketa eta kokalekua">
+    <div class="mb-3">
+        <input type="text" id="searchInput" class="form-control"
+          placeholder="Bilatu izena, etiketa eta kokalekua">
     </div>
 
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div class="d-flex align-items-center gap-2">
+        <button id="nueva-categoria-btn" class="btn btn-primary">
+          <i class="fa fa-plus"></i> Erosi
+        </button>
 
-    <div id="overlay"></div>
+        <button id="carrito-btn" class="btn btn-primary">
+          <i class="bi bi-cart-plus fs-5"></i>
+        </button>
+      </div>
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="d-flex align-items-center gap-2">
-      <button id="nueva-categoria-btn" class="add-button">
-        <i class="bi bi-plus-circle"></i> Erosi
+      <button id="eliminar-seleccionadas" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Ezabatu hautatutakoak
       </button>
 
-      <button id="carrito-btn" class="add-button">
-        <i class="bi bi-cart-plus fs-5"></i>
-      </button>
     </div>
 
-    <button id="eliminar-seleccionadas" class="btn btn-danger">
-      <i class="bi bi-trash"></i> Ezabatu hautatutakoak
-    </button>
-
-  </div>
-
-    </div>
+      
     <!-- Contenedor de inventario y equipos lado a lado -->
     <div class="dashboard-grid">
-    <div class="dashboard-column">
-      <h2>Inbentarioa</h2>
-
-      <!-- Cabecera de columnas -->
-      <div class="data-row data-header">
-        <span>Izena</span>
-        <span>Etiketa</span>
-        <span>Kokaleku</span>
-        <span>Ekintza</span>
-      </div>
-
-      <br>
-
-      <!-- 🔹 Aquí se cargarán las filas dinámicas desde JS -->
-      <div class="equipamientos-grid" id="inventory-list">
-          <!-- Filas dinámicas de inventario -->
-      </div>
+      <section class="dashboard-column" id="inbentarioa-container">
+        <div class="data-row py-2 data-header">
+            <span>Izena</span>
+            <span>Etiketa</span>
+            <span>Kokaleku</span>
+            <span>Ekintza</span>
+        </div>
+        <div id="inventory-list">
+        </div>
+      </section>
     </div>
-    </div>
+  </main>
 
-</main>
 
-<div class="modal fade" id="nuevaCategoriaModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-sm modal-dialog-centered">
-    <div class="modal-content position-relative p-4">
-      <button type="button" class="btn-close-circle" data-bs-dismiss="modal" aria-label="Itxi">&times;</button>
-      <h5>Aukeratu ekipamendua</h5>
-      <select id="equipo-select" class="form-select mb-3">
-        <option value="">-- Aukeratu ekipamendua --</option>
-      </select>
-      <h5>Kantitatea</h5>
-      <input type="number" id="nueva-categoria-input" placeholder="Sartu kantitatea" min="1" class="mb-3 form-control">
-      <button id="guardar-categoria" class="btn btn-primary w-100">Gehitu saskira</button>
+  <div class="modal fade" id="nuevaCategoriaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content position-relative p-4">
+        <button type="button" class="btn-close-circle" data-bs-dismiss="modal" aria-label="Itxi">&times;</button>
+        <h5>Aukeratu ekipamendua</h5>
+        <select id="equipo-select" class="form-select mb-3">
+          <option value="">-- Aukeratu ekipamendua --</option>
+        </select>
+        <h5>Kantitatea</h5>
+        <input type="number" id="nueva-categoria-input" placeholder="Sartu kantitatea" min="1" class="mb-3 form-control">
+        <button id="guardar-categoria" class="btn btn-primary w-100">Gehitu saskira</button>
+      </div>
     </div>
   </div>
-</div>
 
 
-<!-- Modal Saskia -->
-<div class="modal fade" id="cestaModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content position-relative p-4">
-      <!-- Botón de cerrar -->
-      <button type="button" class="btn-close-circle" data-bs-dismiss="modal" aria-label="Itxi">&times;</button>
-      <h5>Nire Saskia</h5>
-      <ul id="cesta-list" class="list-group mb-3">
-        <li class="list-group-item">Saskia hutsik dago</li>
-      </ul>
-      <button id="vaciar-cesta" class="btn btn-danger w-100 mb-2">Saskia hustu</button>
-      <button id="finalizar-compra" class="btn btn-success w-100">Erosi</button>
+  <!-- Modal Saskia -->
+  <div class="modal fade" id="cestaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content position-relative p-4">
+        <!-- Botón de cerrar -->
+        <button type="button" class="btn-close-circle" data-bs-dismiss="modal" aria-label="Itxi">&times;</button>
+        <h5>Nire Saskia</h5>
+        <ul id="cesta-list" class="list-group mb-3">
+          <li class="list-group-item">Saskia hutsik dago</li>
+        </ul>
+        <button id="vaciar-cesta" class="btn btn-danger w-100 mb-2">Saskia hustu</button>
+        <button id="finalizar-compra" class="btn btn-success w-100">Erosi</button>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- MODAL ETIKETA BAKARRA EZABATU -->
+  <div class="modal fade" id="eliminarEtiquetaModal" tabindex="-1" aria-labelledby="eliminarEtiquetaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="eliminarEtiquetaModalLabel">Ezabatzeko baieztapena</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Itxi"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
+          <span id="etiqueta-a-eliminar">Ziur zaude etiketa hau ezabatu nahi duzula?</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Utzi</button>
+          <button type="button" class="btn btn-danger" id="confirmarEliminarEtiqueta">Ezabatu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ETIKETA ANITZ EZABATU -->
+  <div class="modal fade" id="eliminarEtiquetasMasivasModal" tabindex="-1" aria-labelledby="eliminarEtiquetasMasivasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="eliminarEtiquetasMasivasModalLabel">Ezabaketa masiboa baieztatu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Itxi"></button>
+        </div>
+        <div class="modal-body text-center">
+          <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
+          <span id="cantidad-etiquetas">Ziur zaude hautatutako etiketa guztiak ezabatu nahi dituzula?</span>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Utzi</button>
+          <button type="button" class="btn btn-danger" id="confirmarEliminarEtiquetasMasivas">Denak ezabatu</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
+
+  <!-- ============================================================
+        FOOTER
+    ============================================================ -->
+    <footer class="main-footer mt-5">
+      <div class="footer-content text-center py-3">
+        <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
+        <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+      </div>
+    </footer>
 
   <script src="js/inbentarioa.js"></script>
 </body>
-  <!-- ============================================================
-       FOOTER
-  ============================================================ -->
-  <footer class="main-footer mt-5">
-    <div class="footer-content text-center py-3">
-      <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
-      <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
-    </div>
-  </footer>
+ 
 </html>
