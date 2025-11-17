@@ -398,6 +398,43 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+async function cargarGelasDisponibles() {
+  const select = document.getElementById("nuevoKokalekuSelect");
+  const backendGelasURL = CONFIG.BASE_URL + "backend/controladores/gelakController.php";
+  const apiKey = sessionStorage.getItem("apiKey");
+
+  try {
+    const res = await fetch(backendGelasURL, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      }
+    });
+
+    const data = await res.json();
+
+    select.innerHTML = ""; // limpiar
+
+    if (!data.success || !Array.isArray(data.data)) {
+      select.innerHTML = `<option value="">No hay gelas disponibles</option>`;
+      return;
+    }
+
+    // Añadir gelas
+    data.data.forEach(g => {
+      const opt = document.createElement("option");
+      opt.value = g.id;                     // ID de la gela
+      opt.textContent = `${g.izena} (${g.taldea ?? "—"})`;
+      select.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error("Error cargando gelas:", err);
+    select.innerHTML = `<option value="">Error cargando gelas</option>`;
+  }
+}
+
+
 
   // ===================== FINALIZAR ASIGNACIÓN =====================
   function confirmarFinalizacion(etiketa) {
@@ -427,14 +464,14 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 }
 
-function moverAsignacion(etiketa, nuevoKokaleku) {
-  fetch(`${backendKokalekuURL}/mover`, {
-    method: "POST", // cambio de DELETE a POST para mover
+function moverAsignacion(etiketa, nuevaGela) {
+  fetch(`${backendKokalekuURL}`, {
+    method: "PATCH", // cambio de DELETE a POST para mover
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`
     },
-    body: JSON.stringify({ etiketa, nuevoKokaleku })
+    body: JSON.stringify({ etiketa, nuevaGela })
   })
     .then(res => res.json())
     .then(data => {
