@@ -192,15 +192,85 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("select-equipo").addEventListener("change", async e => {
     const idEquipo = parseInt(e.target.value);
     const stockInfo = document.getElementById("stockInfo");
-    if (!idEquipo) { stockInfo.textContent = "Stock disponible: 0"; return; }
+
+    if (!idEquipo) {
+      stockInfo.textContent = "Stock disponible: 0, Activos: 0";
+      return;
+    }
+
     try {
       const res = await fetch(`${backendKokalekuURL}?idEkipamendu=${idEquipo}`, {
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` }
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        }
       });
+
       const data = await res.json();
-      stockInfo.textContent = `Stock disponible: ${data.success ? data.data.stock : 0}`;
-    } catch (err) { console.error(err); stockInfo.textContent = "Stock disponible: 0"; }
+
+      if (data.success) {
+        stockInfo.textContent = `Stock disponible: ${data.data.stockDisponible}, Activos: ${data.data.activos}`;
+        console.log("Kokalekus del equipo:", data.data.kokalekus);
+      } else {
+        stockInfo.textContent = "Stock disponible: 0, Activos: 0";
+      }
+    } catch (err) {
+      console.error(err);
+      stockInfo.textContent = "Stock disponible: 0, Activos: 0";
+    }
   });
+
+
+
+
+
+
+  // ===================== EDITAR (ABRIR MODAL) =====================
+  async function editarAsignacion(etiketa) {
+    try {
+      const res = await fetch(`${backendKokalekuURL}?etiketa=${etiketa}`, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        }
+      });
+
+      const data = await res.json();
+
+      if (!data.success || !data.data) return alert("Asignación no encontrada");
+
+      const k = data.data;
+
+      document.getElementById("edit-etiketa").value = k.etiketa;
+
+      // Cargar las gelas dinámicamente
+      const resGelas = await fetch(backendGelasURL, {
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        }
+      });
+
+      const gelas = await resGelas.json();
+      const select = document.getElementById("edit-select-gela");
+
+      select.innerHTML = "";
+
+      gelas.data.forEach(g => {
+        const opt = document.createElement("option");
+        opt.value = g.id;
+        opt.textContent = `${g.izena} (${g.taldea ?? "—"})`;
+        if (g.id === k.idGela) opt.selected = true;
+        select.appendChild(opt);
+      });
+
+      new bootstrap.Modal(document.getElementById("editAsignacionModal")).show();
+
+    } catch (err) {
+      console.error(err);
+      alert("Error cargando la asignación");
+    }
+  }
 
   // ===================== LISTAR ASIGNACIONES =====================
   async function actualizarAsignaciones() {
@@ -217,7 +287,7 @@ document.addEventListener("DOMContentLoaded", () => {
       container.innerHTML = "";
       const header = document.createElement("div");
       header.classList.add("data-row", "data-header");
-      header.innerHTML = `<span>Etiketa</span><span>Gela</span><span>Taldea</span><span>Desde</span><span>Hasta</span><span>Acciones</span>`;
+      header.innerHTML = `<span>Etiketa</span><span>Gela</span><span>Taldea</span><span>Desde</span><span>Acciones</span>`;
       container.appendChild(header);
 
       data.data.forEach((asignacion, i) => {
@@ -230,7 +300,6 @@ document.addEventListener("DOMContentLoaded", () => {
           <span>${asignacion.gela_izena ?? "—"}</span>
           <span>${asignacion.taldea ?? "—"}</span>
           <span>${asignacion.hasieraData ?? "—"}</span>
-          <span>${asignacion.amaieraData ?? "—"}</span>
           <span>
             <button class="btn btn-sm btn-outline-primary me-1 edit-asign-btn" data-id="${asignacion.etiketa}">✏️</button>
             <button class="btn btn-sm btn-outline-warning delete-asign-btn" data-id="${asignacion.etiketa}">🗓️</button>
@@ -240,7 +309,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       document.querySelectorAll(".edit-asign-btn").forEach(btn => btn.addEventListener("click", () => editarAsignacion(btn.dataset.id)));
-      document.querySelectorAll(".delete-asign-btn").forEach(btn => btn.addEventListener("click", () => finalizarAsignacion(btn.dataset.id)));
+      document.querySelectorAll(".delete-asign-btn").forEach(btn => btn.addEventListener("click", () => confirmarFinalizacion(btn.dataset.id)));
 
     } catch (err) {
       console.error("Error cargando asignaciones:", err);
@@ -248,25 +317,144 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ===================== FINALIZAR ASIGNACIÓN =====================
-  async function finalizarAsignacion(etiketa) {
-    if (!etiketa) return;
+  // ===================== CREAR KOKALEKU =====================
+  document.getElementById("addAsignacionForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const payload = {
+      idGela: parseInt(document.getElementById("select-gela").value),
+      idEkipamendu: parseInt(document.getElementById("select-equipo").value),
+      cantidad: parseInt(document.getElementById("cantidad").value),
+      hasieraData: new Date().toISOString().split("T")[0]
+    };
+
     try {
       const res = await fetch(backendKokalekuURL, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-        body: JSON.stringify({ etiketa }) // backend asigna fecha automáticamente
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(payload)
       });
+
       const data = await res.json();
+
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById("addAsignacionModal")).hide();
+        e.target.reset();
+
+        actualizarAsignaciones();
+
+        document.getElementById("successMessage").textContent =
+          data.message || "Asignación creada correctamente.";
+        new bootstrap.Modal(document.getElementById("successModal")).show();
+      } else {
+        alert("Error: " + data.message);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Error al crear la asignación");
+    }
+  });
+
+
+
+  // ===================== EDITAR (GUARDAR CAMBIOS) =====================
+  document.getElementById("editAsignacionForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const payload = {
+      etiketa: document.getElementById("edit-etiketa").value,
+      idGela: parseInt(document.getElementById("edit-select-gela").value),
+    };
+
+    try {
+      const res = await fetch(backendKokalekuURL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById("editAsignacionModal")).hide();
+        actualizarAsignaciones();
+
+        document.getElementById("successMessage").textContent =
+          data.message || "Asignación actualizada correctamente.";
+        new bootstrap.Modal(document.getElementById("successModal")).show();
+
+      } else alert("Error: " + data.message);
+
+    } catch (err) {
+      console.error(err);
+      alert("Error actualizando la asignación");
+    }
+  });
+
+
+  // ===================== FINALIZAR ASIGNACIÓN =====================
+  function confirmarFinalizacion(etiketa) {
+  if (!etiketa) return;
+
+  // Abrir modal
+  const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  confirmModal.show();
+
+  // Cuando el usuario confirma
+  const confirmBtn = document.getElementById('confirmBtn');
+
+  // Quitamos cualquier listener anterior para no duplicar eventos
+  confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+  const newConfirmBtn = document.getElementById('confirmBtn');
+
+  newConfirmBtn.addEventListener('click', () => {
+    confirmModal.hide();
+    finalizarAsignacion(etiketa);
+  });
+}
+
+function finalizarAsignacion(etiketa) {
+  if (!etiketa) return;
+
+  fetch(backendKokalekuURL, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({ etiketa }) // backend asigna fecha automáticamente
+  })
+    .then(res => res.json())
+    .then(data => {
       if (data.success) {
         actualizarAsignaciones();
+
+        loading = false;
+        allLoaded = false;
+        cargarHistorialBackend();
+
         document.getElementById("successMessage").textContent = data.message || "Asignación finalizada correctamente.";
         new bootstrap.Modal(document.getElementById("successModal")).show();
-      } else alert("Error: " + data.message);
-    } catch (err) { console.error(err); alert("Error finalizando asignación"); }
-  }
+      } else {
+        alert("Error: " + data.message);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error finalizando asignación");
+    });
+}
 
-  // ===================== HISTORIAL CON SCROLL INFINITO =====================
+
+
+  // ===================== HISTORIAL CON FILTROS Y SCROLL INFINITO EN FRONT =====================
   const historialModal = document.getElementById("historialModal");
   const historialList = document.getElementById("historialList");
   const loadingHistorial = document.getElementById("loadingHistorial");
@@ -275,8 +463,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const filterEndDate = document.getElementById("filterEndDate");
   const applyFiltersBtn = document.getElementById("applyFilters");
 
-  let offset = 0, limit = 50, loading = false, allLoaded = false;
+  let historialData = [];       // Todos los registros
+  let filteredData = [];        // Datos filtrados
+  let offset = 0;               // Para scroll infinito
+  const limit = 20;             // Cantidad por "carga"
+  let loading = false;
 
+  // Cargar gelas en filtro
   async function cargarGelasFiltro() {
     try {
       const res = await fetch(backendGelasURL, { headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` } });
@@ -285,7 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
         filterGela.innerHTML = '<option value="">Todas las gelak</option>';
         data.data.forEach(g => {
           const opt = document.createElement('option');
-          opt.value = g.id;
+          opt.value = g.izena;
           opt.textContent = `${g.izena} - ${g.taldea ?? "—"}`;
           filterGela.appendChild(opt);
         });
@@ -293,57 +486,122 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) { console.error(err); }
   }
 
-  async function cargarHistorial(reset = false) {
-    if (loading || allLoaded) return;
-    loading = true;
+  // Cargar historial completo desde backend (solo una vez)
+  async function cargarHistorialBackend() {
     loadingHistorial.style.display = "block";
-
-    if (reset) { offset = 0; historialList.innerHTML = ""; allLoaded = false; }
-
-    const params = new URLSearchParams({ historial: "1", offset, limit });
-    if (filterGela.value) params.append("idGela", filterGela.value);
-    if (filterStartDate.value) params.append("fechaInicio", filterStartDate.value);
-    if (filterEndDate.value) params.append("fechaFin", filterEndDate.value);
-
     try {
-      const res = await fetch(`${backendKokalekuURL}?${params.toString()}`, {
+      const res = await fetch(`${backendKokalekuURL}?historial=1`, {
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` }
       });
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
-        if (data.data.length < limit) allLoaded = true;
-        data.data.forEach(k => {
-          const row = document.createElement("div");
-          row.classList.add("data-row", "py-1", "border-bottom");
-          row.innerHTML = `
-            <span><strong>Etiketa:</strong> ${k.etiketa}</span>
-            <span><strong>Gela:</strong> ${k.gela_izena} (${k.taldea ?? "—"})</span>
-            <span><strong>Equipo:</strong> ${k.ekipamendu} (ID ${k.idEkipamendu})</span>
-            <span><strong>Desde:</strong> ${k.hasieraData}</span>
-            <span><strong>Hasta:</strong> ${k.amaieraData}</span>
-          `;
-          historialList.appendChild(row);
-        });
-        offset += limit;
-      } else if (reset) {
+        historialData = data.data;
+        aplicarFiltros(true); // resetear offset al aplicar filtros
+      } else {
         historialList.innerHTML = `<div class="text-center py-2">No hay registros históricos.</div>`;
-        allLoaded = true;
       }
-    } catch (err) { console.error("Error cargando historial:", err); }
-    finally { loading = false; loadingHistorial.style.display = "none"; }
+    } catch (err) {
+      console.error("Error cargando historial:", err);
+      historialList.innerHTML = `<div class="text-center py-2 text-danger">Error cargando historial.</div>`;
+    } finally {
+      loadingHistorial.style.display = "none";
+    }
   }
 
+  // Aplicar filtros y resetear scroll
+  function aplicarFiltros(reset = false) {
+    if (reset) {
+      offset = 0;
+      historialList.innerHTML = "";
+    }
+
+    const gelaFiltro = filterGela.value.toLowerCase();
+    const startDate = filterStartDate.value ? new Date(filterStartDate.value) : null;
+    const endDate = filterEndDate.value ? new Date(filterEndDate.value) : null;
+
+    filteredData = historialData.filter(k => {
+      if (gelaFiltro && !k.gela_izena.toLowerCase().includes(gelaFiltro)) return false;
+      if (startDate && new Date(k.hasieraData) < startDate) return false;
+      if (endDate && k.amaieraData && new Date(k.amaieraData) > endDate) return false;
+      return true;
+    });
+
+    cargarMas(); // cargar los primeros registros
+  }
+
+  // Función para cargar más registros en scroll
+  function cargarMas() {
+    if (loading) return;
+    loading = true;
+
+    const nextItems = filteredData.slice(offset, offset + limit);
+    nextItems.forEach(k => {
+      const row = document.createElement("div");
+      row.classList.add("data-row", "py-1", "border-bottom");
+      row.innerHTML = `
+      <span><strong>Etiketa:</strong> ${k.etiketa}</span>
+      <span><strong>Gela:</strong> ${k.gela_izena} (${k.taldea ?? "—"})</span>
+      <span><strong>Equipo:</strong> ${k.ekipamendu} (ID ${k.idEkipamendu})</span>
+      <span><strong>Desde:</strong> ${k.hasieraData}</span>
+      <span><strong>Hasta:</strong> ${k.amaieraData ?? "—"}</span>
+    `;
+      historialList.appendChild(row);
+    });
+
+    offset += limit;
+    loading = false;
+
+    if (offset >= filteredData.length) {
+      const endMessage = document.createElement("div");
+      endMessage.classList.add("text-center", "py-2", "text-muted");
+      endMessage.textContent = "No hay más registros.";
+      historialList.appendChild(endMessage);
+    }
+  }
+
+  // Scroll infinito
   historialList.addEventListener("scroll", () => {
-    if (historialList.scrollTop + historialList.clientHeight >= historialList.scrollHeight - 50) {
-      cargarHistorial();
+    if (historialList.scrollTop + historialList.clientHeight >= historialList.scrollHeight - 20) {
+      cargarMas();
     }
   });
 
-  applyFiltersBtn.addEventListener("click", () => cargarHistorial(true));
+  // Botón aplicar filtros
+  applyFiltersBtn.addEventListener("click", () => aplicarFiltros(true));
+
+  // Al abrir modal, cargamos gelas y todo el historial
   historialModal.addEventListener("show.bs.modal", () => {
     cargarGelasFiltro();
-    cargarHistorial(true);
+    cargarHistorialBackend();
   });
+
+  // Seleccionamos el input
+const searchAsignaciones = document.getElementById("searchAsignaciones");
+
+if (searchAsignaciones) {
+  searchAsignaciones.addEventListener("input", () => {
+    const filtro = searchAsignaciones.value.trim().toLowerCase();
+    const contenedor = document.getElementById("asignaciones-list");
+    if (!contenedor) return;
+
+    const filas = contenedor.querySelectorAll(".data-row:not(.data-header)");
+
+    filas.forEach(fila => {
+      const etiketa = fila.children[0]?.innerText.toLowerCase() ?? "";
+      const gela = fila.children[1]?.innerText.toLowerCase() ?? "";
+      const taldea = fila.children[2]?.innerText.toLowerCase() ?? "";
+
+      fila.style.display =
+        etiketa.includes(filtro) ||
+        gela.includes(filtro) ||
+        taldea.includes(filtro)
+          ? ""
+          : "none";
+    });
+  });
+}
+
+
 
   // ===================== INICIALIZACIÓN =====================
   actualizarAsignaciones();
