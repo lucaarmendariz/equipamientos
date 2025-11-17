@@ -403,44 +403,46 @@ document.addEventListener("DOMContentLoaded", () => {
   function confirmarFinalizacion(etiketa) {
   if (!etiketa) return;
 
-  // Abrir modal
-  const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  const confirmModalEl = document.getElementById('confirmModal');
+  const confirmModal = new bootstrap.Modal(confirmModalEl);
   confirmModal.show();
 
-  // Cuando el usuario confirma
+  // Aquí puedes cargar dinámicamente los kokalekus
+  cargarGelasDisponibles();
+
   const confirmBtn = document.getElementById('confirmBtn');
 
-  // Quitamos cualquier listener anterior para no duplicar eventos
-  confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+  confirmBtn.replaceWith(confirmBtn.cloneNode(true)); // evitar duplicados
   const newConfirmBtn = document.getElementById('confirmBtn');
 
   newConfirmBtn.addEventListener('click', () => {
+    const nuevoKokaleku = document.getElementById('nuevoKokalekuSelect').value;
+    if (!nuevoKokaleku) {
+      alert("Debes seleccionar una gela.");
+      return;
+    }
+
     confirmModal.hide();
-    finalizarAsignacion(etiketa);
+    moverAsignacion(etiketa, nuevoKokaleku);
   });
 }
 
-function finalizarAsignacion(etiketa) {
-  if (!etiketa) return;
-
-  fetch(backendKokalekuURL, {
-    method: "DELETE",
+function moverAsignacion(etiketa, nuevoKokaleku) {
+  fetch(`${backendKokalekuURL}/mover`, {
+    method: "POST", // cambio de DELETE a POST para mover
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`
     },
-    body: JSON.stringify({ etiketa }) // backend asigna fecha automáticamente
+    body: JSON.stringify({ etiketa, nuevoKokaleku })
   })
     .then(res => res.json())
     .then(data => {
       if (data.success) {
         actualizarAsignaciones();
-
-        loading = false;
-        allLoaded = false;
         cargarHistorialBackend();
 
-        document.getElementById("successMessage").textContent = data.message || "Asignación finalizada correctamente.";
+        document.getElementById("successMessage").textContent = data.message || "Asignación movida correctamente.";
         new bootstrap.Modal(document.getElementById("successModal")).show();
       } else {
         alert("Error: " + data.message);
@@ -448,9 +450,10 @@ function finalizarAsignacion(etiketa) {
     })
     .catch(err => {
       console.error(err);
-      alert("Error finalizando asignación");
+      alert("Error moviendo asignación");
     });
 }
+
 
 
 
