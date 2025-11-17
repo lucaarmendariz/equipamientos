@@ -303,36 +303,61 @@ document.addEventListener("DOMContentLoaded", () => {
   actualizarListaEquipos();
 
   // Crear equipo
-  document.getElementById("addEquipoForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const payload = {
-      izena: document.getElementById("nombre").value,
-      deskribapena: document.getElementById("descripcion").value,
-      marca: document.getElementById("marca").value || null,
-      modelo: document.getElementById("modelo").value || null,
-      stock: parseInt(document.getElementById("stock").value) || 0,
-      idKategoria: parseInt(document.getElementById("categoria").value) || 0
-    };
+  document.getElementById("addEquipoForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    console.log(payload)
-    fetch(backendURL, {
+  const nombre = document.getElementById("nombre").value.trim();
+  const descripcion = document.getElementById("descripcion").value.trim();
+  const marca = document.getElementById("marca").value.trim() || null;
+  const modelo = document.getElementById("modelo").value.trim() || null;
+  const stock = parseInt(document.getElementById("stock").value) || 0;
+  const idKategoria = parseInt(document.getElementById("categoria").value) || 0;
+
+  const payload = { izena: nombre, deskribapena: descripcion, marca, modelo, stock, idKategoria };
+
+  try {
+    // 1️⃣ Crear equipo
+    const resEquipo = await fetch(backendURL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify(payload)
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          bootstrap.Modal.getInstance(document.getElementById("addEquipoModal")).hide();
-          e.target.reset();
-          actualizarListaEquipos();
-          new bootstrap.Modal(document.getElementById("successModal")).show();
-        } else alert("Error: " + data.message);
+    });
+
+    const dataEquipo = await resEquipo.json();
+    if (!dataEquipo.success) return alert(dataEquipo.message);
+
+    const nuevoEquipoId = dataEquipo.data.id; // Suponiendo que el backend devuelve el ID creado
+
+    // 2️⃣ Si stock > 0, crear etiquetas en inventario
+    if (stock > 0) {
+      const resStock = await fetch(categoriasURL.replace('kategoriaController', 'inbentarioController'), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({ action: "STOCK", idEkipamendu: nuevoEquipoId, cantidad: stock })
       });
-  });
+
+      const dataStock = await resStock.json();
+      if (!dataStock.success) return alert(dataStock.message);
+    }
+
+    // 3️⃣ Cerrar modal, limpiar formulario y recargar lista
+    bootstrap.Modal.getInstance(document.getElementById("addEquipoModal")).hide();
+    e.target.reset();
+    actualizarListaEquipos();
+    new bootstrap.Modal(document.getElementById("successModal")).show();
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al crear equipo o actualizar inventario");
+  }
+});
+
 
   // Editar equipo
   function editarEquipo(id) {
@@ -356,38 +381,41 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   }
 
-  document.getElementById("editEquipoForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const payload = {
-      id: parseInt(document.getElementById("edit-id").value),
-      izena: document.getElementById("edit-nombre").value,
-      deskribapena: document.getElementById("edit-descripcion").value,
-      marka: document.getElementById("edit-marca").value || null,
-      modelo: document.getElementById("edit-modelo").value || null,
-      stock: parseInt(document.getElementById("edit-stock").value) || 0,
-      idKategoria: parseInt(document.getElementById("edit-categoria").value) || 0
-    };
+  document.getElementById("editEquipoForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    console.log(JSON.stringify(payload) + 'a enviar')
+  const payload = {
+    id: parseInt(document.getElementById("edit-id").value),
+    izena: document.getElementById("edit-nombre").value.trim(),
+    deskribapena: document.getElementById("edit-descripcion").value.trim(),
+    marca: document.getElementById("edit-marca").value.trim() || null,
+    modelo: document.getElementById("edit-modelo").value.trim() || null,
+    idKategoria: parseInt(document.getElementById("edit-categoria").value) || 0
+  };
 
-
-    fetch(backendURL, {
+  try {
+    const res = await fetch(backendURL, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
+        "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify(payload)
-    })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          bootstrap.Modal.getInstance(document.getElementById("editEquipoModal")).hide();
-          actualizarListaEquipos();
-          new bootstrap.Modal(document.getElementById("editSuccessModal")).show();
-        } else alert("Error: " + data.message);
-      });
-  });
+    });
+
+    const data = await res.json();
+    if (!data.success) return alert(data.message);
+
+    bootstrap.Modal.getInstance(document.getElementById("editEquipoModal")).hide();
+    actualizarListaEquipos();
+    new bootstrap.Modal(document.getElementById("editSuccessModal")).show();
+
+  } catch (error) {
+    console.error(error);
+    alert("Error al actualizar equipo");
+  }
+});
+
 
   let equipoAEliminarId = null;
 

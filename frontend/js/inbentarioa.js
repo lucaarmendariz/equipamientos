@@ -273,7 +273,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`../backend/controladores/inbentarioController.php`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'DELETE', etiketa: etiquetaSeleccionada }),
+        body: JSON.stringify({ action: 'DELETE', etiketa: etiketa }),
         headers,
       });
       const data = await response.json();
@@ -282,7 +282,8 @@ document.addEventListener("DOMContentLoaded", () => {
         row.remove();
         const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
         if (stockCell) stockCell.textContent = data.nuevo_stock;
-        console.log(data.message);
+          console.log(data.message);
+        mostrarInfo("Etiqueta eliminada correctamente");
       } else {
         alert(data.message || 'Error al eliminar la etiqueta'); // Puedes reemplazar esto también por otro modal
       }
