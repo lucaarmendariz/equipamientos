@@ -1,21 +1,40 @@
 const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ===== ELEMENTOS =====
+  // ===== ELEMENTOS DEL DOM =====
   const inventoryList = document.getElementById('inventory-list');
   const equipoSelect = document.getElementById('equipo-select');
   const nuevaCategoriaBtn = document.getElementById('nueva-categoria-btn');
-  const nuevaCategoriaModal = new bootstrap.Modal(document.getElementById('nuevaCategoriaModal'));
+  const nuevaCategoriaModalEl = document.getElementById('nuevaCategoriaModal');
   const nuevaCategoriaInput = document.getElementById('nueva-categoria-input');
   const guardarCategoriaBtn = document.getElementById('guardar-categoria');
-  const searchInput = document.getElementById("searchInput");
+  const searchInput = document.getElementById('searchInput');
 
   const carritoBtn = document.getElementById('carrito-btn');
   const cestaModalEl = document.getElementById('cestaModal');
-  const cestaModal = new bootstrap.Modal(cestaModalEl);
   const cestaList = document.getElementById('cesta-list');
   const vaciarCestaBtn = document.getElementById('vaciar-cesta');
   const finalizarCompraBtn = document.getElementById('finalizar-compra');
+  const eliminarSeleccionadasBtn = document.getElementById('eliminar-seleccionadas');
+
+  // ===== Inicializamos modales de Bootstrap solo si existen =====
+  const nuevaCategoriaModal = nuevaCategoriaModalEl ? new bootstrap.Modal(nuevaCategoriaModalEl) : null;
+  const cestaModal = cestaModalEl ? new bootstrap.Modal(cestaModalEl) : null;
+
+  const eliminarEtiquetaModalEl = document.getElementById('eliminarEtiquetaModal');
+  const eliminarEtiquetaModal = eliminarEtiquetaModalEl ? new bootstrap.Modal(eliminarEtiquetaModalEl) : null;
+
+  const eliminarEtiquetasMasivasModalEl = document.getElementById('eliminarEtiquetasMasivasModal');
+  const eliminarEtiquetasMasivasModal = eliminarEtiquetasMasivasModalEl ? new bootstrap.Modal(eliminarEtiquetasMasivasModalEl) : null;
+
+  const etiquetaAEliminarSpan = document.getElementById('etiqueta-a-eliminar');
+  const confirmarEliminarEtiquetaBtn = document.getElementById('confirmarEliminarEtiqueta');
+  const cantidadEtiquetasSpan = document.getElementById('cantidad-etiquetas');
+  const confirmarEliminarEtiquetasMasivasBtn = document.getElementById('confirmarEliminarEtiquetasMasivas');
+
+  let etiquetaSeleccionada = null;
+  let filaSeleccionada = null;
+  let etiquetasSeleccionadas = [];
 
   // ==================
   // CESTA DE LA COMPRA
@@ -23,9 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let cesta = [];
 
   function actualizarCesta() {
+    if (!cestaList) return;
     cestaList.innerHTML = '';
     if (cesta.length === 0) {
-      cestaList.innerHTML = '<li class="list-group-item">La cesta está vacía</li>';
+      cestaList.innerHTML = '<li class="list-group-item">Saskia hutsik dago</li>';
       return;
     }
 
@@ -35,13 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Checkbox para decidir si se crean etiquetas automáticamente
       li.innerHTML = `
-      <div>
-        <strong>${item.nombre}</strong> - Cantidad: ${item.cantidad}
-      </div>
-      <div class="form-check form-check-inline">
-      </div>
-      <button class="btn btn-sm btn-outline-danger" onclick="eliminarItem(${index})">&times;</button>
-    `;
+        ${item.nombre} - Kantitatea: ${item.cantidad}
+        <button class="btn btn-sm btn-outline-danger" onclick="eliminarItem(${index})">&times;</button>
+      `;
       cestaList.appendChild(li);
     });
   }
@@ -52,16 +68,18 @@ document.addEventListener("DOMContentLoaded", () => {
     actualizarCesta();
   };
 
-  vaciarCestaBtn.addEventListener('click', () => {
+  vaciarCestaBtn?.addEventListener('click', () => {
     cesta = [];
     actualizarCesta();
   });
 
-  carritoBtn.addEventListener('click', () => {
+  carritoBtn?.addEventListener('click', () => {
     actualizarCesta();
-    cestaModal.show();
+    cestaModal?.show();
   });
 
+  // =========== INVENTARIO ===========
+=======
   // ================== INVENTARIO ==================
 
   const headers = {
@@ -76,7 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
           console.error('Error al cargar inventario:', res.message);
           return;
         }
-        console.log('Inventario cargado:', res.data);
         inventoryList.innerHTML = '';
         res.data.forEach(item => {
           const div = document.createElement('div');
@@ -89,7 +106,6 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="col-ekintzak">
               <input type="checkbox" class="select-etiqueta"/>
               <button class="btn btn-sm btn-outline-danger eliminar-btn">🗑️</button>
-              
             </span>
           `;
           inventoryList.appendChild(div);
@@ -98,24 +114,17 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error('Error al cargar inventario:', err));
   }
 
-  // ============================
-  // BÚSQUEDA GLOBAL DE EQUIPOS
-  // ============================
-  if (searchInput && inventoryList) {
-    searchInput.addEventListener("input", () => {
-      const filtro = searchInput.value.trim().toLowerCase();
-      const filas = inventoryList.querySelectorAll(".data-row");
-
-      filas.forEach(fila => {
-        const textoFila = fila.innerText.toLowerCase();
-        fila.style.display = textoFila.includes(filtro) ? "" : "none";
-      });
+  // ======= BÚSQUEDA GLOBAL =======
+  searchInput?.addEventListener("input", () => {
+    const filtro = searchInput.value.trim().toLowerCase();
+    const filas = inventoryList.querySelectorAll(".data-row");
+    filas.forEach(fila => {
+      const textoFila = fila.innerText.toLowerCase();
+      fila.style.display = textoFila.includes(filtro) ? "" : "none";
     });
-  }
+  });
 
-  // ================
-  //  EQUIPAMIENTOS
-  // ================
+  // ======= CARGAR EQUIPOS =======
   function cargarEquipamientos() {
     fetch('../backend/controladores/ekipamenduakController.php', { headers })
       .then(res => res.json())
@@ -135,16 +144,14 @@ document.addEventListener("DOMContentLoaded", () => {
       .catch(err => console.error('Error fetching equipamientos:', err));
   }
 
-  //==================
-  // MODAL DE COMPRA 
-  //==================
-  nuevaCategoriaBtn.onclick = () => {
+  // ===== MODAL DE COMPRA =====
+  nuevaCategoriaBtn?.addEventListener('click', () => {
     nuevaCategoriaInput.value = '';
     guardarCategoriaBtn.textContent = 'Gehitu saskira';
-    nuevaCategoriaModal.show();
-  };
+    nuevaCategoriaModal?.show();
+  });
 
-  guardarCategoriaBtn.onclick = () => {
+  guardarCategoriaBtn?.addEventListener('click', () => {
     const idEquipo = parseInt(equipoSelect.value);
     const cantidad = parseInt(nuevaCategoriaInput.value.trim());
 
@@ -158,14 +165,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const nombreEquipo = equipoSelect.options[equipoSelect.selectedIndex].text;
-
     cesta.push({ id: idEquipo, nombre: nombreEquipo, cantidad });
-    Swal.fire({ icon: 'success', title: 'Añadido', text: `${nombreEquipo} Saskira gehituta` });
-    nuevaCategoriaModal.hide();
+    Swal.fire({ icon: 'success', title: 'Gehituta', text: `${nombreEquipo} Saskira gehituta` });
+    nuevaCategoriaModal?.hide();
     nuevaCategoriaInput.value = '';
     equipoSelect.value = '';
     actualizarCesta();
-  };
+  });
 
   // ==================
   // FINALIZAR COMPRA
@@ -235,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   // ==================
-  // ELIMINAR ETIQUETA
+  // ELIMINAR ETIQUETA INDIVIDUAL
   // ==================
   function mostrarConfirmacionEtiketa(message) {
     return new Promise((resolve) => {
@@ -269,12 +275,13 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!confirmado) return;
 
     try {
-      const response = await fetch('../backend/controladores/inbentarioController.php', {
+      const response = await fetch(`../backend/controladores/inbentarioController.php`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'DELETE', etiketa: etiquetaSeleccionada })
         headers,
         body: JSON.stringify({ action: 'DELETE', etiketa })
       });
-
       const data = await response.json();
 
       if (data.success) {

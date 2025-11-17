@@ -1,3 +1,9 @@
+/* Contenedor principal de la lista */
+#inbentarioa-container {
+  width: 100%; /* Ocupa todo el ancho disponible */
+  max-width: 1200px; /* Limita el máximo para no romper el diseño */
+  margin: 0 auto; /* Centrar horizontalmente */
+=======
 @import 'style.scss';
 
 /* === RESET === */
@@ -49,227 +55,46 @@ header {
   margin-bottom: 1rem;
 }
 
-/* === CONTENEDOR GENERAL === */
-.dashboard-container {
-  width: 100%;
-  padding: 1rem;
-  flex-grow: 1;
-}
-
-/* === GRID DE COLUMNAS === */
+/* Grid de dashboard */
 .dashboard-grid {
   display: flex;
+  justify-content: center; /* Centra la columna */
   gap: 20px;
-  flex-wrap: nowrap;
-}
-
-.dashboard-column {
-  flex: 1;
-  min-width: 0;
-  background-color: var(--blue-bg-medium);
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  min-height: 300px;
-  max-height: 600px;
-  overflow-y: auto;
-}
-
-.dashboard-column h2 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--blue-dark);
-  border-bottom: 2px solid var(--blue-light);
-  padding-bottom: 0.5rem;
-}
-
-/* === SCROLLBAR === */
-.dashboard-column::-webkit-scrollbar {
-  width: 6px;
-}
-.dashboard-column::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-/* === TABLAS === */
-.equipamientos-grid {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: 0.25rem;
-}
-
-/* === FILAS Y CABECERA === */
-.data-row,
-.data-header {
-  display: grid;
-  grid-template-columns: 2fr 1.2fr 1.5fr 0.5fr; /* Ajusta según tu necesidad */
-  align-items: center;
-  padding: 0.6rem 1rem;
-  border-radius: 6px;
-  font-weight: 500;
-  gap: 0.5rem; /* espacio entre columnas */
-}
-
-.data-header {
-  background-color: var(--blue-bg-dark);
-  color: var(--blue-darkest);
-  font-weight: 700;
-}
-
-/* === CELDAS === */
-.data-row span,
-.data-header span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.data-row span:last-child {
-  flex: 0 0 auto; /* que no se encoja el botón */
-}
-
-/* === COLUMNA DE ACCIONES === */
-.col-ekintzak {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.7rem;
-  white-space: nowrap;
-}
-
-.col-ekintzak i {
-  font-size: 1.1rem;
-  vertical-align: middle;
-}
-
-/* === BOTONES === */
-.col-ekintzak button {
-  background-color: var(--blue-dark);
-  border: none;
-  border-radius: 6px;
-  color: white;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  padding: 4px 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.col-ekintzak button:hover {
-  background-color: var(--blue-medium);
-}
-
-/* === FILAS ALTERNAS Y HOVER === */
-.data-row:nth-child(even) {
-  background-color: #cce4f6;
-}
-.data-row:nth-child(odd) {
-  background-color: #e3f2fd;
-}
-.data-row:hover {
-  background-color: #b3d9f0;
-  cursor: pointer;
-}
-
-/* === TABLA INVENTARIO === */
-.dashboard-column:first-child .data-row,
-.dashboard-column:first-child .data-header {
-  display: grid;
-  grid-template-columns: 2fr 1.2fr 1.5fr 0.5fr;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* === BÚSQUEDA === */
-.search-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }
 
-.search-wrapper {
-  position: relative;
-  flex: 1;
-  min-width: 250px;
+/* Columna específica */
+.dashboard-column {
+  flex: 1 1 90%; /* Ocupa casi todo el ancho de la página */
+  min-width: 700px; /* Ancho mínimo para que no se comprima demasiado */
 }
 
-.search-wrapper input {
-  width: 100%;
-  padding: 10px 10px 10px 35px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-}
-
-.search-icon {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-  color: #777;
-  pointer-events: none;
-}
-
-/* === BOTÓN AÑADIR === */
-.add-button {
-  background-color: var(--blue-dark);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 20px;
+/* Filas de datos */
+.data-row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  font-size: 0.95rem;
-}
-.add-button:hover {
-  background-color: var(--blue-medium);
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
 }
 
-/* === NAVBAR === */
-.navbar {
-  margin-top: 1rem;
-  padding: 0;
-  width: 100%;
-  background: transparent;
-  box-shadow: none;
+/* Cabecera */
+.data-header {
+  font-weight: bold;
+  background-color: #64b5F6;
 }
-.segmento {
-  display: flex;
+
+/* Filas pares */
+.data-row.even {
+  background-color: #fafafa;
+}
+
+/* Filas vacías o mensajes */
+.data-row.empty {
   justify-content: center;
-  align-items: center;
+  font-style: italic;
+  color: #666;
 }
-.nav {
-  display: flex;
-  gap: 1rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-.nav-link {
-  display: block;
-  padding: 0.5rem 1.2rem;
-  background-color: transparent;
-  color: var(--text-color);
-  border-radius: 20px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-.nav-link:hover {
-  background-color: var(--blue-light);
-  color: var(--blue-darkest);
-}
+/* Botón de cerrar en círculo rojo */
 
 .btn-close-circle {
   position: absolute;
