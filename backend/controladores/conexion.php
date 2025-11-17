@@ -1,11 +1,6 @@
 <?php
 declare(strict_types=1);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
 class DB
 {
     private static ?mysqli $conn = null;
@@ -15,8 +10,8 @@ class DB
         if (self::$conn === null) {
             $host = 'localhost';
             $user = 'root';
-            $pass = 'ikasle123';
-            $db = 'erronkae1t2';
+            $pass = '';
+            $db = 'erronkabd';
 
             self::$conn = new mysqli($host, $user, $pass, $db);
             if (self::$conn->connect_errno) {

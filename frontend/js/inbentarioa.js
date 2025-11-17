@@ -78,8 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
     cestaModal?.show();
   });
 
-  // =========== INVENTARIO ===========
-=======
   // ================== INVENTARIO ==================
 
   const headers = {
@@ -202,8 +200,6 @@ document.addEventListener("DOMContentLoaded", () => {
             mostrarInfo(data.message);
             return;
           }
-
-          if (crearEtiquetas) {
             // Mostrar etiquetas recién creadas en inventario con botón eliminar
             data.nuevas_etiquetas.forEach(etk => {
               const etiquetaDiv = document.createElement('div');
@@ -222,7 +218,6 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
               inventoryList.appendChild(etiquetaDiv);
             });
-          }
 
           // Actualizar stock visual si existe
           const stockSpan = document.querySelector(`#stock-${item.id}`);
@@ -278,9 +273,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch(`../backend/controladores/inbentarioController.php`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'DELETE', etiketa: etiquetaSeleccionada })
+        body: JSON.stringify({ action: 'DELETE', etiketa: etiquetaSeleccionada }),
         headers,
-        body: JSON.stringify({ action: 'DELETE', etiketa })
       });
       const data = await response.json();
 

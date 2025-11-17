@@ -108,7 +108,7 @@ try {
             $hasieraData = $input['hasieraData'] ?? date("Y-m-d");
             $cantidad = (int) ($input['cantidad'] ?? 1);
 
-            if (!$idGela || !$idEkipamendu || $cantidad < 0) {
+            if (!$idGela || !$idEkipamendu) {
                 respond(false, [], "Faltan campos obligatorios o cantidad inválida");
             }
 
@@ -116,69 +116,76 @@ try {
             $success = Kokaleku::create($idGela, $idEkipamendu, $cantidad, $hasieraData);
             respond($success, [], $success ? "Kokaleku(s) creado(s) correctamente" : "No hay suficientes unidades disponibles para este equipo");
             break;
-        
-                // ----------------------------
+
+        // ----------------------------
         // MOVER / REASIGNAR KOKALEKU
         // ----------------------------
         case 'PATCH':
+    $etiketa = $input['etiketa'] ?? '';
+    $nuevaGela = (int) ($input['nuevaGela'] ?? 0);
 
-            $etiketa = $input['etiketa'] ?? '';
-            $nuevaGela = (int) ($input['nuevaGela'] ?? 0);
+    if (!$etiketa || !$nuevaGela) {
+        respond(false, [], "Faltan campos obligatorios");
+    }
 
-            if (!$etiketa || !$nuevaGela) {
-                respond(false, [], "Faltan campos obligatorios");
-            }
+    $conn->begin_transaction();
 
-            // 1️⃣ Obtener el kokaleku activo actual
-            $stmt = $conn->prepare("
-                SELECT idEkipamendu, idGela 
-                FROM kokalekua 
-                WHERE etiketa = ? AND amaieraData IS NULL
-                LIMIT 1
-            ");
-            $stmt->bind_param("s", $etiketa);
-            $stmt->execute();
-            $actual = $stmt->get_result()->fetch_assoc();
+    try {
+        // Obtener kokaleku activo
+        $sql = "SELECT idGela, hasieraData FROM kokalekua WHERE etiketa = ? AND amaieraData IS NULL LIMIT 1";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception("Prepare failed (select): " . $conn->error);
+        $stmt->bind_param("s", $etiketa);
+        $stmt->execute();
+        $actual = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+
+        if (!$actual) {
+            $conn->rollback();
+            respond(false, [], "No existe un kokaleku activo para esta etiqueta");
+        }
+
+        // Finalizar kokaleku anterior
+        $fin = date("Y-m-d H:i:s");
+        $sql = "UPDATE kokalekua SET amaieraData = ? WHERE etiketa = ? AND amaieraData IS NULL";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception("Prepare failed (update): " . $conn->error);
+        $stmt->bind_param("ss", $fin, $etiketa);
+        $stmt->execute();
+        if ($stmt->affected_rows < 1) {
             $stmt->close();
+            $conn->rollback();
+            respond(false, [], "No se pudo finalizar la asignación (ninguna fila afectada).");
+        }
+        $stmt->close();
 
-            if (!$actual) {
-                respond(false, [], "No existe un kokaleku activo para esta etiqueta");
-            }
+        // Crear nuevo kokaleku con timestamp completo
+        $inicio = date("Y-m-d H:i:s");
+        $sql = "INSERT INTO kokalekua (etiketa, idGela, hasieraData) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        if (!$stmt) throw new Exception("Prepare failed (insert): " . $conn->error);
+        $stmt->bind_param("sis", $etiketa, $nuevaGela, $inicio);
+        $stmt->execute();
+        if ($stmt->affected_rows < 1) {
+            throw new Exception("Insert failed: " . $stmt->error);
+        }
+        $stmt->close();
 
-            $idEkipamendu = (int) $actual['idEkipamendu'];
+        $conn->commit();
 
-            // 2️⃣ Finalizar el kokaleku anterior (asignar amaieraData)
-            $fin = date("Y-m-d");
+        respond(true, [
+            "etiketa" => $etiketa,
+            "nuevaGela" => $nuevaGela,
+            "hasieraData" => $inicio,
+            "amaieraAnterior" => $fin
+        ], "Kokaleku movido correctamente");
 
-            $stmt = $conn->prepare("
-                UPDATE kokalekua
-                SET amaieraData = ?
-                WHERE etiketa = ? AND amaieraData IS NULL
-            ");
-            $stmt->bind_param("ss", $fin, $etiketa);
-            $stmt->execute();
-            $stmt->close();
+    } catch (Exception $e) {
+        respond(false, [], "No se pudo crear la nueva asignación: " . $e->getMessage());
+    }
+    break;
 
-            // 3️⃣ Crear un nuevo kokaleku con la misma etiqueta
-            $inicio = date("Y-m-d");
 
-            $stmt = $conn->prepare("
-                INSERT INTO kokalekua (etiketa, idGela, idEkipamendu, hasieraData, amaieraData)
-                VALUES (?, ?, ?, ?, NULL)
-            ");
-            $stmt->bind_param("siis", $etiketa, $nuevaGela, $idEkipamendu, $inicio);
-            $stmt->execute();
-            $stmt->close();
-
-            respond(true, [
-                "etiketa" => $etiketa,
-                "nuevaGela" => $nuevaGela,
-                "idEkipamendu" => $idEkipamendu,
-                "hasieraData" => $inicio,
-                "amaieraAnterior" => $fin
-            ], "Kokaleku movido correctamente");
-
-            break;
 
 
         // ----------------------------
