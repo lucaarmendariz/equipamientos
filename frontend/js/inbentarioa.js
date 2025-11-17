@@ -28,16 +28,24 @@ document.addEventListener("DOMContentLoaded", () => {
       cestaList.innerHTML = '<li class="list-group-item">La cesta está vacía</li>';
       return;
     }
+
     cesta.forEach((item, index) => {
       const li = document.createElement('li');
       li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+      // Checkbox para decidir si se crean etiquetas automáticamente
       li.innerHTML = `
-        ${item.nombre} - Cantidad: ${item.cantidad}
-        <button class="btn btn-sm btn-outline-danger" onclick="eliminarItem(${index})">&times;</button>
-      `;
+      <div>
+        <strong>${item.nombre}</strong> - Cantidad: ${item.cantidad}
+      </div>
+      <div class="form-check form-check-inline">
+      </div>
+      <button class="btn btn-sm btn-outline-danger" onclick="eliminarItem(${index})">&times;</button>
+    `;
       cestaList.appendChild(li);
     });
   }
+
 
   window.eliminarItem = function (index) {
     cesta.splice(index, 1);
@@ -57,11 +65,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // ================== INVENTARIO ==================
 
   const headers = {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    };
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${apiKey}`,
+  };
   function cargarInventario() {
-    fetch('../backend/controladores/inbentarioController.php', {headers})
+    fetch('../backend/controladores/inbentarioController.php', { headers })
       .then(r => r.json())
       .then(res => {
         if (!res.success) {
@@ -109,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
   //  EQUIPAMIENTOS
   // ================
   function cargarEquipamientos() {
-    fetch('../backend/controladores/ekipamenduakController.php', {headers})
+    fetch('../backend/controladores/ekipamenduakController.php', { headers })
       .then(res => res.json())
       .then(data => {
         if (!data.success) {
@@ -162,77 +170,103 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==================
   // FINALIZAR COMPRA
   // ==================
+
+
+
   finalizarCompraBtn.addEventListener('click', () => {
     if (cesta.length === 0) {
-      Swal.fire({ icon: 'error', title: 'Errorea', text: 'Saskia hutsik dago!' });
+      mostrarInfo('Saskia hutsik dago!');
       return;
     }
 
-    cesta.forEach(item => {
-      console.log("Enviando compra:", item);
-
+    cesta.forEach((item, index) => {
       fetch('../backend/controladores/inbentarioController.php', {
         method: 'POST',
         headers,
         body: JSON.stringify({
           action: 'STOCK',
           idEkipamendu: item.id,
-          cantidad: item.cantidad
+          cantidad: item.cantidad,
         })
+
       })
         .then(res => res.json())
         .then(data => {
-          console.log("Respuesta JSON:", data);
-
           if (!data.success) {
-            Swal.fire({ icon: 'error', title: 'Errorea', text: data.message });
+            mostrarInfo(data.message);
             return;
           }
 
-          // Mostrar etiquetas recién creadas en inventario con botón eliminar
-          data.nuevas_etiquetas.forEach(etk => {
-            const etiquetaDiv = document.createElement('div');
-            etiquetaDiv.classList.add('data-row');
-            etiquetaDiv.dataset.etiketa = etk;
-            etiquetaDiv.innerHTML = `
+          if (crearEtiquetas) {
+            // Mostrar etiquetas recién creadas en inventario con botón eliminar
+            data.nuevas_etiquetas.forEach(etk => {
+              const etiquetaDiv = document.createElement('div');
+              etiquetaDiv.classList.add('data-row');
+              etiquetaDiv.dataset.etiketa = etk;
+              etiquetaDiv.innerHTML = `
               <span>${item.nombre}</span>
               <span>${etk}</span>
               <span>Kokaleku ezezaguna</span>
               <span class="col-ekintzak">
-              <input type="checkbox" class="select-etiqueta"/>
+                <input type="checkbox" class="select-etiqueta"/>
                 <button class="btn btn-sm btn-primary eliminar-btn">
                   <i class="bi bi-trash"></i>
                 </button>
               </span>
             `;
-            inventoryList.appendChild(etiquetaDiv);
-          });
+              inventoryList.appendChild(etiquetaDiv);
+            });
+          }
 
           // Actualizar stock visual si existe
           const stockSpan = document.querySelector(`#stock-${item.id}`);
           if (stockSpan) stockSpan.textContent = data.nuevo_stock;
 
-          Swal.fire({
-            icon: 'success',
-            title: 'Erosketa osatuta!',
-            text: 'Stock eguneratu da eta etiketak sortu dira.'
-          });
-
+          cestaModal.hide();
           cesta = [];
           actualizarCesta();
         })
         .catch(err => {
-          console.error("Error catch JS:", err);
-          Swal.fire({ icon: 'error', title: 'Errorea', text: 'Ez da erosketa prozesatu.' });
+          console.error(err);
+          mostrarInfo('Ez da erosketa prozesatu.');
         });
     });
   });
 
+
   // ==================
   // ELIMINAR ETIQUETA
   // ==================
+  function mostrarConfirmacionEtiketa(message) {
+    return new Promise((resolve) => {
+      const modalEl = document.getElementById('confirmModal');
+      const modalBody = document.getElementById('confirmModalBody');
+      const yesBtn = document.getElementById('confirmModalYesBtn');
+
+      const modal = new bootstrap.Modal(modalEl);
+      modalBody.textContent = message;
+
+      function onYes() {
+        resolve(true);
+        yesBtn.removeEventListener('click', onYes);
+        modal.hide();
+      }
+
+      yesBtn.addEventListener('click', onYes);
+
+      modalEl.addEventListener('hidden.bs.modal', () => {
+        resolve(false); // Si se cierra el modal sin pulsar "Sí"
+        yesBtn.removeEventListener('click', onYes);
+      }, { once: true });
+
+      modal.show();
+    });
+  }
+
+
   async function eliminarEtiqueta(row, etiketa) {
-    if (!confirm(`¿Deseas eliminar la etiqueta ${etiketa}?`)) return;
+    const confirmado = await mostrarConfirmacionEtiketa(`¿Deseas eliminar la etiqueta ${etiketa}?`);
+    if (!confirmado) return;
 
     try {
       const response = await fetch('../backend/controladores/inbentarioController.php', {
@@ -245,21 +279,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (data.success) {
         row.remove();
-
         const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
         if (stockCell) stockCell.textContent = data.nuevo_stock;
-
         console.log(data.message);
       } else {
-        alert(data.message || 'Error al eliminar la etiqueta');
+        alert(data.message || 'Error al eliminar la etiqueta'); // Puedes reemplazar esto también por otro modal
       }
     } catch (err) {
       console.error(err);
-      alert('Error en la petición al servidor');
+      alert('Error en la petición al servidor'); // También se puede reemplazar por modal
     }
   }
 
+
   // Delegación de eventos para eliminar etiquetas
+
+  function mostrarInfo(message) {
+    const modalEl = document.getElementById('infoModal');
+    const modalBody = document.getElementById('infoModalBody');
+    modalBody.textContent = message;
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+  }
+
+
   inventoryList.addEventListener('click', (e) => {
     const button = e.target.closest('.eliminar-btn');
     if (!button) return;
@@ -269,37 +312,38 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById('eliminar-seleccionadas').addEventListener('click', async () => {
-  const selectedCheckboxes = document.querySelectorAll('.select-etiqueta:checked');
-  if (selectedCheckboxes.length === 0) {
-    alert('No hay etiquetas seleccionadas');
-    return;
-  }
-
-  if (!confirm(`¿Deseas eliminar ${selectedCheckboxes.length} etiquetas?`)) return;
-
-  const etiquetas = Array.from(selectedCheckboxes).map(cb => cb.closest('.data-row').dataset.etiketa);
-
-  try {
-    const response = await fetch('../backend/controladores/inbentarioController.php', {
-      method: 'POST', // Usamos POST para enviar array de etiquetas
-      headers,
-      body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-      // Eliminar filas visualmente
-      selectedCheckboxes.forEach(cb => cb.closest('.data-row').remove());
-      alert(data.message);
-    } else {
-      alert(data.message || 'Error al eliminar etiquetas');
+    const selectedCheckboxes = document.querySelectorAll('.select-etiqueta:checked');
+    if (selectedCheckboxes.length === 0) {
+      mostrarInfo('No hay etiquetas seleccionadas');
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    alert('Error al contactar con el servidor');
-  }
-});
+
+    const confirmado = await mostrarConfirmacionEtiketa(`¿Deseas eliminar ${selectedCheckboxes.length} etiquetas?`);
+    if (!confirmado) return;
+
+    const etiquetas = Array.from(selectedCheckboxes).map(cb => cb.closest('.data-row').dataset.etiketa);
+
+    try {
+      const response = await fetch('../backend/controladores/inbentarioController.php', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        selectedCheckboxes.forEach(cb => cb.closest('.data-row').remove());
+        mostrarInfo(data.message);
+      } else {
+        mostrarInfo(data.message || 'Error al eliminar etiquetas');
+      }
+    } catch (err) {
+      console.error(err);
+      mostrarInfo('Error al contactar con el servidor');
+    }
+  });
+
 
   // ===== INICIAL =====
   cargarInventario();
