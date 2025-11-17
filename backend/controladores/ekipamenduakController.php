@@ -22,19 +22,48 @@ $response = [
 try {
     switch ($method) {
         case 'GET':
-            // Listar todos los equipamientos
-            $sql = "SELECT id, izena, deskribapena, marka, modelo, stock, idKategoria FROM ekipamendua ORDER BY izena";
-            $result = $conn->query($sql);
-            if (!$result) throw new Exception("Error al obtener equipos: " . $conn->error);
+            $id = intval($_GET['id'] ?? 0);
 
-            $equipos = [];
-            while ($row = $result->fetch_assoc()) {
-                $equipos[] = $row;
+            if ($id > 0) {
+                $equipo = Ekipamendua::getById($id);
+                if (!$equipo)
+                    throw new Exception("Equipo no encontrado");
+
+                // Obtener nombre de categoría
+                $stmt = $conn->prepare("SELECT izena FROM kategoria WHERE id = ?");
+                $idKategoria = $equipo->getIdKategoria();
+                $stmt->bind_param("i", $idKategoria);
+                $stmt->execute();
+                $row = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+
+                $data = $equipo->toArray();
+                $data['kategoria'] = $row['izena'] ?? null;
+
+                $response['success'] = true;
+                $response['data'] = $data;
+
+            } else {
+                // Listar todos los equipamientos con nombre de categoría
+                $sql = "SELECT e.id, e.izena, e.deskribapena, e.marka, e.modelo, e.stock, e.idKategoria, k.izena AS kategoria
+                FROM ekipamendua e
+                LEFT JOIN kategoria k ON e.idKategoria = k.id
+                ORDER BY e.izena";
+                $result = $conn->query($sql);
+                if (!$result)
+                    throw new Exception("Error al obtener equipos: " . $conn->error);
+
+                $equipos = [];
+                while ($row = $result->fetch_assoc()) {
+                    $equipos[] = $row;
+                }
+
+                $response['success'] = true;
+                $response['data'] = $equipos;
             }
-
-            $response['success'] = true;
-            $response['data'] = $equipos;
             break;
+
+
 
         case 'POST':
             // Crear nuevo equipamiento
@@ -45,10 +74,12 @@ try {
             $stock = intval($input['stock'] ?? 0); // si no hay stock, 0
             $idKategoria = intval($input['idKategoria'] ?? 0);
 
-            if (!$nombre) throw new Exception("El nombre del equipo es obligatorio");
+            if (!$nombre)
+                throw new Exception("El nombre del equipo es obligatorio");
 
             $stmt = $conn->prepare("INSERT INTO ekipamendua (izena, deskribapena, marka, modelo, stock, idKategoria) VALUES (?, ?, ?, ?, ?, ?)");
-            if (!$stmt) throw new Exception("Error en prepare: " . $conn->error);
+            if (!$stmt)
+                throw new Exception("Error en prepare: " . $conn->error);
             $stmt->bind_param("ssssii", $nombre, $descripcion, $marka, $modelo, $stock, $idKategoria);
             $stmt->execute();
             $nuevoId = $stmt->insert_id;
@@ -69,7 +100,8 @@ try {
                     $lastNum++;
                     $codigo = 'ETK' . sprintf('%04d', $lastNum);
                     $item = Inbentarioa::create($codigo, $nuevoId, $hoy);
-                    if (!$item) throw new Exception("Error al crear inventario para etiqueta $codigo");
+                    if (!$item)
+                        throw new Exception("Error al crear inventario para etiqueta $codigo");
                     $nuevasEtiquetas[] = $codigo;
                 }
             }
@@ -82,7 +114,8 @@ try {
         case 'PUT':
             // Editar equipamiento (no permite cambiar stock)
             $id = intval($input['id'] ?? 0);
-            if (!$id) throw new Exception("ID del equipo requerido");
+            if (!$id)
+                throw new Exception("ID del equipo requerido");
 
             $nombre = trim($input['izena'] ?? '');
             $descripcion = trim($input['deskribapena'] ?? '');
@@ -91,7 +124,8 @@ try {
             $idKategoria = intval($input['idKategoria'] ?? 0);
 
             $stmt = $conn->prepare("UPDATE ekipamendua SET izena = ?, deskribapena = ?, marka = ?, modelo = ?, idKategoria = ? WHERE id = ?");
-            if (!$stmt) throw new Exception("Error en prepare: " . $conn->error);
+            if (!$stmt)
+                throw new Exception("Error en prepare: " . $conn->error);
             $stmt->bind_param("ssssii", $nombre, $descripcion, $marka, $modelo, $idKategoria, $id);
             $stmt->execute();
             $stmt->close();
@@ -102,10 +136,12 @@ try {
 
         case 'DELETE':
             $id = intval($input['id'] ?? 0);
-            if (!$id) throw new Exception("ID del equipo requerido para eliminar");
+            if (!$id)
+                throw new Exception("ID del equipo requerido para eliminar");
 
             $stmt = $conn->prepare("DELETE FROM ekipamendua WHERE id = ?");
-            if (!$stmt) throw new Exception("Error en prepare: " . $conn->error);
+            if (!$stmt)
+                throw new Exception("Error en prepare: " . $conn->error);
             $stmt->bind_param("i", $id);
             $stmt->execute();
             $stmt->close();

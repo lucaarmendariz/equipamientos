@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         header.innerHTML = `
         <span>Nombre</span>
         <span>Stock</span>
-        <span>Marca</span>
+        <span>Marka</span>
         <span>Modelo</span>
         <span>Categoría</span>
         <span>Acciones</span>
@@ -308,12 +308,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const nombre = document.getElementById("nombre").value.trim();
   const descripcion = document.getElementById("descripcion").value.trim();
-  const marca = document.getElementById("marca").value.trim() || null;
+  const marka = document.getElementById("marka").value.trim() || null;
   const modelo = document.getElementById("modelo").value.trim() || null;
   const stock = parseInt(document.getElementById("stock").value) || 0;
   const idKategoria = parseInt(document.getElementById("categoria").value) || 0;
 
-  const payload = { izena: nombre, deskribapena: descripcion, marca, modelo, stock, idKategoria };
+  const payload = { izena: nombre, deskribapena: descripcion, marka, modelo, stock, idKategoria };
 
   try {
     // 1️⃣ Crear equipo
@@ -361,6 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Editar equipo
   function editarEquipo(id) {
+    console.log("hola", id);
     const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
@@ -370,12 +371,12 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(data => {
         if (!data.success || !data.data) return alert("Equipo no encontrado");
         const e = data.data;
+        console.log(e);
         document.getElementById("edit-id").value = e.id;
         document.getElementById("edit-nombre").value = e.izena;
         document.getElementById("edit-descripcion").value = e.deskribapena ?? "";
-        document.getElementById("edit-marca").value = e.marka ?? "";
+        document.getElementById("edit-marka").value = e.marka ?? "";
         document.getElementById("edit-modelo").value = e.modelo ?? "";
-        document.getElementById("edit-stock").value = e.stock ?? 0;
         document.getElementById("edit-categoria").value = e.idKategoria ?? "";
         new bootstrap.Modal(document.getElementById("editEquipoModal")).show();
       });
@@ -388,7 +389,7 @@ document.addEventListener("DOMContentLoaded", () => {
     id: parseInt(document.getElementById("edit-id").value),
     izena: document.getElementById("edit-nombre").value.trim(),
     deskribapena: document.getElementById("edit-descripcion").value.trim(),
-    marca: document.getElementById("edit-marca").value.trim() || null,
+    marka: document.getElementById("edit-marka").value.trim() || null,
     modelo: document.getElementById("edit-modelo").value.trim() || null,
     idKategoria: parseInt(document.getElementById("edit-categoria").value) || 0
   };
