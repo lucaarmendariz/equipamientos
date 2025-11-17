@@ -4,9 +4,9 @@ require_once "../controladores/conexion.php"; // aquí está la clase DB
 
 class Gela
 {
-    private int $id;
-    private string $izena;
-    private ?string $taldea;
+    public int $id;
+    public string $izena;
+    public ?string $taldea;
 
     public function __construct(int $id, string $izena, ?string $taldea)
     {

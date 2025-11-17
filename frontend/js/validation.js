@@ -1,19 +1,19 @@
 document.addEventListener("DOMContentLoaded", () => {
  // --- CONTROL DE SESIÓN Y ROLES ---
   const role = sessionStorage.getItem("userRole");
+  const apiKey = sessionStorage.getItem("apiKey");
 
-  if (!role) {
-    alert("Sesión no válida. Por favor, inicia sesión de nuevo.");
+  if (!apiKey || !role) {
+    alert("Sesión no válida. Inicia sesión nuevamente.");
     window.location.href = "../frontend/index.html";
     return;
   }
 
-  // Si NO es admin, ocultamos la columna y el botón de "Erabiltzaileak"
   if (role.toLowerCase() !== "a") {
+    // ocultar zonas admin
     const usuariosContainer = document.getElementById("usuarios-container");
     const usuariosLink = Array.from(document.querySelectorAll("nav a"))
       .find(link => link.textContent.includes("Erabiltzaileak"));
-
     if (usuariosContainer) usuariosContainer.style.display = "none";
     if (usuariosLink) usuariosLink.style.display = "none";
   }

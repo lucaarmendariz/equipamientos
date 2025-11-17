@@ -1,3 +1,5 @@
+const apiKey = sessionStorage.getItem("apiKey");
+
 document.addEventListener("DOMContentLoaded", () => {
   // ===== ELEMENTOS DEL DOM =====
   const inventoryList = document.getElementById('inventory-list');
@@ -73,8 +75,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // =========== INVENTARIO ===========
+=======
+  // ================== INVENTARIO ==================
+
+  const headers = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    };
   function cargarInventario() {
-    fetch('../backend/controladores/inbentarioController.php')
+    fetch('../backend/controladores/inbentarioController.php', {headers})
       .then(r => r.json())
       .then(res => {
         if (!res.success) {
@@ -113,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ======= CARGAR EQUIPOS =======
   function cargarEquipamientos() {
-    fetch('../backend/controladores/ekipamenduakController.php')
+    fetch('../backend/controladores/ekipamenduakController.php', {headers})
       .then(res => res.json())
       .then(data => {
         if (!data.success) {
@@ -170,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
     cesta.forEach(item => {
       fetch('../backend/controladores/inbentarioController.php', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify({
           action: 'STOCK',
           idEkipamendu: item.id,
@@ -241,6 +250,8 @@ document.addEventListener("DOMContentLoaded", () => {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'DELETE', etiketa: etiquetaSeleccionada })
+        headers,
+        body: JSON.stringify({ action: 'DELETE', etiketa })
       });
       const data = await response.json();
 
@@ -277,6 +288,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   confirmarEliminarEtiquetasMasivasBtn?.addEventListener('click', async () => {
     if (etiquetasSeleccionadas.length === 0) return;
+  try {
+    const response = await fetch('../backend/controladores/inbentarioController.php', {
+      method: 'POST', // Usamos POST para enviar array de etiquetas
+      headers,
+      body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
+    });
 
     try {
       const response = await fetch(`../backend/controladores/inbentarioController.php`, {

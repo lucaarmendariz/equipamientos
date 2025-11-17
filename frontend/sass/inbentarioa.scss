@@ -3,6 +3,56 @@
   width: 100%; /* Ocupa todo el ancho disponible */
   max-width: 1200px; /* Limita el máximo para no romper el diseño */
   margin: 0 auto; /* Centrar horizontalmente */
+=======
+@import 'style.scss';
+
+/* === RESET === */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* === BASE === */
+body {
+  font-family: 'Inria Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--blue-bg-lightest);
+  color: var(--text-color);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* === HEADER === */
+header {
+  background-color: var(--blue-dark);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menu-icon,
+.user-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+
+
+/* === TEXTO DE BIENVENIDA === */
+.welcome-text {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--blue-darkest);
+  margin-bottom: 1rem;
 }
 
 /* Grid de dashboard */
