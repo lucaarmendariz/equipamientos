@@ -217,22 +217,38 @@ document.addEventListener("DOMContentLoaded", () => {
         },
         body: JSON.stringify({ id: categoriaAEliminarId })
       });
+
       const data = await res.json();
-      if (!data.success) return alert(data.message);
 
-      const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
-      document.getElementById("categoriaSuccessMessage").textContent = data.message || "Categoría eliminada correctamente.";
-      successModal.show();
+      // Ocultar modal de confirmación
+      bootstrap.Modal.getInstance(document.getElementById("confirmCategoriaDeleteModal")).hide();
 
-      cargarCategoriasTabla();
-      cargarCategorias();
+      if (data.success) {
+        // Modal de éxito
+        const successModal = new bootstrap.Modal(document.getElementById("categoriaSuccessModal"));
+        document.getElementById("categoriaSuccessMessage").textContent = data.message || "Categoría eliminada correctamente.";
+        successModal.show();
+
+        // Actualizar tabla y selects
+        cargarCategoriasTabla();
+        cargarCategorias();
+      } else {
+        // Modal de error
+        const errorModalBody = document.querySelector("#errorModal .modal-body");
+        errorModalBody.textContent = data.message;
+        const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+        errorModal.show();
+      }
     } catch (error) {
-      console.error("Error al eliminar categoría:", error);
+      bootstrap.Modal.getInstance(document.getElementById("confirmCategoriaDeleteModal")).hide();
+      const errorModalBody = document.querySelector("#errorModal .modal-body");
+      errorModalBody.textContent = "Error al eliminar la categoria, tiene equipamientos con esta categoria asignada.";
+      new bootstrap.Modal(document.getElementById("errorModal")).show();
     } finally {
       categoriaAEliminarId = null;
-      bootstrap.Modal.getInstance(document.getElementById("confirmCategoriaDeleteModal")).hide();
     }
   });
+
 
 
 
@@ -304,59 +320,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Crear equipo
   document.getElementById("addEquipoForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const nombre = document.getElementById("nombre").value.trim();
-  const descripcion = document.getElementById("descripcion").value.trim();
-  const marka = document.getElementById("marka").value.trim() || null;
-  const modelo = document.getElementById("modelo").value.trim() || null;
-  const stock = parseInt(document.getElementById("stock").value) || 0;
-  const idKategoria = parseInt(document.getElementById("categoria").value) || 0;
+    const nombre = document.getElementById("nombre").value.trim();
+    const descripcion = document.getElementById("descripcion").value.trim();
+    const marka = document.getElementById("marka").value.trim() || null;
+    const modelo = document.getElementById("modelo").value.trim() || null;
+    const stock = parseInt(document.getElementById("stock").value) || 0;
+    const idKategoria = parseInt(document.getElementById("categoria").value) || 0;
 
-  const payload = { izena: nombre, deskribapena: descripcion, marka, modelo, stock, idKategoria };
+    const payload = { izena: nombre, deskribapena: descripcion, marka, modelo, stock, idKategoria };
 
-  try {
-    // 1️⃣ Crear equipo
-    const resEquipo = await fetch(backendURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const dataEquipo = await resEquipo.json();
-    if (!dataEquipo.success) return alert(dataEquipo.message);
-
-    const nuevoEquipoId = dataEquipo.data.id; // Suponiendo que el backend devuelve el ID creado
-
-    // 2️⃣ Si stock > 0, crear etiquetas en inventario
-    if (stock > 0) {
-      const resStock = await fetch(categoriasURL.replace('kategoriaController', 'inbentarioController'), {
+    try {
+      // 1️⃣ Crear equipo
+      const resEquipo = await fetch(backendURL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
         },
-        body: JSON.stringify({ action: "STOCK", idEkipamendu: nuevoEquipoId, cantidad: stock })
+        body: JSON.stringify(payload)
       });
 
-      const dataStock = await resStock.json();
-      if (!dataStock.success) return alert(dataStock.message);
+      const dataEquipo = await resEquipo.json();
+      if (!dataEquipo.success) return alert(dataEquipo.message);
+
+      const nuevoEquipoId = dataEquipo.data.id; // Suponiendo que el backend devuelve el ID creado
+
+      // 2️⃣ Si stock > 0, crear etiquetas en inventario
+      if (stock > 0) {
+        const resStock = await fetch(categoriasURL.replace('kategoriaController', 'inbentarioController'), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({ action: "STOCK", idEkipamendu: nuevoEquipoId, cantidad: stock })
+        });
+
+        const dataStock = await resStock.json();
+        if (!dataStock.success) return alert(dataStock.message);
+      }
+
+      // 3️⃣ Cerrar modal, limpiar formulario y recargar lista
+      bootstrap.Modal.getInstance(document.getElementById("addEquipoModal")).hide();
+      e.target.reset();
+      actualizarListaEquipos();
+      new bootstrap.Modal(document.getElementById("successModal")).show();
+
+    } catch (error) {
+      console.error(error);
+      alert("Error al crear equipo o actualizar inventario");
     }
-
-    // 3️⃣ Cerrar modal, limpiar formulario y recargar lista
-    bootstrap.Modal.getInstance(document.getElementById("addEquipoModal")).hide();
-    e.target.reset();
-    actualizarListaEquipos();
-    new bootstrap.Modal(document.getElementById("successModal")).show();
-
-  } catch (error) {
-    console.error(error);
-    alert("Error al crear equipo o actualizar inventario");
-  }
-});
+  });
 
 
   // Editar equipo
@@ -383,39 +399,39 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   document.getElementById("editEquipoForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const payload = {
-    id: parseInt(document.getElementById("edit-id").value),
-    izena: document.getElementById("edit-nombre").value.trim(),
-    deskribapena: document.getElementById("edit-descripcion").value.trim(),
-    marka: document.getElementById("edit-marka").value.trim() || null,
-    modelo: document.getElementById("edit-modelo").value.trim() || null,
-    idKategoria: parseInt(document.getElementById("edit-categoria").value) || 0
-  };
+    const payload = {
+      id: parseInt(document.getElementById("edit-id").value),
+      izena: document.getElementById("edit-nombre").value.trim(),
+      deskribapena: document.getElementById("edit-descripcion").value.trim(),
+      marka: document.getElementById("edit-marka").value.trim() || null,
+      modelo: document.getElementById("edit-modelo").value.trim() || null,
+      idKategoria: parseInt(document.getElementById("edit-categoria").value) || 0
+    };
 
-  try {
-    const res = await fetch(backendURL, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify(payload)
-    });
+    try {
+      const res = await fetch(backendURL, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
 
-    const data = await res.json();
-    if (!data.success) return alert(data.message);
+      const data = await res.json();
+      if (!data.success) return alert(data.message);
 
-    bootstrap.Modal.getInstance(document.getElementById("editEquipoModal")).hide();
-    actualizarListaEquipos();
-    new bootstrap.Modal(document.getElementById("editSuccessModal")).show();
+      bootstrap.Modal.getInstance(document.getElementById("editEquipoModal")).hide();
+      actualizarListaEquipos();
+      new bootstrap.Modal(document.getElementById("editSuccessModal")).show();
 
-  } catch (error) {
-    console.error(error);
-    alert("Error al actualizar equipo");
-  }
-});
+    } catch (error) {
+      console.error(error);
+      alert("Error al actualizar equipo");
+    }
+  });
 
 
   let equipoAEliminarId = null;
@@ -426,10 +442,9 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.show();
   }
 
-  // Listener del botón "Eliminar" en el modal
+  // Listener del botón "Eliminar" en el modal de confirmación
   document.getElementById("confirmDeleteButton").addEventListener("click", () => {
     if (!equipoAEliminarId) return;
-
 
     fetch(backendURL, {
       method: "DELETE",
@@ -441,20 +456,34 @@ document.addEventListener("DOMContentLoaded", () => {
     })
       .then(res => res.json())
       .then(data => {
+        const confirmModalEl = document.getElementById("confirmDeleteModal");
+        const confirmModal = bootstrap.Modal.getInstance(confirmModalEl);
+        confirmModal.hide(); // Ocultamos el modal de confirmación
+
         if (data.success) {
+          // Equipo eliminado correctamente
           actualizarListaEquipos();
-          new bootstrap.Modal(document.getElementById("editDeleteModal")).show();
+          // Puedes mostrar un modal de éxito si quieres
+          new bootstrap.Modal(document.getElementById("successModal")).show();
         } else {
-          alert("Error: " + data.message);
+          // Mostrar el error en un modal
+          const errorModalBody = document.querySelector("#errorModal .modal-body");
+          errorModalBody.textContent = data.message;
+          const errorModal = new bootstrap.Modal(document.getElementById("errorModal"));
+          errorModal.show();
         }
       })
+      .catch(err => {
+        console.error(err);
+        const errorModalBody = document.querySelector("#errorModal .modal-body");
+        errorModalBody.textContent = "Error inesperado al eliminar el equipo.";
+        new bootstrap.Modal(document.getElementById("errorModal")).show();
+      })
       .finally(() => {
-        // Ocultar modal de confirmación y resetear variable
         equipoAEliminarId = null;
-        const modalEl = document.getElementById("confirmDeleteModal");
-        bootstrap.Modal.getInstance(modalEl).hide();
       });
   });
+
 
 
   // ============================================================

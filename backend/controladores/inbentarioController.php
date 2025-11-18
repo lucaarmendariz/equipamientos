@@ -26,17 +26,18 @@ try {
         // =====================
         case 'GET':
             $sql = "
-                SELECT 
-                    i.etiketa AS etiketa,
-                    e.id AS idEkipamendu,
-                    e.izena AS ekipamendua,
-                    g.taldea AS gela
-                FROM inbentarioa i
-                JOIN ekipamendua e ON i.idEkipamendu = e.id
-                LEFT JOIN kokalekua k ON i.etiketa = k.etiketa
-                LEFT JOIN gela g ON k.idGela = g.id
-                ORDER BY e.izena;
-            ";
+    SELECT 
+        i.etiketa AS etiketa,
+        e.id AS idEkipamendu,
+        e.izena AS ekipamendua,
+        g.taldea AS gela
+    FROM inbentarioa i
+    JOIN ekipamendua e ON i.idEkipamendu = e.id
+    LEFT JOIN kokalekua k ON i.etiketa = k.etiketa AND (k.amaieraData IS NULL OR k.amaieraData = '')
+    LEFT JOIN gela g ON k.idGela = g.id
+    ORDER BY e.izena, i.etiketa;
+";
+
 
             $result = $conn->query($sql);
             if (!$result) throw new Exception("Error al obtener inventario: " . $conn->error);
@@ -259,7 +260,7 @@ try {
 
 
             // Actualizar stock
-            $nuevo_stock = $stock_actual + $cantidad;
+            $nuevo_stock = $cantidad;
             $update = $conn->prepare("UPDATE ekipamendua SET stock = ? WHERE id = ?");
             $update->bind_param("ii", $nuevo_stock, $idEkipamendu);
             $update->execute();

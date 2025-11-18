@@ -113,26 +113,44 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("confirmDeleteMessage").textContent = "¿Seguro que deseas eliminar esta gela?";
     new bootstrap.Modal(document.getElementById("confirmDeleteModal")).show();
   }
+
   document.getElementById("confirmDeleteButton").addEventListener("click", async () => {
-    if (!gelaAEliminarId) return;
-    try {
-      const res = await fetch(backendGelasURL, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
-        body: JSON.stringify({ id: parseInt(gelaAEliminarId) })
-      });
-      const data = await res.json();
-      if (data.success) {
-        actualizarListaGelas();
-        document.getElementById("successMessage").textContent = data.message || "Gela eliminada correctamente.";
-        new bootstrap.Modal(document.getElementById("successModal")).show();
-      } else alert("Error: " + data.message);
-    } catch (err) { console.error(err); alert("Error eliminando gela"); }
-    finally {
-      gelaAEliminarId = null;
-      bootstrap.Modal.getInstance(document.getElementById("confirmDeleteModal")).hide();
+  if (!gelaAEliminarId) return;
+
+  try {
+    const res = await fetch(backendGelasURL, {
+      method: "DELETE",
+      headers: { 
+        "Content-Type": "application/json", 
+        "Authorization": `Bearer ${apiKey}` 
+      },
+      body: JSON.stringify({ id: parseInt(gelaAEliminarId) })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      actualizarListaGelas();
+      document.getElementById("successMessage").textContent = data.message || "Gela eliminada correctamente.";
+      new bootstrap.Modal(document.getElementById("successModal")).show();
+    } else {
+      // Usar modal de error en vez de alert
+      const errorModalMessage = document.getElementById("errorCascadeMessage");
+      errorModalMessage.textContent = "No se puede eliminar la gela porque tiene registros relacionados.";
+      new bootstrap.Modal(document.getElementById("errorCascadeModal")).show();
     }
-  });
+  } catch (err) {
+    console.error(err);
+    const errorModalMessage = document.getElementById("errorCascadeMessage");
+    errorModalMessage.textContent = "Error al contactar con el servidor.";
+    new bootstrap.Modal(document.getElementById("errorCascadeModal")).show();
+  } finally {
+    gelaAEliminarId = null;
+    const confirmModalInstance = bootstrap.Modal.getInstance(document.getElementById("confirmDeleteModal"));
+    if(confirmModalInstance) confirmModalInstance.hide();
+  }
+});
+
 
   // ===================== BÚSQUEDA DE GELAK =====================
   const searchInput = document.getElementById("searchInput");
@@ -221,57 +239,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-
-
-
-
-  // ===================== EDITAR (ABRIR MODAL) =====================
-  async function editarAsignacion(etiketa) {
-    try {
-      const res = await fetch(`${backendKokalekuURL}?etiketa=${etiketa}`, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        }
-      });
-
-      const data = await res.json();
-
-      if (!data.success || !data.data) return alert("Asignación no encontrada");
-
-      const k = data.data;
-
-      document.getElementById("edit-etiketa").value = k.etiketa;
-
-      // Cargar las gelas dinámicamente
-      const resGelas = await fetch(backendGelasURL, {
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        }
-      });
-
-      const gelas = await resGelas.json();
-      const select = document.getElementById("edit-select-gela");
-
-      select.innerHTML = "";
-
-      gelas.data.forEach(g => {
-        const opt = document.createElement("option");
-        opt.value = g.id;
-        opt.textContent = `${g.izena} (${g.taldea ?? "—"})`;
-        if (g.id === k.idGela) opt.selected = true;
-        select.appendChild(opt);
-      });
-
-      new bootstrap.Modal(document.getElementById("editAsignacionModal")).show();
-
-    } catch (err) {
-      console.error(err);
-      alert("Error cargando la asignación");
-    }
-  }
-
   // ===================== LISTAR ASIGNACIONES =====================
   async function actualizarAsignaciones() {
     const container = document.getElementById("asignaciones-list");
@@ -301,14 +268,12 @@ document.addEventListener("DOMContentLoaded", () => {
           <span>${asignacion.taldea ?? "—"}</span>
           <span>${asignacion.hasieraData ?? "—"}</span>
           <span>
-            <button class="btn btn-sm btn-outline-primary me-1 edit-asign-btn" data-id="${asignacion.etiketa}">✏️</button>
             <button class="btn btn-sm btn-outline-warning delete-asign-btn" data-id="${asignacion.etiketa}">🗓️</button>
           </span>
         `;
         container.appendChild(row);
       });
 
-      document.querySelectorAll(".edit-asign-btn").forEach(btn => btn.addEventListener("click", () => editarAsignacion(btn.dataset.id)));
       document.querySelectorAll(".delete-asign-btn").forEach(btn => btn.addEventListener("click", () => confirmarFinalizacion(btn.dataset.id)));
 
     } catch (err) {
@@ -640,8 +605,6 @@ if (searchAsignaciones) {
     });
   });
 }
-
-
 
   // ===================== INICIALIZACIÓN =====================
   actualizarAsignaciones();

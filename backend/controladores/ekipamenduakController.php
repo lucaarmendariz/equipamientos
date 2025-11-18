@@ -85,27 +85,6 @@ try {
             $nuevoId = $stmt->insert_id;
             $stmt->close();
 
-            // Crear inventario automáticamente según el stock
-            if ($stock > 0) {
-                $hoy = date('Y-m-d');
-                // Obtener el último número de etiqueta
-                $result = $conn->query("SELECT etiketa FROM inbentarioa WHERE etiketa LIKE 'ETK%' ORDER BY etiketa DESC LIMIT 1");
-                $lastNum = 0;
-                if ($row = $result->fetch_assoc()) {
-                    $lastNum = intval(substr($row['etiketa'], 3));
-                }
-
-                $nuevasEtiquetas = [];
-                for ($i = 0; $i < $stock; $i++) {
-                    $lastNum++;
-                    $codigo = 'ETK' . sprintf('%04d', $lastNum);
-                    $item = Inbentarioa::create($codigo, $nuevoId, $hoy);
-                    if (!$item)
-                        throw new Exception("Error al crear inventario para etiqueta $codigo");
-                    $nuevasEtiquetas[] = $codigo;
-                }
-            }
-
             $response['success'] = true;
             $response['message'] = "Equipo creado correctamente";
             $response['data'] = ['id' => $nuevoId, 'stock' => $stock ?? 0];
@@ -139,6 +118,22 @@ try {
             if (!$id)
                 throw new Exception("ID del equipo requerido para eliminar");
 
+            // ✅ Verificar si existen etiquetas
+            $stmtCheck = $conn->prepare("SELECT COUNT(*) as cnt FROM inbentarioa WHERE idEkipamendu = ?");
+            $stmtCheck->bind_param("i", $id);
+            $stmtCheck->execute();
+            $row = $stmtCheck->get_result()->fetch_assoc();
+            $stmtCheck->close();
+
+            if ($row['cnt'] > 0) {
+                // Si hay etiquetas, no se puede eliminar
+                $response['success'] = false;
+                $response['message'] = "No se puede eliminar el equipo. Tiene " . $row['cnt'] . " etiquetas asociadas.";
+                echo json_encode($response);
+                exit;
+            }
+
+            // ✅ Si no hay etiquetas, eliminar normalmente
             $stmt = $conn->prepare("DELETE FROM ekipamendua WHERE id = ?");
             if (!$stmt)
                 throw new Exception("Error en prepare: " . $conn->error);
@@ -149,6 +144,7 @@ try {
             $response['success'] = true;
             $response['message'] = "Equipo eliminado correctamente";
             break;
+
 
         default:
             throw new Exception("Método no soportado");
