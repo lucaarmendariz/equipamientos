@@ -91,8 +91,6 @@ class Kokaleku
         return $data;
     }
 
-
-
     public static function getById(string $etiketa): ?array
     {
         $conn = DB::getConnection();

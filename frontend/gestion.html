@@ -26,32 +26,31 @@
 <body>
   <!-- HEADER -->
   <header>
-    <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
+    <div class="menu-icon" aria-label="Menua" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
     <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
     <div class="user-icon">
       <span class="user-name" id="user-name"></span>
       <i class="fas fa-user"></i>
       <div class="user-menu">
-        <a href="perfil.html">Ver perfil</a>
-        <a href="perfil.html#editar">Modificar perfil</a>
-        <a href="#" id="logout-button">Cerrar sesión</a>
+        <a href="perfil.html">Profila ikusi</a>
+        <a href="perfil.html#editar">Profila editatu</a>
+        <a href="#" id="logout-button">Saioa itxi</a>
       </div>
     </div>
   </header>
 
-  <!-- MENÚ DE NAVEGACIÓN -->
   <nav id="main-nav">
     <div class="nav-container">
       <a href="equipamientos.html">Ekipamenduak</a>
       <a href="inbentarioa.html">Inbentarioa</a>
-      <a href="usuarios.html">Erabiltzaileak</a>
-      <a href="gestion.html" class="active">Gestioak</a>
+      <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
+      <a href="gestion.html">Kudeaketak</a>
     </div>
   </nav>
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="dashboard-container container py-4">
-    <h2 class="mb-3 text-center">Gestión de Gelak y Asignaciones</h2>
+    <h2 class="mb-3 text-center">Gelen eta kokalekuen kudeaketa</h2>
 
     <div class="row g-4">
       <!-- COL: Gelak -->
@@ -62,7 +61,7 @@
         </div>
         <div class="text-end mb-3">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGelaModal">
-            <i class="fa fa-plus"></i> Añadir Gela
+            <i class="fa fa-plus"></i> Gehitu Gela
           </button>
         </div>
         <div id="gelak-list">
@@ -72,22 +71,22 @@
 
       <!-- COL: Asignaciones -->
       <div class="col-md-6">
-        <h4>Asignaciones por Etiqueta</h4>
+        <h4>Kokalekuak</h4>
         <div class="mb-3">
           <input type="text" id="searchAsignaciones" class="form-control"
             placeholder="Buscar por etiqueta, gela o taldea">
         </div>
         <div class="text-end mb-3">
           <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addAsignacionModal">
-            <i class="fa fa-plus"></i> Asignar Equipo
+            <i class="fa fa-plus"></i> Kokatu ekipamendua
           </button>
           <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#historialModal"
             id="openHistorialBtn">
-            <i class="fa fa-clock-rotate-left"></i> Ver Historial
+            <i class="fa fa-clock-rotate-left"></i> Ikusi Historial
           </button>
         </div>
         <div id="asignaciones-list">
-          <div class="data-row text-center py-2">Cargando asignaciones...</div>
+          <div class="data-row text-center py-2">Kokalekuak kargatzen...</div>
         </div>
       </div>
     </div>
@@ -99,12 +98,12 @@
       <div class="modal-content">
         <form id="addGelaForm">
           <div class="modal-header">
-            <h5 class="modal-title" id="addGelaModalLabel">Nueva Gela</h5>
+            <h5 class="modal-title" id="addGelaModalLabel">Gela berria</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label for="gela-nombre" class="form-label">Nombre</label>
+              <label for="gela-nombre" class="form-label">Izena</label>
               <input type="text" class="form-control" id="gela-nombre" placeholder="4 digitoko izena" required>
             </div>
             <div class="mb-3">
@@ -113,8 +112,8 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Añadir</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+            <button type="submit" class="btn btn-primary">Gehitu</button>
           </div>
         </form>
       </div>
@@ -128,12 +127,12 @@
         <form id="editGelaForm">
           <input type="hidden" id="edit-gela-id">
           <div class="modal-header">
-            <h5 class="modal-title" id="editGelaModalLabel">Editar Gela</h5>
+            <h5 class="modal-title" id="editGelaModalLabel">Gela editatu</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label for="edit-gela-nombre" class="form-label">Nombre</label>
+              <label for="edit-gela-nombre" class="form-label">Izena</label>
               <input type="text" class="form-control" id="edit-gela-nombre" placeholder="4 digitoko izena" required>
             </div>
             <div class="mb-3">
@@ -142,8 +141,8 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar cambios</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+            <button type="submit" class="btn btn-success">Gorde aldaketak</button>
           </div>
         </form>
       </div>
@@ -157,31 +156,31 @@
       <div class="modal-content">
         <form id="addAsignacionForm">
           <div class="modal-header">
-            <h5 class="modal-title" id="addAsignacionModalLabel">Asignar Kokaleku</h5>
+            <h5 class="modal-title" id="addAsignacionModalLabel">Kokalekua sortu</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
             <div class="mb-3">
               <label for="select-gela" class="form-label">Gela</label>
               <select class="form-select" id="select-gela" required>
-                <option value="">Seleccione gela...</option>
+                <option value="">Aukeratu gela...</option>
               </select>
             </div>
             <div class="mb-3">
-              <label for="select-equipo" class="form-label">Equipo</label>
+              <label for="select-equipo" class="form-label">Ekipamendua</label>
               <select class="form-select" id="select-equipo" required>
-                <option value="">Seleccione equipo...</option>
+                <option value="">Ekipamendua aukeratu...</option>
               </select>
               <small id="stockInfo" class="form-text text-muted mt-1">Stock disponible: 0</small>
             </div>
             <div class="mb-3">
-              <label for="cantidad" class="form-label">Cantidad</label>
+              <label for="cantidad" class="form-label">Kantitatea</label>
               <input type="number" class="form-control" id="cantidad" min="1" value="1" required>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Asignar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+            <button type="submit" class="btn btn-primary">Kokatu</button>
           </div>
         </form>
       </div>
@@ -195,7 +194,7 @@
         <form id="editAsignacionForm">
           <input type="hidden" id="edit-etiketa">
           <div class="modal-header">
-            <h5 class="modal-title">Editar Asignación</h5>
+            <h5 class="modal-title">Kokapena editatu</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
@@ -206,40 +205,12 @@
               <select id="edit-select-gela" class="form-select" required></select>
             </div>
 
-            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <button type="submit" class="btn btn-primary">Gorde aldaketak</button>
           </div>
         </form>
       </div>
     </div>
   </div>
-
-  <!-- MODAL: Finalizar Asignación -->
-  <div class="modal fade" id="endAsignacionModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <form id="endAsignacionForm">
-          <input type="hidden" id="end-etiketa">
-          <div class="modal-header">
-            <h5 class="modal-title">Finalizar Asignación</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="end-amaieraData" class="form-label">Fecha fin</label>
-              <input type="date" id="end-amaieraData" class="form-control" required>
-            </div>
-            <p class="text-muted small">Al asignar una fecha de finalización, la asignación se registra en el historial
-              de kokalekus.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-warning">Finalizar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
 
   <!-- MODAL: Éxito -->
   <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
@@ -248,7 +219,7 @@
         <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i>
         <span id="successMessage"></span>
         <div class="mt-3">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Baieztatu</button>
         </div>
       </div>
     </div>
@@ -259,10 +230,10 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content text-center p-4">
         <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i>
-        <span id="confirmDeleteMessage">¿Seguro que deseas eliminar?</span>
+        <span id="confirmDeleteMessage">Seguru zaude ezabatu nahi duzula?</span>
         <div class="mt-3">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Ezabatu</button>
         </div>
       </div>
     </div>
@@ -272,20 +243,20 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Historial de Kokalekus</h5>
+          <h5 class="modal-title">Kokalekuen Historiala</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <div class="filters mb-2">
             <select id="filterGela" class="form-select form-select-sm">
-              <option value="">Todas las gelak</option>
+              <option value="">Gela guztiak</option>
             </select>
             <input type="date" id="filterStartDate" class="form-control form-control-sm mt-1">
             <input type="date" id="filterEndDate" class="form-control form-control-sm mt-1">
-            <button id="applyFilters" class="btn btn-sm btn-primary mt-1">Filtrar</button>
+            <button id="applyFilters" class="btn btn-sm btn-primary mt-1">Filtratu</button>
           </div>
           <div id="historialList"></div>
-          <div id="loadingHistorial" class="text-center my-2">Cargando...</div>
+          <div id="loadingHistorial" class="text-center my-2">Kargatzen...</div>
         </div>
       </div>
     </div>
@@ -296,21 +267,21 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="confirmModalLabel">Confirmar acción</h5>
+          <h5 class="modal-title" id="confirmModalLabel">Baieztatu kudeaketa</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
-          <p>¿Estás seguro de que deseas mover esta asignación?</p>
-          <label for="nuevoKokalekuSelect" class="form-label">Selecciona la nueva gela:</label>
+          <p>Seguru zaude ekipamendu honek kokalekuz aldatu nahi duzula?</p>
+          <label for="nuevoKokalekuSelect" class="form-label">Aukeratu gela berria:</label>
           <select id="nuevoKokalekuSelect" class="form-select">
-            <option id="optionSelect" value="" >-- Selecciona --</option>
+            <option id="optionSelect" value="" >-- Aukeratu --</option>
             <!-- Opciones generadas dinámicamente desde el backend -->
           </select>
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" id="confirmBtn" class="btn btn-danger">Finalizar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+          <button type="button" id="confirmBtn" class="btn btn-danger">Amaitu</button>
         </div>
       </div>
     </div>
@@ -322,14 +293,14 @@
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
       <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Error</h5>
+        <h5 class="modal-title">Errorea</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
-        <p id="errorCascadeMessage">No se puede eliminar la gela porque existen registros relacionados.</p>
+        <p id="errorCascadeMessage">Ezin da gela ezabatu kokalekuren bat esleituta daukalako.</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">Aceptar</button>
+        <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">Baieztatu</button>
       </div>
     </div>
   </div>
@@ -338,11 +309,11 @@
 
   <!-- FOOTER -->
   <footer class="main-footer mt-5">
-    <div class="footer-content text-center py-3">
-      <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
-      <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
-    </div>
-  </footer>
+        <div class="footer-content text-center py-3">
+            <p>&copy; 2025 Santurtzi LHII. Eskubide guztiak erreserbatuta.</p>
+            <p>Kontaktua: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+        </div>
+    </footer>
 
 </body>
 

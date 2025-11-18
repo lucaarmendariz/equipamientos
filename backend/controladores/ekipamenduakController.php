@@ -45,10 +45,13 @@ try {
 
             } else {
                 // Listar todos los equipamientos con nombre de categoría
-                $sql = "SELECT e.id, e.izena, e.deskribapena, e.marka, e.modelo, e.stock, e.idKategoria, k.izena AS kategoria
-                FROM ekipamendua e
-                LEFT JOIN kategoria k ON e.idKategoria = k.id
-                ORDER BY e.izena";
+                $sql = "SELECT e.id, e.izena, e.deskribapena, e.marka, e.modelo, 
+        (SELECT COUNT(*) FROM inbentarioa i WHERE i.idEkipamendu = e.id) AS stock,
+        e.idKategoria, k.izena AS kategoria
+        FROM ekipamendua e
+        LEFT JOIN kategoria k ON e.idKategoria = k.id
+        ORDER BY e.izena";
+
                 $result = $conn->query($sql);
                 if (!$result)
                     throw new Exception("Error al obtener equipos: " . $conn->error);

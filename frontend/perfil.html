@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="eu">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil - Santurtzi LHII</title>
+    <title>Profila - Santurtzi LHII</title>
 
     <script src="js/menu.js"></script>
     <script src="js/validation.js"></script>
     <script src="js/profile.js"></script>
+    <script src="assets/config.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-Bx8/Z8l...etc..." crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -21,12 +23,12 @@
         <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
         <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
         <div class="user-icon">
-            <span class="user-name" id="user-name"></span> <!-- Aquí aparecerá nombre + apellido -->
+            <span class="user-name" id="user-name"></span> <!-- Hemen agertuko da izena + abizena -->
             <i class="fas fa-user"></i>
             <div class="user-menu">
-                <a href="perfil.html">Ver perfil</a>
-                <a href="perfil.html#editar">Modificar perfil</a>
-                <a href="#" id="logout-button">Cerrar sesión</a>
+                <a href="perfil.html">Profila ikusi</a>
+                <a href="perfil.html#editar">Profila editatu</a>
+                <a href="#" id="logout-button">Saioa itxi</a>
             </div>
         </div>
 
@@ -36,27 +38,27 @@
             <a href="equipamientos.html">Ekipamenduak</a>
             <a href="inbentarioa.html">Inbentarioa</a>
             <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
-            <a href="gestion.html">Gestioak</a>
+            <a href="gestion.html">Kudeaketak</a>
         </div>
     </nav>
     <main class="profile-container">
-        <h2 id="profile-title">Perfil de usuario</h2>
+        <h2 id="profile-title">Erabiltzailearen profila</h2>
 
         <form id="profile-form">
-            <label for="username">Usuario:</label>
+            <label for="username">Erabiltzailea:</label>
             <input type="text" id="username" name="username" disabled>
 
-            <label for="name">Nombre:</label>
+            <label for="name">Izena:</label>
             <input type="text" id="name" name="name" disabled>
 
-            <label for="lastname">Apellido:</label>
+            <label for="lastname">Abizena:</label>
             <input type="text" id="lastname" name="lastname" disabled>
 
-            <label for="role">Rol:</label>
+            <label for="role">Rola:</label>
             <input type="text" id="role" name="role" disabled>
 
             <div class="buttons">
-                <button type="submit" id="save-btn" style="display:none;">Guardar cambios</button>
+                <button type="submit" id="save-btn" style="display:none;">Aldaketak gorde</button>
             </div>
         </form>
     </main>

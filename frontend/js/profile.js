@@ -1,13 +1,16 @@
 const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  const erabiltzaileURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
+
   const username = sessionStorage.getItem("username");
   const name = sessionStorage.getItem("name");
   const lastname = sessionStorage.getItem("lastname");
   const role = sessionStorage.getItem("userRole");
 
   if (!username || !role) {
-    alert("Sesión no válida. Por favor, inicia sesión de nuevo.");
+    alert("Saio baliogabea. Mesedez, hasi saioa berriro.");
     window.location.href = "index.html";
     return;
   }
@@ -24,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   inputUsername.value = username;
   inputName.value = name;
   inputLastname.value = lastname;
-  inputRole.value = role.toUpperCase() === "A" ? "Administrador" : "Usuario";
+  inputRole.value = role.toUpperCase() === "A" ? "Administrador" : "Erabiltzailea";
   if (userNameSpan) userNameSpan.textContent = `${name} ${lastname}`;
 
   // Función para actualizar el modo (ver o editar)
@@ -48,14 +51,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const updatedLastname = inputLastname.value.trim();
 
     if (!updatedName || !updatedLastname) {
-      alert("Por favor, completa todos los campos.");
+      alert("Mesedez, bete eremu guztiak.");
       return;
     }
-const headers = {
+
+    const headers = {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${apiKey}`,
     };
-fetch("../backend/controladores/erabiltzaileController.php", {
+
+    fetch(erabiltzaileURL, {
       method: "POST",
       headers,
       body: JSON.stringify({
@@ -68,7 +73,7 @@ fetch("../backend/controladores/erabiltzaileController.php", {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        alert("Perfil actualizado correctamente");
+        alert("Profila behar bezala eguneratu da.");
 
         // Actualizar sessionStorage y el header
         sessionStorage.setItem("name", updatedName);
@@ -78,7 +83,7 @@ fetch("../backend/controladores/erabiltzaileController.php", {
         // Volver a modo ver perfil
         window.location.hash = "";
       } else {
-        alert("Error al actualizar perfil: " + data.message);
+        alert("Errorea profil eguneratzean: " + data.message);
       }
     })
     .catch(err => console.error(err));

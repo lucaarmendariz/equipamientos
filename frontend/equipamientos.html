@@ -19,6 +19,8 @@
   <script src="js/validation.js"></script>
   <script src="js/menu.js"></script>
   <script src="assets/config.js"></script>
+  <script src="js/equipamientos.js"></script>
+
 
 </head>
 
@@ -27,28 +29,25 @@
        HEADER
   ============================================================ -->
   <header>
-    <div class="menu-icon" aria-label="Menú" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
+    <div class="menu-icon" aria-label="Menua" role="button" tabindex="0"><i class="fas fa-bars"></i></div>
     <div class="title"><a href="menu.html">Santurtzi LHII</a></div>
     <div class="user-icon">
       <span class="user-name" id="user-name"></span>
       <i class="fas fa-user"></i>
       <div class="user-menu">
-        <a href="perfil.html">Ver perfil</a>
-        <a href="perfil.html#editar">Modificar perfil</a>
-        <a href="#" id="logout-button">Cerrar sesión</a>
+        <a href="perfil.html">Profila ikusi</a>
+        <a href="perfil.html#editar">Profila editatu</a>
+        <a href="#" id="logout-button">Saioa itxi</a>
       </div>
     </div>
   </header>
 
-  <!-- ============================================================
-       MENÚ DE NAVEGACIÓN
-  ============================================================ -->
   <nav id="main-nav">
     <div class="nav-container">
-      <a href="equipamientos.html" class="active">Ekipamenduak</a>
+      <a href="equipamientos.html">Ekipamenduak</a>
       <a href="inbentarioa.html">Inbentarioa</a>
       <a href="usuarios.html" id="usuarios-link">Erabiltzaileak</a>
-      <a href="gestion.html">Gestioak</a>
+      <a href="gestion.html">Kudeaketak</a>
     </div>
   </nav>
 
@@ -67,10 +66,10 @@
     <!-- Botón para añadir nuevo equipo -->
     <div class="text-end mb-3">
       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipoModal">
-        <i class="fa fa-plus"></i> Añadir Equipo
+        <i class="fa fa-plus"></i> Gehitu Ekipamendua
       </button>
       <button type="button" class="btn btn-secondary" id="openCategoriasModalBtn">
-        <i class="fa fa-cog"></i> Gestionar Categorías
+        <i class="fa fa-cog"></i>Kategoriak kudeatu
       </button>
 
     </div>
@@ -79,7 +78,7 @@
     <div class="dashboard-grid">
       <section class="dashboard-column" id="equipamientos-container">
         <div id="equipamientos-list">
-          <div class="data-row text-center py-2">Cargando datos...</div>
+          <div class="data-row text-center py-2">Datuak kargatzen...</div>
         </div>
       </section>
     </div>
@@ -93,17 +92,17 @@
       <div class="modal-content">
         <form id="addEquipoForm">
           <div class="modal-header">
-            <h5 class="modal-title" id="addEquipoModalLabel">Nuevo Equipo</h5>
+            <h5 class="modal-title" id="addEquipoModalLabel">Ekipamendu berria</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
 
           <div class="modal-body">
             <div class="mb-3">
-              <label for="nombre" class="form-label">Nombre</label>
+              <label for="nombre" class="form-label">Izena</label>
               <input type="text" class="form-control" id="nombre" required>
             </div>
             <div class="mb-3">
-              <label for="descripcion" class="form-label">Descripción</label>
+              <label for="descripcion" class="form-label">Deskribapena</label>
               <textarea class="form-control" id="descripcion" required></textarea>
             </div>
             <div class="row">
@@ -123,7 +122,7 @@
               </div>
               <div class="col-md-6 mb-3">
                 <label for="categoria" class="form-label d-flex justify-content-between align-items-center">
-                  <span>Categoría</span>
+                  <span>Kategoria</span>
                 </label>
                 <select class="form-select" id="categoria" required></select>
               </div>
@@ -132,8 +131,8 @@
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Añadir</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+            <button type="submit" class="btn btn-primary">Gehitu</button>
           </div>
         </form>
       </div>
@@ -150,17 +149,17 @@
         <form id="editEquipoForm">
           <input type="hidden" id="edit-id">
           <div class="modal-header">
-            <h5 class="modal-title" id="editEquipoModalLabel">Editar Equipo</h5>
+            <h5 class="modal-title" id="editEquipoModalLabel">Kudeatu ekipamendua</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
 
           <div class="modal-body">
             <div class="mb-3">
-              <label for="edit-nombre" class="form-label">Nombre</label>
+              <label for="edit-nombre" class="form-label">Izena</label>
               <input type="text" class="form-control" id="edit-nombre" required>
             </div>
             <div class="mb-3">
-              <label for="edit-descripcion" class="form-label">Descripción</label>
+              <label for="edit-descripcion" class="form-label">Deskribapena</label>
               <textarea class="form-control" id="edit-descripcion" required></textarea>
             </div>
             <div class="row">
@@ -176,7 +175,7 @@
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="edit-categoria" class="form-label d-flex justify-content-between align-items-center">
-                  <span>Categoría</span>
+                  <span>Kategoria</span>
                 </label>
                 <select class="form-select" id="edit-categoria"></select>
               </div>
@@ -184,8 +183,8 @@
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-success">Guardar cambios</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+            <button type="submit" class="btn btn-success">Gorde aldaketak</button>
           </div>
         </form>
       </div>
@@ -199,12 +198,12 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="successModalLabel">¡Éxito!</h5>
+          <h5 class="modal-title" id="successModalLabel">Arrakasta!</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body text-center">
           <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
-          <span id="successMessage">Operación realizada correctamente.</span>
+          <span id="successMessage">Kudeaketa ondo eginda.</span>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
@@ -221,15 +220,15 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editSuccessModalLabel">¡Equipo actualizado!</h5>
+          <h5 class="modal-title" id="editSuccessModalLabel">Ekipamendua editatuta!</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body text-center">
           <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
-          <span id="editSuccessMessage">El equipo ha sido modificado correctamente.</span>
+          <span id="editSuccessMessage">Ekipamendua ondo editatuta.</span>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Baieztatu</button>
         </div>
       </div>
     </div>
@@ -242,15 +241,15 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editDeleteModalLabel">¡Equipo eliminado!</h5>
+          <h5 class="modal-title" id="editDeleteModalLabel">Ekipamendua ezabatuta!</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body text-center">
           <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
-          <span id="editSuccessMessage">El equipo ha sido eliminado correctamente.</span>
+          <span id="editSuccessMessage">Ekipamendua ondo ezabatuta.</span>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Baieztatu</button>
         </div>
       </div>
     </div>
@@ -264,16 +263,16 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar eliminación</h5>
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Baieztatu ezabaketa</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body text-center">
           <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
-          <span id="confirmDeleteMessage">¿Seguro que deseas eliminar este equipo?</span>
+          <span id="confirmDeleteMessage">Seguru zaude ekipamendu hay ezabatu nahi duzula?</span>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Ezabatu</button>
         </div>
       </div>
     </div>
@@ -287,35 +286,34 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="manageCategoriasModalLabel">Gestión de Categorías</h5>
+          <h5 class="modal-title" id="manageCategoriasModalLabel">Kategorien kudeaketa</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
         </div>
         <div class="modal-body">
 
           <!-- Botón para añadir nueva categoría -->
           <div class="mb-3 text-end">
-            <button class="btn btn-primary btn-sm" id="addCategoriaModalBtn"><i class="fa fa-plus"></i> Nueva
-              Categoría</button>
+            <button class="btn btn-primary btn-sm" id="addCategoriaModalBtn"><i class="fa fa-plus"></i>Kategoria berria</button>
           </div>
 
           <!-- Tabla de categorías -->
           <table class="table table-bordered table-hover">
             <thead class="table-light">
               <tr>
-                <th>Nombre</th>
-                <th>Acciones</th>
+                <th>Izena</th>
+                <th>Ekintzak</th>
               </tr>
             </thead>
             <tbody id="categoriasTableBody">
               <tr>
-                <td colspan="3" class="text-center">Cargando categorías...</td>
+                <td colspan="3" class="text-center">Kategoriak kargatzen...</td>
               </tr>
             </tbody>
           </table>
 
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Itxi</button>
         </div>
       </div>
     </div>
@@ -330,20 +328,20 @@
       <div class="modal-content">
         <form id="addCategoriaForm">
           <div class="modal-header">
-            <h5 class="modal-title" id="addCategoriaModalLabel">Nueva Categoría</h5>
+            <h5 class="modal-title" id="addCategoriaModalLabel">Kategoria berria</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
 
           <div class="modal-body">
             <div class="mb-3">
-              <label for="categoria-nombre" class="form-label">Nombre de la categoría</label>
+              <label for="categoria-nombre" class="form-label">Kategoriaren izena</label>
               <input type="text" class="form-control" id="categoria-nombre" required>
             </div>
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-primary">Crear</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+            <button type="submit" class="btn btn-primary">Sortu</button>
           </div>
         </form>
       </div>
@@ -355,15 +353,15 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="categoriaSuccessModalLabel">¡Categoría actualizada!</h5>
+        <h5 class="modal-title" id="categoriaSuccessModalLabel">Kategoria editatuta!</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body text-center">
         <i class="fa-solid fa-check-circle fa-2x text-success mb-3"></i><br>
-        <span id="categoriaSuccessMessage">La categoría ha sido modificada correctamente.</span>
+        <span id="categoriaSuccessMessage">Kategoria ondo editatuta.</span>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Baieztatu</button>
       </div>
     </div>
   </div>
@@ -374,16 +372,16 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="confirmCategoriaDeleteModalLabel">Confirmar eliminación</h5>
+        <h5 class="modal-title" id="confirmCategoriaDeleteModalLabel">Baieztatu ezabaketa</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body text-center">
         <i class="fa-solid fa-triangle-exclamation fa-2x text-warning mb-3"></i><br>
-        <span id="confirmCategoriaDeleteMessage">¿Seguro que deseas eliminar esta categoría?</span>
+        <span id="confirmCategoriaDeleteMessage">Seguru zaude kategoria hau ezabatu nahi duzula?</span>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="confirmCategoriaDeleteButton">Eliminar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ezeztatu</button>
+        <button type="button" class="btn btn-danger" id="confirmCategoriaDeleteButton">Ezabatu</button>
       </div>
     </div>
   </div>
@@ -393,38 +391,32 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Aviso</h5>
+        <h5 class="modal-title">Abisua</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
       </div>
       <div class="modal-body">
         <!-- Aquí se mostrará el mensaje del backend -->
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Itxi</button>
       </div>
     </div>
   </div>
 </div>
 
-
-
-
-
-
   <!-- ============================================================
        FOOTER
   ============================================================ -->
   <footer class="main-footer mt-5">
-    <div class="footer-content text-center py-3">
-      <p>&copy; 2025 Santurtzi LHII. Todos los derechos reservados.</p>
-      <p>Contacto: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
-    </div>
-  </footer>
+        <div class="footer-content text-center py-3">
+            <p>&copy; 2025 Santurtzi LHII. Eskubide guztiak erreserbatuta.</p>
+            <p>Kontaktua: <a href="mailto:info@santurtzilhii.eus">info@santurtzilhii.eus</a></p>
+        </div>
+    </footer>
 
   <!-- ============================================================
        SCRIPT PRINCIPAL (CRUD)
   ============================================================ -->
-  <script src="js/equipamientos.js"></script>
 </body>
 
 </html>

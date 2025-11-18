@@ -76,15 +76,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   cargarDatos(inbentarioURL, "inbentario-list", [
     { label: "Etiqueta", key: "etiketa" },
-    { label: "Equipo", key: "equipo" },
-    { label: "Erosketa Data", key: "erosketaData" }
+    { label: "Ekipamendu id-a", key: "idEkipamendu" },
   ]);
 
   cargarDatos(erabiltzaileakURL, "usuarios-list", [
     { label: "NAN", key: "nan" },
-    { label: "Nombre", key: "izena" },
-    { label: "Apellido", key: "abizena" },
-    { label: "Usuario", key: "erabiltzailea" },
-    { label: "Rol", key: "rola" }
+    { label: "Izena", key: "izena" },
+    { label: "Abizena", key: "abizena" },
+    { label: "Erabiltzailea", key: "erabiltzailea" },
+    { label: "Rola", key: "rola" }
   ]);
 });

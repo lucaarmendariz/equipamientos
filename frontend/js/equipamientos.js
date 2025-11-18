@@ -276,12 +276,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const header = document.createElement("div");
         header.classList.add("data-row", "data-header");
         header.innerHTML = `
-        <span>Nombre</span>
-        <span>Stock</span>
+        <span>Izena</span>
+        <span>Stocka</span>
         <span>Marka</span>
         <span>Modelo</span>
-        <span>Categoría</span>
-        <span>Acciones</span>
+        <span>Kategoria</span>
+        <span>Ekintzak</span>
       `;
         container.appendChild(header);
 

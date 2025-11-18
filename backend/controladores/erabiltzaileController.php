@@ -41,6 +41,9 @@ try {
         // =================================================
         // ACTUALIZAR PERFIL (MODIFICAR PROPIO)
         // =================================================
+        // =================================================
+// ACTUALIZAR PERFIL (MODIFICAR PROPIO) usando API Key
+// =================================================
         case 'PUT':
             $username = trim($input['username'] ?? '');
             $name = trim($input['name'] ?? '');
@@ -50,15 +53,39 @@ try {
                 throw new Exception('Datos incompletos.');
             }
 
-            if (!isset($_SESSION['username']) || $_SESSION['username'] !== $username) {
-                throw new Exception('No autorizado.');
+            // Obtener username real desde la API Key
+            $conn = DB::getConnection();
+            $stmt = $conn->prepare("SELECT erabiltzailea FROM erabiltzailea WHERE apiKey = ?");
+            $apiKeyFromHeader = null;
+            if (function_exists('getallheaders')) {
+                $headers = getallheaders();
+                if (isset($headers['Authorization']) && preg_match('/Bearer\s+(\S+)/', $headers['Authorization'], $matches)) {
+                    $apiKeyFromHeader = $matches[1];
+                }
+            }
+            if (!$apiKeyFromHeader && isset($_SERVER['HTTP_AUTHORIZATION'])) {
+                if (preg_match('/Bearer\s+(\S+)/', $_SERVER['HTTP_AUTHORIZATION'], $matches)) {
+                    $apiKeyFromHeader = $matches[1];
+                }
             }
 
-            $conn = DB::getConnection();
+            $stmt->bind_param("s", $apiKeyFromHeader);
+            $stmt->execute();
+            $stmt->bind_result($realUsername);
+            if (!$stmt->fetch()) {
+                throw new Exception('No autorizado: API Key no válida.');
+            }
+            $stmt->close();
+
+            // Validar que el usuario del input coincide con la API Key
+            if ($realUsername !== $username) {
+                throw new Exception('No autorizado: usuario incorrecto.');
+            }
+
+            // Actualizar perfil
             $stmt = $conn->prepare("UPDATE erabiltzailea SET izena = ?, abizena = ? WHERE erabiltzailea = ?");
             if (!$stmt)
                 throw new Exception('Error en la base de datos.');
-
             $stmt->bind_param('sss', $name, $lastname, $username);
             $stmt->execute();
             $stmt->close();
@@ -66,6 +93,7 @@ try {
             $response['success'] = true;
             $response['message'] = 'Perfil actualizado correctamente.';
             break;
+
 
         // =================================================
         // ACTUALIZAR USUARIO (ADMIN)

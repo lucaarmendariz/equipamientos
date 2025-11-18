@@ -1,39 +1,35 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="eu">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Login</title>
+  <title>Saioa hasi</title>
   <link rel="stylesheet" href="sass/style.scss" />
   <script src="js/login.js"></script>
   <script src="assets/config.js"></script>
-
-
 </head>
 
 <body>
   <main class="login-container">
 
     <form class="login-form" id="loginForm" action="../backend/controladores/loginController.php" method="POST">
-      <h2>Iniciar sesión</h2>
+      <h2>Saioa hasi</h2>
 
       <fieldset>
-        <label for="username">Usuario</label>
-        <input type="text" id="username" name="username" placeholder="Introduce tu usuario" required />
+        <label for="username">Erabiltzailea</label>
+        <input type="text" id="username" name="username" placeholder="Sartu zure erabiltzailea" required />
       </fieldset>
 
       <fieldset>
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" name="password" placeholder="Introduce tu contraseña" required />
+        <label for="password">Pasahitza</label>
+        <input type="password" id="password" name="password" placeholder="Sartu zure pasahitza" required />
       </fieldset>
       <label id="error-message" style="color: red; margin-bottom: 1rem;"></label>
 
-      <button type="submit">Entrar</button>
+      <button type="submit">Sartu</button>
     </form>
   </main>
-
-
 </body>
 
 </html>

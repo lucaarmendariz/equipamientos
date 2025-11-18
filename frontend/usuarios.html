@@ -34,9 +34,9 @@
             <span class="user-name" id="user-name"></span>
             <i class="fas fa-user"></i>
             <div class="user-menu">
-                <a href="perfil.html">Ver perfil</a>
-                <a href="perfil.html#editar">Modificar perfil</a>
-                <a href="#" id="logout-button">Cerrar sesión</a>
+                <a href="perfil.html">Profila ikusi</a>
+                <a href="perfil.html#editar">Profila editatu</a>
+                <a href="#" id="logout-button">Saioa itxi</a>
             </div>
         </div>
     </header>
@@ -49,7 +49,7 @@
             <a href="equipamientos.html">Ekipamenduak</a>
             <a href="inbentarioa.html">Inbentarioa</a>
             <a href="usuarios.html" id="usuarios-link" class="active">Erabiltzaileak</a>
-            <a href="gestion.html">Gestioak</a>
+            <a href="gestion.html">Kudeaketak</a>
         </div>
     </nav>
 
@@ -57,7 +57,7 @@
        CONTENIDO PRINCIPAL
   ============================================================ -->
     <main class="dashboard-container container py-4">
-        <h2 class="text-center mb-4">Gestión de Erabiltzaileak</h2>
+        <h2 class="text-center mb-4">Erabiltzaileen Kudeaketa</h2>
 
         <!-- Búsqueda -->
         <input type="text" id="searchUserInput" class="form-control mb-3" placeholder="Bilatu erabiltzaileak...">
@@ -75,7 +75,7 @@
         <section class="dashboard-column" id="equipamientos-container">
 
             <div id="users-list" class="data-container">
-                <div class="data-row text-center py-2">Kargatzen erabiltzaileak...</div>
+                <div class="data-row text-center py-2">Erabiltzaileak kargatzen...</div>
             </div>
         </section>
     </main>
@@ -138,7 +138,7 @@
             <div class="modal-content">
                 <form id="editUserForm">
                     <div class="modal-header">
-                        <h5 class="modal-title">Editatu erabiltzailea</h5>
+                        <h5 class="modal-title">Erabiltzailea editatu</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
@@ -149,7 +149,7 @@
                         <div class="mb-2">
                             <label>Erabiltzailea</label>
                             <input id="edit-username" class="form-control" readonly>
-                            <small class="text-muted">Ezin da erabiltzaile-izena aldatu.</small>
+                            <small class="text-muted">Erabiltzaile-izena ezin da aldatu.</small>
                         </div>
                         <div class="mb-2"><label>Pasahitza</label><input id="edit-password" type="password"
                                 class="form-control" placeholder="Hutsa utzi ez aldatzeko"></div>
@@ -163,7 +163,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" data-bs-dismiss="modal">Utzi</button>
-                        <button class="btn btn-success" type="submit">Gorde aldaketak</button>
+                        <button class="btn btn-success" type="submit">Aldaketak gorde</button>
                     </div>
                 </form>
             </div>
@@ -177,7 +177,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-center">
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">Ezabatu erabiltzailea</h5>
+                    <h5 class="modal-title">Erabiltzailea ezabatu</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">Ziur zaude erabiltzailea ezabatu nahi duzula?</div>
