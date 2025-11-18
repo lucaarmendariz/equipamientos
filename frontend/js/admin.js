@@ -6,9 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "login.html"; // o la ruta de tu login
     return;
   }
-  const ekipamenduakURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
-  const inbentarioURL = CONFIG.BASE_URL + "backend/controladores/inbentarioController.php";
-  const erabiltzaileakURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
+  const ekipamenduakURL = CONFIG.BASE_URL + "controladores/ekipamenduakController.php";
+  const inbentarioURL = CONFIG.BASE_URL + "controladores/inbentarioController.php";
+  const erabiltzaileakURL = CONFIG.BASE_URL + "controladores/erabiltzaileController.php";
 
   // --- Helper para escapar HTML ---
   function escapeHtml(str) {

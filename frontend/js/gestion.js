@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const backendGelasURL = CONFIG.BASE_URL + "backend/controladores/gelakController.php";
-  const backendEquiposURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
-  const backendKokalekuURL = CONFIG.BASE_URL + "backend/controladores/kokalekuaController.php";
+  const backendGelasURL = CONFIG.BASE_URL + "controladores/gelakController.php";
+  const backendEquiposURL = CONFIG.BASE_URL + "controladores/ekipamenduakController.php";
+  const backendKokalekuURL = CONFIG.BASE_URL + "controladores/kokalekuaController.php";
   const apiKey = sessionStorage.getItem("apiKey");
 
   // ===================== LISTAR GELAK =====================
@@ -365,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function cargarGelasDisponibles() {
   const select = document.getElementById("nuevoKokalekuSelect");
-  const backendGelasURL = CONFIG.BASE_URL + "backend/controladores/gelakController.php";
+  const backendGelasURL = CONFIG.BASE_URL + "controladores/gelakController.php";
   const apiKey = sessionStorage.getItem("apiKey");
 
   try {

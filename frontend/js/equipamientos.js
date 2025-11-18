@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const backendURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
-  const categoriasURL = CONFIG.BASE_URL + "backend/controladores/kategoriaController.php";
+  const backendURL = CONFIG.BASE_URL + "controladores/ekipamenduakController.php";
+  const categoriasURL = CONFIG.BASE_URL + "controladores/kategoriaController.php";
 
   const apiKey = sessionStorage.getItem("apiKey");
 

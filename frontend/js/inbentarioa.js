@@ -1,8 +1,8 @@
 const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {
-  const inbentarioURL = CONFIG.BASE_URL + "backend/controladores/inbentarioController.php";
-  const ekipamenduURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
+  const inbentarioURL = CONFIG.BASE_URL + "controladores/inbentarioController.php";
+  const ekipamenduURL = CONFIG.BASE_URL + "controladores/ekipamenduakController.php";
 
   const inventoryList = document.getElementById('inventory-list');
   const equipoSelect = document.getElementById('equipo-select');

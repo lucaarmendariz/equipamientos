@@ -1,4 +1,4 @@
-const erabiltzaileakURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
+const erabiltzaileakURL = CONFIG.BASE_URL + "controladores/erabiltzaileController.php";
   const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {

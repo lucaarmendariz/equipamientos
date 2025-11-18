@@ -2,7 +2,7 @@ const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const erabiltzaileURL = CONFIG.BASE_URL + "backend/controladores/erabiltzaileController.php";
+  const erabiltzaileURL = CONFIG.BASE_URL + "controladores/erabiltzaileController.php";
 
   const username = sessionStorage.getItem("username");
   const name = sessionStorage.getItem("name");

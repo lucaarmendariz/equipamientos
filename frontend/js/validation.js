@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (!apiKey || !role) {
     alert("Sesión no válida. Inicia sesión nuevamente.");
-    window.location.href = "../frontend/index.html";
+    window.location.href = "index.html";
     return;
   }
 
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (protectedPages.includes(currentPage) && role.toLowerCase() !== "a") {
     alert("No tienes permisos para acceder a esta página.");
-    window.location.href = "../frontend/menu.html"; // redirigir a una página segura
+    window.location.href = "menu.html"; // redirigir a una página segura
     return;
   }
 
