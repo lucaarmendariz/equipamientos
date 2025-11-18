@@ -21,21 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const nuevaCategoriaModal = nuevaCategoriaModalEl ? new bootstrap.Modal(nuevaCategoriaModalEl) : null;
   const cestaModal = cestaModalEl ? new bootstrap.Modal(cestaModalEl) : null;
 
-  const eliminarEtiquetaModalEl = document.getElementById('eliminarEtiquetaModal');
-  const eliminarEtiquetaModal = eliminarEtiquetaModalEl ? new bootstrap.Modal(eliminarEtiquetaModalEl) : null;
-
-  const eliminarEtiquetasMasivasModalEl = document.getElementById('eliminarEtiquetasMasivasModal');
-  const eliminarEtiquetasMasivasModal = eliminarEtiquetasMasivasModalEl ? new bootstrap.Modal(eliminarEtiquetasMasivasModalEl) : null;
-
-  const etiquetaAEliminarSpan = document.getElementById('etiqueta-a-eliminar');
-  const confirmarEliminarEtiquetaBtn = document.getElementById('confirmarEliminarEtiqueta');
-  const cantidadEtiquetasSpan = document.getElementById('cantidad-etiquetas');
-  const confirmarEliminarEtiquetasMasivasBtn = document.getElementById('confirmarEliminarEtiquetasMasivas');
-
-  let etiquetaSeleccionada = null;
-  let filaSeleccionada = null;
-  let etiquetasSeleccionadas = [];
-
   // ==================
   // CESTA DE LA COMPRA
   // ==================
@@ -211,9 +196,7 @@ document.addEventListener("DOMContentLoaded", () => {
               <span>Kokaleku ezezaguna</span>
               <span class="col-ekintzak">
                 <input type="checkbox" class="select-etiqueta"/>
-                <button class="btn btn-sm btn-primary eliminar-btn">
-                  <i class="bi bi-trash"></i>
-                </button>
+                <button class="btn btn-sm btn-outline-danger eliminar-btn">🗑️</button>
               </span>
             `;
               inventoryList.appendChild(etiquetaDiv);
