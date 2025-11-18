@@ -1,64 +1,52 @@
-# Equipamientos
+# Ekipamenduen Kudeaketa Aplikazioa
 
-Este proyecto es una aplicación web que gestiona información sobre equipamientos, utilizando PHP en el backend y JavaScript en el frontend para interactuar con la base de datos.
+Proiektu honek informatikako mintegi batean ekipamenduen kudeaketa egiteko web-aplikazio bat da. Ekipamenduak, periferikoak eta beste material batzuk kontrolatzen ditu, eta stocka eta erregistroak eguneratzen ditu. Sistema honek erabiltzailearen rolen kudeaketa (admin eta user) ere onartzen du, eta administratzaileek erabiltzaileak eta inbentarioa kudeatzeko baimenak dituzte. Horrez gain, aplikazioak MariaDB/MySQL datu-base bat eta PHP bidez garatutako API bat erabiltzen ditu.
 
-## Estructura del Proyecto
+## Deskribapena
 
-El proyecto está dividido en dos partes principales:
+Aplikazio honek mintegi batean informatikako ekipamenduen kudeaketa ahalbidetzen du, eta **altak, bajak eta aldaketak** egiteko aukera ematen du inbentarioan. Erabiltzaileek saioa hasi behar dute login bidez, eta administratzaileek bakarrik dituzte erabiltzaileak kudeatzeko baimenak.
 
-1. **Backend**: Implementado en PHP, donde se encuentran las clases y controladores que interactúan con la base de datos.
-2. **Frontend**: Implementado con HTML, CSS y JavaScript, donde se gestiona el diseño y las interacciones con el usuario. Los archivos JavaScript realizan peticiones `fetch` a los controladores del backend.
+Aplikazioak honako funtzionalitateak ditu:
 
----
+- Ekipamenduak kudeatzea (ordenagailuak, portatiluak, periferikoak, eta abar)
+- Stockaren eguneraketa eta inbentarioa kudeatzea
+- Erabiltzaileen rolak kudeatzea (admin eta user)
+- Inbentarioaren txostenak eta auditoriak
 
-## Backend
-
-El backend está compuesto por clases PHP que se encargan de la lógica de negocio y los controladores que gestionan las peticiones del frontend y las operaciones con la base de datos.
-
-- **Controladores**: Se encuentran en el directorio `backend/`. Los controladores reciben las solicitudes HTTP desde el frontend y las procesan, utilizando las clases correspondientes para interactuar con la base de datos.
-  
-- **Base de Datos**: El backend está diseñado para interactuar con una base de datos MySQL o similar. Los controladores ejecutan consultas SQL para obtener o modificar los datos.
-
-### Funcionalidades del Backend:
-
-- Gestión de equipamientos: Los controladores permiten realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre los equipamientos.
-- Validación de datos: Asegura que los datos enviados por el frontend sean correctos antes de procesarlos.
-
----
-
-## Frontend
-
-El frontend está compuesto por dos carpetas principales, una para el diseño visual y otra para los archivos de JavaScript que se encargan de interactuar con el backend.
-
-### Estructura del Frontend:
-
-- **Diseño**: Los archivos HTML y CSS están organizados en la carpeta `frontend/`. El diseño incluye las vistas para mostrar la información de los equipamientos al usuario.
-  
-- **JavaScript**: Los archivos `JS` en la carpeta `frontend/js/` contienen la lógica para interactuar con los controladores del backend. Utilizan la función `fetch()` para enviar solicitudes HTTP a los controladores del backend y actualizar la interfaz de usuario dinámicamente.
-
-### Funcionalidades del Frontend:
-
-- Mostrar una lista de equipamientos en una vista tabular.
-- Formularios para crear, editar y eliminar equipamientos.
-- Interacción dinámica con el backend usando `fetch()` para actualizar la interfaz sin necesidad de recargar la página.
-
----
-
-## Requisitos
-
-Para poder ejecutar este proyecto, necesitas tener instalados los siguientes programas:
-
-- **PHP 7.x o superior**
-- **Servidor web (Apache o similar)**
-- **Base de datos MySQL**
-- **Navegador web moderno (para el frontend)**
-
----
-
-## Instalación
+## Funtzionalitateak
 
 ### Backend
 
-1. Clona el repositorio en tu servidor local o de desarrollo.
+- **PHP** erabiltzen da bezeroak egindako eskaerei erantzuteko eta datu-basearekin komunikatzeko.
+- **API Key** erabiltzen da erabiltzaileak saioa hasi ondoren, eskatutako eskaerak autentifikatzeko.
+- **Datu-basea** MariaDB/MySQL erabiliz kudeatzen da eta honako taulak ditu: ekipamenduak, kategoriak, erabiltzaileak eta stocka.
+- Backend-ak honako funtzionalitateak eskaintzen ditu:
+  - Ekipamenduak
+  - Kategoriak
+  - Erabiltzaileak (rola: admin, user)
+  - Stockaren kudeaketa (alta eta baja)
+  - Ekipamenduen etiketen kudeaketa
+  - Saioen kudeaketa `apiKey` bidez
+
+### Frontend
+
+- **HTML5 eta CSS3** erabiltzen dira web-orrien diseinua egiteko.
+- **SASS** erabiltzen da estiloak antolatzeko.
+- **JavaScript (Fetch eta JQuery)** interaktibitatea eta formularioen baliozkotzea egiteko.
+- Formularioen baliozkotzea bezeroaren eta zerbitzariaren aldean egiten da.
+- Interfazearen diseinua **Figma** erabiliz egin da, erabilgarritasun eta irisgarritasun arauak kontuan hartuta.
+
+### Sistema Aholkulariak
+
+- **PHP 7.x edo berriagoa**.
+- **Web zerbitzari Apache** edo antzeko bat.
+- **Datu-basea MariaDB/MySQL**.
+- **Nabigatzaile moderno bat** aplikazioa erabiltzeko.
+
+## Instalazioa
+
+### Backend
+
+1. **Erabilera-erabiltzailea kopiatu**:
    ```bash
-   git clone https://github.com/lucaarmendariz/equipamientos.git
+   git clone https://github.com/tuusuario/equipamientos.git
