@@ -22,15 +22,31 @@ class Inbentarioa
 
     // CRUD
     public static function getAll(): array
-    {
-        $conn = DB::getConnection();
-        $result = $conn->query("SELECT etiketa, idEkipamendu, erosketadata FROM inbentarioa");
-        $inb = [];
-        while ($row = $result->fetch_assoc()) {
-            $inb[] = new Inbentarioa($row['etiketa'], (int)$row['idEkipamendu'], $row['erosketadata']);
-        }
-        return $inb;
+{
+    $conn = DB::getConnection();
+
+    $sql = "
+        SELECT 
+            i.etiketa,
+            i.idEkipamendu,
+            i.erosketadata,
+            g.taldea AS gela
+        FROM inbentarioa i
+        LEFT JOIN kokalekua k ON i.etiketa = k.etiketa
+        LEFT JOIN gela g ON k.idGela = g.id
+        WHERE k.amaieraData IS NULL OR k.amaieraData = ''
+        ORDER BY i.idEkipamendu, i.etiketa
+    ";
+
+    $result = $conn->query($sql);
+    $inb = [];
+    while ($row = $result->fetch_assoc()) {
+        $item = new Inbentarioa($row['etiketa'], (int)$row['idEkipamendu'], $row['erosketadata']);
+        $inb[] = $item->toArray() + ['gela' => $row['gela'] ?? null];
     }
+    return $inb;
+}
+
 
     public static function getByEtiketa(string $etiketa): ?Inbentarioa
     {

@@ -105,11 +105,11 @@
           <div class="modal-body">
             <div class="mb-3">
               <label for="gela-nombre" class="form-label">Nombre</label>
-              <input type="text" class="form-control" id="gela-nombre" required>
+              <input type="text" class="form-control" id="gela-nombre" placeholder="4 digitoko izena" required>
             </div>
             <div class="mb-3">
               <label for="gela-taldea" class="form-label">Taldea</label>
-              <input type="text" class="form-control" id="gela-taldea">
+              <input type="text" class="form-control" id="gela-taldea" placeholder="5 digitoko izena" required>
             </div>
           </div>
           <div class="modal-footer">
@@ -134,11 +134,11 @@
           <div class="modal-body">
             <div class="mb-3">
               <label for="edit-gela-nombre" class="form-label">Nombre</label>
-              <input type="text" class="form-control" id="edit-gela-nombre" required>
+              <input type="text" class="form-control" id="edit-gela-nombre" placeholder="4 digitoko izena" required>
             </div>
             <div class="mb-3">
               <label for="edit-gela-taldea" class="form-label">Taldea</label>
-              <input type="text" class="form-control" id="edit-gela-taldea">
+              <input type="text" class="form-control" id="edit-gela-taldea" placeholder="5 digitoko izena" required>
             </div>
           </div>
           <div class="modal-footer">
@@ -303,7 +303,7 @@
           <p>¿Estás seguro de que deseas mover esta asignación?</p>
           <label for="nuevoKokalekuSelect" class="form-label">Selecciona la nueva gela:</label>
           <select id="nuevoKokalekuSelect" class="form-select">
-            <option value="">-- Selecciona --</option>
+            <option id="optionSelect" value="" >-- Selecciona --</option>
             <!-- Opciones generadas dinámicamente desde el backend -->
           </select>
         </div>
@@ -317,6 +317,23 @@
   </div>
 
 
+<!-- Modal de error específico -->
+<div class="modal fade" id="errorCascadeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p id="errorCascadeMessage">No se puede eliminar la gela porque existen registros relacionados.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger w-100" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
   <!-- FOOTER -->

@@ -2,12 +2,13 @@
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 
-require_once  '../klaseak/kategoriak.php';
-require_once  'conexion.php';
+require_once '../klaseak/kategoriak.php';
+require_once 'conexion.php';
 require_once 'apiKey.php';
 
 ApiKeyManager::requireApiKey(); // <-- aquí se valida la sesión por API key
-function respond(bool $success, array $data = [], string $message = ''): void {
+function respond(bool $success, array $data = [], string $message = ''): void
+{
     echo json_encode(['success' => $success, 'data' => $data, 'message' => $message]);
     exit;
 }
@@ -18,7 +19,7 @@ try {
     // Obtener datos JSON si existe
     $input = json_decode(file_get_contents('php://input'), true) ?? [];
 
-    switch($method) {
+    switch ($method) {
         // ================================
         // LISTAR CATEGORÍAS
         // ================================
@@ -33,7 +34,8 @@ try {
         // ================================
         case 'POST':
             $nombre = $input['izena'] ?? '';
-            if (!$nombre) respond(false, [], 'Falta el nombre de la categoría');
+            if (!$nombre)
+                respond(false, [], 'Falta el nombre de la categoría');
 
             $categoria = Kategoria::create($nombre);
             if ($categoria) {
@@ -47,12 +49,14 @@ try {
         // ACTUALIZAR CATEGORÍA
         // ================================
         case 'PUT':
-            $id = (int)($input['id'] ?? 0);
+            $id = (int) ($input['id'] ?? 0);
             $nombre = $input['izena'] ?? '';
-            if (!$id || !$nombre) respond(false, [], 'Faltan campos obligatorios');
+            if (!$id || !$nombre)
+                respond(false, [], 'Faltan campos obligatorios');
 
             $categoria = Kategoria::getById($id);
-            if (!$categoria) respond(false, [], 'Categoría no encontrada');
+            if (!$categoria)
+                respond(false, [], 'Categoría no encontrada');
 
             if ($categoria->update($nombre)) {
                 respond(true, $categoria->toArray(), 'Categoría actualizada correctamente');
@@ -65,16 +69,33 @@ try {
         // ELIMINAR CATEGORÍA
         // ================================
         case 'DELETE':
-            $id = (int)($input['id'] ?? 0);
-            if (!$id) respond(false, [], 'Falta el ID de la categoría');
-            $categoria = Kategoria::getById($id);
+            $id = (int) ($input['id'] ?? 0);
+            if (!$id)
+                respond(false, [], 'Falta el ID de la categoría');
 
+            $categoria = Kategoria::getById($id);
+            if (!$categoria)
+                respond(false, [], 'Categoría no encontrada');
+
+            // 🔹 Verificar si hay equipos asociados
+            $stmt = $conn->prepare("SELECT COUNT(*) as cnt FROM ekipamendua WHERE idKategoria = ?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $row = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            if ($row['cnt'] > 0) {
+                respond(false, [], "No se puede eliminar la categoría. Tiene {$row['cnt']} equipos asociados.");
+            }
+
+            // 🔹 Si no hay equipos, eliminar
             if ($categoria->delete()) {
                 respond(true, [], 'Categoría eliminada correctamente');
             } else {
                 respond(false, [], 'Error al eliminar la categoría');
             }
             break;
+
 
         default:
             respond(false, [], 'Método no soportado');

@@ -1,6 +1,9 @@
 const apiKey = sessionStorage.getItem("apiKey");
 
 document.addEventListener("DOMContentLoaded", () => {
+  const inbentarioURL = CONFIG.BASE_URL + "backend/controladores/inbentarioController.php";
+  const ekipamenduURL = CONFIG.BASE_URL + "backend/controladores/ekipamenduakController.php";
+
   // ===== ELEMENTOS DEL DOM =====
   const inventoryList = document.getElementById('inventory-list');
   const equipoSelect = document.getElementById('equipo-select');
@@ -30,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!cestaList) return;
     cestaList.innerHTML = '';
     if (cesta.length === 0) {
-      cestaList.innerHTML = '<li class="list-group-item">Saskia hutsik dago</li>';
+      cestaList.innerHTML = '<li class="list-group-item">Lista hutsik dago</li>';
       return;
     }
 
@@ -69,33 +72,38 @@ document.addEventListener("DOMContentLoaded", () => {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${apiKey}`,
   };
+  
   function cargarInventario() {
-    fetch('../backend/controladores/inbentarioController.php', { headers })
-      .then(r => r.json())
-      .then(res => {
-        if (!res.success) {
-          console.error('Error al cargar inventario:', res.message);
+  fetch(inbentarioURL, { headers })
+  .then(r => r.json())
+  .then(res => {
+      if (!res.success) return;
+    console.log(res);
+      inventoryList.innerHTML = '';
+      if (res.data.length === 0) {
+          inventoryList.innerHTML = `<div class="data-row text-center">No hay asignaciones activas.</div>`;
           return;
-        }
-        inventoryList.innerHTML = '';
-        res.data.forEach(item => {
+      }
+
+      res.data.forEach(item => {
           const div = document.createElement('div');
           div.className = 'data-row';
           div.dataset.etiketa = item.etiketa;
           div.innerHTML = `
-            <span>${item.ekipamendua}</span>
-            <span>${item.etiketa}</span>
-            <span>${item.gela ?? 'Kokaleku ezezaguna'}</span>
-            <span class="col-ekintzak">
-              <input type="checkbox" class="select-etiqueta"/>
-              <button class="btn btn-sm btn-outline-danger eliminar-btn">🗑️</button>
-            </span>
+              <span>${item.ekipamendua}</span>
+              <span>${item.etiketa}</span>
+              <span>${item.gela ?? 'Kokaleku ezezaguna'}</span>
+              <span class="col-ekintzak">
+                  <input type="checkbox" class="select-etiqueta"/>
+                  <button class="btn btn-sm btn-outline-danger eliminar-btn">🗑️</button>
+              </span>
           `;
           inventoryList.appendChild(div);
-        });
-      })
-      .catch(err => console.error('Error al cargar inventario:', err));
-  }
+      });
+  })
+    .catch(err => console.error('Error al cargar inventario:', err));
+}
+
 
   // ======= BÚSQUEDA GLOBAL =======
   searchInput?.addEventListener("input", () => {
@@ -109,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ======= CARGAR EQUIPOS =======
   function cargarEquipamientos() {
-    fetch('../backend/controladores/ekipamenduakController.php', { headers })
+    fetch(ekipamenduURL, { headers })
       .then(res => res.json())
       .then(data => {
         if (!data.success) {
@@ -130,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== MODAL DE COMPRA =====
   nuevaCategoriaBtn?.addEventListener('click', () => {
     nuevaCategoriaInput.value = '';
-    guardarCategoriaBtn.textContent = 'Gehitu saskira';
+    guardarCategoriaBtn.textContent = 'Gehitu listara';
     nuevaCategoriaModal?.show();
   });
 
@@ -143,13 +151,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
     if (!cantidad || cantidad <= 0) {
-      Swal.fire({ icon: 'info', title: 'Info', text: 'artu balio zuzen bat' });
+      Swal.fire({ icon: 'info', title: 'Info', text: 'Sartu kantitate bat' });
       return;
     }
 
     const nombreEquipo = equipoSelect.options[equipoSelect.selectedIndex].text;
     cesta.push({ id: idEquipo, nombre: nombreEquipo, cantidad });
-    Swal.fire({ icon: 'success', title: 'Gehituta', text: `${nombreEquipo} Saskira gehituta` });
+    Swal.fire({ icon: 'success', title: 'Gehituta', text: `${nombreEquipo} Listara gehituta` });
     nuevaCategoriaModal?.hide();
     nuevaCategoriaInput.value = '';
     equipoSelect.value = '';
@@ -164,12 +172,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   finalizarCompraBtn.addEventListener('click', () => {
     if (cesta.length === 0) {
-      mostrarInfo('Saskia hutsik dago!');
+      mostrarInfo('Lista hutsik dago!');
       return;
     }
 
     cesta.forEach((item, index) => {
-      fetch('../backend/controladores/inbentarioController.php', {
+      fetch(inbentarioURL, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -218,117 +226,131 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  // ==================
-  // ELIMINAR ETIQUETA INDIVIDUAL
-  // ==================
-  function mostrarConfirmacionEtiketa(message) {
-    return new Promise((resolve) => {
-      const modalEl = document.getElementById('confirmModal');
-      const modalBody = document.getElementById('confirmModalBody');
-      const yesBtn = document.getElementById('confirmModalYesBtn');
-
-      const modal = new bootstrap.Modal(modalEl);
-      modalBody.textContent = message;
-
-      function onYes() {
-        resolve(true);
-        yesBtn.removeEventListener('click', onYes);
-        modal.hide();
-      }
-
-      yesBtn.addEventListener('click', onYes);
-
-      modalEl.addEventListener('hidden.bs.modal', () => {
-        resolve(false); // Si se cierra el modal sin pulsar "Sí"
-        yesBtn.removeEventListener('click', onYes);
-      }, { once: true });
-
-      modal.show();
-    });
-  }
-
-
-  async function eliminarEtiqueta(row, etiketa) {
-    const confirmado = await mostrarConfirmacionEtiketa(`¿Deseas eliminar la etiqueta ${etiketa}?`);
-    if (!confirmado) return;
-
-    try {
-      const response = await fetch(`../backend/controladores/inbentarioController.php`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'DELETE', etiketa: etiketa }),
-        headers,
-      });
-      const data = await response.json();
-
-      if (data.success) {
-        row.remove();
-        const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
-        if (stockCell) stockCell.textContent = data.nuevo_stock;
-          console.log(data.message);
-        mostrarInfo("Etiqueta eliminada correctamente");
-      } else {
-        alert(data.message || 'Error al eliminar la etiqueta'); // Puedes reemplazar esto también por otro modal
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Error en la petición al servidor'); // También se puede reemplazar por modal
-    }
-  }
-
-
-  // Delegación de eventos para eliminar etiquetas
-
-  function mostrarInfo(message) {
-    const modalEl = document.getElementById('infoModal');
-    const modalBody = document.getElementById('infoModalBody');
-    modalBody.textContent = message;
+ // Confirmación
+function mostrarConfirmacion(message) {
+  return new Promise(resolve => {
+    const modalEl = document.getElementById('confirmModal');
+    const modalBody = document.getElementById('confirmModalBody');
+    const yesBtn = document.getElementById('confirmModalYesBtn');
     const modal = new bootstrap.Modal(modalEl);
+
+    modalBody.textContent = message;
+
+    function onYes() {
+      resolve(true);
+      yesBtn.removeEventListener('click', onYes);
+      modal.hide();
+    }
+
+    yesBtn.addEventListener('click', onYes);
+
+    modalEl.addEventListener('hidden.bs.modal', () => {
+      resolve(false); // si cierra sin pulsar "Sí"
+      yesBtn.removeEventListener('click', onYes);
+    }, { once: true });
+
     modal.show();
+  });
+}
+
+// Eliminar una etiqueta individual
+async function eliminarEtiqueta(row, etiketa) {
+  const confirmado = await mostrarConfirmacion(`¿Deseas eliminar la etiqueta ${etiketa}?`);
+  if (!confirmado) return;
+
+  try {
+    const response = await fetch(inbentarioURL, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ action: 'DELETE', etiketa })
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      row.remove();
+      const stockCell = document.querySelector(`#stock-${data.idEkipamendu}`);
+      if(stockCell) stockCell.textContent = data.nuevo_stock;
+      mostrarInfo(data.message || 'Etiqueta eliminada correctamente', 'success');
+    } else {
+      mostrarInfo("No se ha podido eliminar la etiqueta porque tiene un kokaleku asignado");
+    }
+
+  } catch (err) {
+    console.error(err);
+    mostrarInfo('Error al conectar con el servidor', 'error');
+  }
+}
+
+
+
+
+
+// Mostrar información (éxito o error)
+function mostrarInfo(message, tipo = 'info') {
+  const modalEl = document.getElementById('infoModal');
+  const modalTitle = document.getElementById('infoModalTitle');
+  const modalBody = document.getElementById('infoModalBody');
+  const modalHeader = document.getElementById('infoModalHeader');
+
+  modalBody.textContent = message;
+
+  // Cambiar color del header según tipo
+  modalHeader.className = 'modal-header';
+  if(tipo === 'success') modalHeader.classList.add('bg-success', 'text-white');
+  else if(tipo === 'error') modalHeader.classList.add('bg-danger', 'text-white');
+  else modalHeader.classList.add('bg-primary', 'text-white');
+
+  modalTitle.textContent = tipo === 'success' ? 'Éxito' : tipo === 'error' ? 'Error' : 'Info';
+
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+}
+
+
+  // Eliminar etiquetas seleccionadas
+async function eliminarSeleccionadas() {
+  const selectedCheckboxes = document.querySelectorAll('.select-etiqueta:checked');
+  if(selectedCheckboxes.length === 0) {
+    mostrarInfo('No hay etiquetas seleccionadas');
+    return;
   }
 
+  const confirmado = await mostrarConfirmacion(`¿Deseas eliminar ${selectedCheckboxes.length} etiquetas?`);
+  if (!confirmado) return;
 
-  inventoryList.addEventListener('click', (e) => {
-    const button = e.target.closest('.eliminar-btn');
-    if (!button) return;
-    const row = button.closest('.data-row');
-    const etiketa = row.dataset.etiketa;
-    eliminarEtiqueta(row, etiketa);
-  });
+  const etiquetas = Array.from(selectedCheckboxes).map(cb => cb.closest('.data-row').dataset.etiketa);
 
-  document.getElementById('eliminar-seleccionadas').addEventListener('click', async () => {
-    const selectedCheckboxes = document.querySelectorAll('.select-etiqueta:checked');
-    if (selectedCheckboxes.length === 0) {
-      mostrarInfo('No hay etiquetas seleccionadas');
-      return;
+  try {
+    const response = await fetch(inbentarioURL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
+    });
+    const data = await response.json();
+
+    if (data.success) {
+      selectedCheckboxes.forEach(cb => cb.closest('.data-row').remove());
+      mostrarInfo(data.message || 'Etiquetas eliminadas correctamente', 'success');
+    } else {
+      mostrarInfo("No se han podido eliminar las etiquetas porque tienen un kokaleku asignado");
     }
 
-    const confirmado = await mostrarConfirmacionEtiketa(`¿Deseas eliminar ${selectedCheckboxes.length} etiquetas?`);
-    if (!confirmado) return;
+  } catch (err) {
+    console.error(err);
+    mostrarInfo('Error al contactar con el servidor', 'error');
+  }
+}
+// Individual
+inventoryList.addEventListener('click', (e) => {
+  const button = e.target.closest('.eliminar-btn');
+  if(!button) return;
+  const row = button.closest('.data-row');
+  const etiketa = row.dataset.etiketa;
+  eliminarEtiqueta(row, etiketa);
+});
 
-    const etiquetas = Array.from(selectedCheckboxes).map(cb => cb.closest('.data-row').dataset.etiketa);
-
-    try {
-      const response = await fetch('../backend/controladores/inbentarioController.php', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ action: 'DELETE_MULTIPLE', etiquetas })
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        selectedCheckboxes.forEach(cb => cb.closest('.data-row').remove());
-        mostrarInfo(data.message);
-      } else {
-        mostrarInfo(data.message || 'Error al eliminar etiquetas');
-      }
-    } catch (err) {
-      console.error(err);
-      mostrarInfo('Error al contactar con el servidor');
-    }
-  });
-
+// Masiva
+eliminarSeleccionadasBtn?.addEventListener('click', eliminarSeleccionadas);
 
   // ===== INICIAL =====
   cargarInventario();
