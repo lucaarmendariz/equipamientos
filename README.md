@@ -36,17 +36,3 @@ Aplikazioak honako funtzionalitateak ditu:
 - Formularioen baliozkotzea bezeroaren eta zerbitzariaren aldean egiten da.
 - Interfazearen diseinua **Figma** erabiliz egin da, erabilgarritasun eta irisgarritasun arauak kontuan hartuta.
 
-### Sistema Aholkulariak
-
-- **PHP 7.x edo berriagoa**.
-- **Web zerbitzari Apache** edo antzeko bat.
-- **Datu-basea MariaDB/MySQL**.
-- **Nabigatzaile moderno bat** aplikazioa erabiltzeko.
-
-## Instalazioa
-
-### Backend
-
-1. **Erabilera-erabiltzailea kopiatu**:
-   ```bash
-   git clone https://github.com/tuusuario/equipamientos.git
